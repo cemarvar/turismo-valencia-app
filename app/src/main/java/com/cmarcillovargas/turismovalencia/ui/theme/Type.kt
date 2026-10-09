@@ -38,15 +38,15 @@ val Typography = Typography(
     displayLarge = style(FontWeight.ExtraBold, 57, 64, TitleTracking),
     displayMedium = style(FontWeight.ExtraBold, 45, 52, TitleTracking),
     displaySmall = style(FontWeight.ExtraBold, 36, 44, TitleTracking),
-    headlineLarge = style(FontWeight.ExtraBold, 32, 40, TitleTracking),
-    headlineMedium = style(FontWeight.ExtraBold, 28, 36, TitleTracking),
-    headlineSmall = style(FontWeight.ExtraBold, 22, 28, TitleTracking), // «Cerca de ti»
+    headlineLarge = style(FontWeight.ExtraBold, 33, 40, TitleTracking), // «Valencia» del splash
+    headlineMedium = style(FontWeight.ExtraBold, 26, 32, TitleTracking), // Título del onboarding
+    headlineSmall = style(FontWeight.ExtraBold, 21, 26, TitleTracking), // «Cerca de ti», «Idioma de la app»
     titleLarge = style(FontWeight.ExtraBold, 20, 26, TitleTracking),    // Nombre en el perfil
     // Tarjetas y barras superiores: SemiBold.
     titleMedium = style(FontWeight.SemiBold, 17, 22),                   // «Mercado Central», «Perfil y ajustes»
     titleSmall = style(FontWeight.SemiBold, 15, 20),
     bodyLarge = style(FontWeight.Normal, 16, 24),
-    bodyMedium = style(FontWeight.Normal, 14, 20),
+    bodyMedium = style(FontWeight.Normal, 15, 22),                      // Subtítulo del sheet de idioma
     bodySmall = style(FontWeight.Normal, 13, 18),                       // Metadatos: «Ciutat Vella · 450 m»
     labelLarge = style(FontWeight.SemiBold, 14, 20),                    // Botones
     labelMedium = style(FontWeight.SemiBold, 13, 16),                   // Chips
@@ -59,3 +59,11 @@ val Typography = Typography(
  */
 val Typography.eyebrow: TextStyle
     get() = labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.14.em)
+
+/** Título de la barra superior de las pantallas interiores («Tickets & Tours», «Descargas sin conexión»). */
+val Typography.screenTitle: TextStyle
+    get() = titleMedium.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = TitleTracking)
+
+/** Cabecera grande de las pestañas («Favoritos», «Mis reservas»). */
+val Typography.tabTitle: TextStyle
+    get() = headlineMedium

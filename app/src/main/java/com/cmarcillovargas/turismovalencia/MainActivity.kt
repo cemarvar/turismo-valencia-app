@@ -1,36 +1,34 @@
 package com.cmarcillovargas.turismovalencia
 
+import android.content.pm.ApplicationInfo
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
+import com.cmarcillovargas.turismovalencia.ui.AppRoot
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Tema solo claro: iconos oscuros en las barras del sistema aunque el móvil esté en modo oscuro.
+        // Las pantallas con fondo oscuro los cambian con SystemBarIcons.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
         )
-        setContent {
-            TurismoValenciaTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    // TODO(nav): host de navegación y pantalla de inicio.
-                    Box(Modifier.fillMaxSize())
-                }
-            }
+        // Solo en builds de depuración: `adb shell am start -n …/.MainActivity --es route detalle/mercado-central`
+        // abre una pantalla concreta, `--ez offline true` simula que no hay conexión y
+        // `--ez emptyFavorites true` vacía los favoritos.
+        val debuggable = applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        val startRoute = if (debuggable) intent.getStringExtra("route") else null
+        if (debuggable && intent.hasExtra("offline")) {
+            (application as TurismoApp).container.network.force(!intent.getBooleanExtra("offline", false))
         }
+        if (debuggable && intent.getBooleanExtra("emptyFavorites", false)) {
+            (application as TurismoApp).container.favorites.clear()
+        }
+        setContent { AppRoot(startRoute = startRoute) }
     }
 }
