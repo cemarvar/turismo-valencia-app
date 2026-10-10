@@ -25,6 +25,8 @@ import com.cmarcillovargas.turismovalencia.ui.screens.reservas.ReservaConfirmada
 import com.cmarcillovargas.turismovalencia.ui.screens.reservas.ReservarRoute
 import com.cmarcillovargas.turismovalencia.ui.screens.reservas.ReservasRoute
 import com.cmarcillovargas.turismovalencia.ui.screens.valbot.ValBotRoute
+import com.cmarcillovargas.turismovalencia.ui.screens.web.ContactoRoute
+import com.cmarcillovargas.turismovalencia.ui.screens.web.WebPageRoute
 
 private fun stringArg(name: String) = navArgument(name) {
     type = NavType.StringType
@@ -55,6 +57,8 @@ fun AppNavHost(
                 },
                 onOpenTickets = { open(Routes.entradas()) },
                 onOpenSustainable = { open(Routes.Sostenible) },
+                onOpenPage = { open(Routes.pagina(it)) },
+                onOpenContact = { open(Routes.Contacto) },
             )
         }
         composable(Routes.MapaPattern, arguments = listOf(stringArg("focus"), stringArg("q"))) { entry ->
@@ -70,6 +74,7 @@ fun AppNavHost(
                 question = entry.arguments?.getString("q")?.takeIf { it.isNotBlank() },
                 onBack = { onTab(Routes.Inicio) },
                 onOpenItem = openItem,
+                onOpenPage = { open(Routes.pagina(it)) },
                 onOpenFavorites = { onTab(Routes.Favoritos) },
                 onOpenMap = { onTab(Routes.Mapa) },
             )
@@ -92,6 +97,7 @@ fun AppNavHost(
                 onOpenOffer = { open(Routes.reservar(it)) },
                 onOpenMap = { open(Routes.mapa(query = it)) },
                 onAskValBot = { open(Routes.valbot(it)) },
+                onOpenGuide = { open(Routes.pagina(it)) },
             )
         }
         composable(Routes.CategoriaPattern, arguments = listOf(navArgument("key") { type = NavType.StringType })) { entry ->
@@ -105,11 +111,12 @@ fun AppNavHost(
                 onBack = back,
                 onOpenRoute = { open(Routes.ruta(it)) },
                 onOpenMap = { open(Routes.mapa(focus = it)) },
+                onOpenContact = { open(Routes.Contacto) },
             )
         }
         composable(Routes.EntradasPattern, arguments = listOf(stringArg("tab"))) { entry ->
             val tab = OfferTab.entries.firstOrNull { it.name.equals(entry.arguments?.getString("tab"), ignoreCase = true) } ?: OfferTab.Experiencias
-            EntradasRoute(initialTab = tab, onBack = back, onReserve = { open(Routes.reservar(it)) })
+            EntradasRoute(initialTab = tab, onBack = back, onReserve = { open(Routes.reservar(it)) }, onOpenPage = { open(Routes.pagina(it)) })
         }
         composable(Routes.Sostenible) { SostenibleRoute(onBack = back, onOpenItem = openItem) }
         composable(Routes.RutaPattern, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
@@ -137,8 +144,18 @@ fun AppNavHost(
         }
         composable(Routes.Descargas) { DescargasRoute(onBack = back, onOpenItem = openItem) }
         composable(Routes.Perfil) {
-            PerfilRoute(onBack = back, onOpenDownloads = { open(Routes.Descargas) }, onLogout = onLogout)
+            PerfilRoute(
+                onBack = back,
+                onOpenDownloads = { open(Routes.Descargas) },
+                onOpenContact = { open(Routes.Contacto) },
+                onOpenPage = { open(Routes.pagina(it)) },
+                onLogout = onLogout,
+            )
         }
+        composable(Routes.PaginaPattern, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
+            WebPageRoute(id = entry.arguments?.getString("id").orEmpty(), onBack = back, onOpenContact = { open(Routes.Contacto) })
+        }
+        composable(Routes.Contacto) { ContactoRoute(onBack = back, onOpenPage = { open(Routes.pagina(it)) }) }
         composable(Routes.Notificaciones) {
             NotificacionesRoute(
                 onBack = back,

@@ -26,9 +26,12 @@ import androidx.compose.material.icons.outlined.AccessibilityNew
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.GpsFixed
 import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -81,6 +84,8 @@ private enum class Dialog { Location, TextSize, Privacy, Logout }
 fun PerfilRoute(
     onBack: () -> Unit,
     onOpenDownloads: () -> Unit,
+    onOpenContact: () -> Unit,
+    onOpenPage: (String) -> Unit,
     onLogout: () -> Unit,
     viewModel: PerfilViewModel = viewModel(factory = containerFactory { PerfilViewModel(it) }),
 ) {
@@ -91,6 +96,8 @@ fun PerfilRoute(
         onBack = onBack,
         onOpenLanguage = { showLanguage = true },
         onOpenDownloads = onOpenDownloads,
+        onOpenContact = onOpenContact,
+        onOpenPage = onOpenPage,
         onNotifications = viewModel::onNotifications,
         onLocation = viewModel::onLocation,
         onTextScale = viewModel::onTextScale,
@@ -105,6 +112,8 @@ fun PerfilScreen(
     onBack: () -> Unit,
     onOpenLanguage: () -> Unit,
     onOpenDownloads: () -> Unit,
+    onOpenContact: () -> Unit,
+    onOpenPage: (String) -> Unit,
     onNotifications: (Boolean) -> Unit,
     onLocation: (LocationMode) -> Unit,
     onTextScale: (TextScale) -> Unit,
@@ -134,7 +143,13 @@ fun PerfilScreen(
             }
             SectionLabel(stringResource(R.string.profile_account), Modifier.padding(top = Spacing.m))
             Group {
+                SettingRow(Icons.Outlined.SupportAgent, stringResource(R.string.profile_contact), stringResource(R.string.profile_contact_text), onClick = onOpenContact) { Chevron() }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 SettingRow(Icons.Outlined.Shield, stringResource(R.string.profile_privacy), null, onClick = { dialog = Dialog.Privacy }) { Chevron() }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                SettingRow(Icons.Outlined.Gavel, stringResource(R.string.legal_notice), null, onClick = { onOpenPage("AvisoLegal") }) { Chevron() }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                SettingRow(Icons.Outlined.PrivacyTip, stringResource(R.string.legal_privacy), null, onClick = { onOpenPage("PoliticaPrivacidad") }) { Chevron() }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 SettingRow(Icons.AutoMirrored.Outlined.Logout, stringResource(R.string.profile_logout), null, onClick = { dialog = Dialog.Logout }) {}
             }
@@ -286,5 +301,5 @@ private fun TextScale.label(): Int = when (this) {
 @Preview(name = "G1 · Perfil y ajustes", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PerfilPreview() {
-    TurismoValenciaTheme { PerfilScreen(PerfilUiState(offlineMb = 48, reservations = 3), {}, {}, {}, {}, {}, {}, {}) }
+    TurismoValenciaTheme { PerfilScreen(PerfilUiState(offlineMb = 48, reservations = 3), {}, {}, {}, {}, {}, {}, {}, {}, {}) }
 }

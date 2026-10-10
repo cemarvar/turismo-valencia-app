@@ -1,0 +1,41 @@
+package com.cmarcillovargas.turismovalencia.util
+
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+
+/** Direcciones de la web, para compartir y «Ver en la web». */
+const val WebBaseUrl = "https://turismovalenciaa.netlify.app"
+
+fun webUrlOf(pageId: String): String = "$WebBaseUrl/$pageId"
+
+/** Abre una dirección web en el navegador. */
+fun Context.openUrl(url: String) = launch(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+
+/** Abre el marcador con el número, sin llamar. */
+fun Context.dial(phone: String) = launch(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone.filter { it.isDigit() || it == '+' })))
+
+/** Abre el correo con el destinatario ya puesto. */
+fun Context.email(address: String) = launch(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$address")))
+
+/** Abre una búsqueda en el mapa del móvil. */
+fun Context.openMapSearch(query: String) = launch(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + Uri.encode(query))))
+
+/** Comparte un texto con el selector del sistema. */
+fun Context.shareText(subject: String, text: String, chooserTitle: String) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+    launch(Intent.createChooser(intent, chooserTitle))
+}
+
+private fun Context.launch(intent: Intent) {
+    try {
+        startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+        // Sin app que lo gestione (emulador sin navegador, por ejemplo): no pasa nada.
+    }
+}

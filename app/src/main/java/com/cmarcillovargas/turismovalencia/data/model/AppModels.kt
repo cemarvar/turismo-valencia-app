@@ -53,7 +53,7 @@ data class SearchSuggestion(
     /** Id de ficha, id de oferta o texto a buscar en el mapa, según `kind`. */
     val target: String,
 ) {
-    enum class Kind { Dish, Place, Offer, Map }
+    enum class Kind { Dish, Place, Offer, Map, Guide }
 }
 
 /** Mensaje del chat de ValBot. */
@@ -64,6 +64,8 @@ data class ChatMessage(
     val time: String,
     /** Fichas que acompañan a la respuesta del bot. */
     val cardIds: List<String> = emptyList(),
+    /** Guías de la web que acompañan a la respuesta del bot. */
+    val pageIds: List<String> = emptyList(),
     val isError: Boolean = false,
     val offlineLinks: Boolean = false,
 )

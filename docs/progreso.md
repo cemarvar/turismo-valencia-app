@@ -1,6 +1,6 @@
 # Progreso
 
-Última actualización: 2026-10-09 (frontend completo).
+Última actualización: 2026-10-09 (frontend completo + todas las secciones de la web).
 
 ## Hecho
 - **Base del proyecto**: theme en `ui/theme` (`Color`, `Type`, `Shape`, `Theme`, `Dimens`, `ThemePreview`), fuentes Source Sans 3 en `res/font/`, `MainActivity` edge-to-edge con barras claras y `CLAUDE.md`.
@@ -22,6 +22,17 @@
   - **G1 Perfil** (idioma, notificaciones, ubicación, descargas, **tamaño del texto** que escala toda la app, privacidad, cerrar sesión que vuelve a la bienvenida) y **G2 Notificaciones** (leídas al abrirlas).
   - **H1 Sin conexión** en Inicio, Mapa y ValBot, con el estado real de la red (`NetworkMonitor`).
   - Contenido de ejemplo sacado de la web (13 Qué ver, 9 platos, 6 alojamientos, 5 eventos, 7 temas sostenibles, 16 ofertas).
+- **Todas las secciones y módulos de la web** (repositorio `cemarvar/TurismoValencia`, 65 páginas), con su contenido y sus fotos:
+  - **Portada**: tras «Cerca de ti» se añadieron «Lo esencial para ver en Valencia» (9 tarjetas), «Planes que alimentan el alma» (6), «Turismo sostenible» (6) y el resumen de Contacto, igual que la web.
+  - **Lo esencial (8)**: Navidad, 10 visitas imprescindibles, Valencia en 3 días, Ciudad amurallada, Patrimonio de la Humanidad, Monumentos y museos, Ciudad de las Artes y las Ciencias y Bioparc. **Planes (6)**: Espectáculo, En familia, Naturaleza, Fiestas tradicionales, Deportes y Exposición. Pantalla genérica `pagina/{id}` con cabecera, texto, filtros, tarjetas numeradas, datos, tarifas, cómo llegar y consejos.
+  - **Fichas de Qué ver, Eventos, Gastronomía, Alojamientos y Sostenible**: debajo de la ficha del diseño se añade la «Guía completa» de la web (secciones numeradas con datos, datos de la visita, cronología, dónde comer, consejos…).
+  - **Tickets & Tours**: al final de cada pestaña, las guías de la web (Valencia Tourist Card, Bus turístico, tours por el centro, Ciencias y Artes, bici, paseo marítimo, tour privado, excursiones, experiencias gastronómicas y náuticas), con sus enlaces externos.
+  - **Contacto** (`contacto`): oficina de turismo, horario, teléfono, correo, mapa, redes (LinkedIn, Facebook, Instagram, X) y enlaces legales. **Aviso legal** y **Política de privacidad** como páginas. Se llega desde la portada, el pie de cada guía y Perfil.
+  - **Buscador y ValBot** conocen las guías: salen como sugerencia y ValBot las recomienda con tarjetas (Navidad, 3 días, tours, deportes, contacto…).
+  - Fotos: 443 fotos de la web reducidas a 900 px en `assets/img/` (29 MB; el APK de depuración pasa de 23 a 52 MB). Las fichas y ofertas que no tenían foto en el diseño usan ahora las de la web.
+- **Portada por secciones**: al elegir Qué ver / Gastronomía / Alojamientos / Eventos cambian el carrusel de destacados, el título y el texto de la sección (los de la web: «Tradición culinaria», «Opciones de alojamiento», «Eventos destacados») y el listado (hasta 6 fichas, en el orden de la web); el chip elegido queda siempre a la vista. «Qué ver» mantiene «Cerca de ti» del diseño.
+- **Índices de las secciones como en la web**: Qué ver pasa de 13 a **15** lugares (se añaden Bioparc y Ciudad de las Artes y las Ciencias), Eventos de 5 a **6** (Deportes), y Gastronomía y Alojamientos usan los títulos, el orden y las fotos de la web. Las fichas del Figma conservan su título y su foto del diseño.
+- **Pruebas** (`tools/verify`): 13 comprobaciones de datos, 20 contra la web publicada, 12 de chips, 13 de secciones, 22 de tarjetas, 10 de contacto/legal, 4 de guías, 8 de fichas, 16 de páginas, 5 de buscador y 5 de fotos (compara la captura con el archivo de `assets/img`): todas correctas.
 - **Calibración contra el Figma**: las 22 capturas de B–H se compararon con el emulador (780×1688 px, 320 dpi) en hojas «diseño | app» y se ajustaron tamaños de letra, alturas y espaciados. Diferencias que quedan: la barra de estado del emulador es más alta que la del diseño (todo baja ~12 dp), los textos de ejemplo cambian (fechas relativas a hoy, «60 MB» calculado), y los pins del mapa dibujado no coinciden con los de OpenStreetMap del diseño.
 - **Pruebas funcionales en el emulador**: recorrido bienvenida → app, favoritos, descargas, idioma, búsqueda, ValBot (pregunta y respuesta), reserva completa (F2 → F3 → lista), tamaño de texto, filtros del mapa, cerrar sesión y teclado (la barra inferior se oculta y el contenido sube).
 
@@ -33,8 +44,9 @@
 - `TODO(i18n)`: aplicar el idioma elegido a la app y a ValBot (hoy se guarda la elección, pero los textos están solo en español).
 - `TODO(splash)`: integrar la SplashScreen API del sistema (en Android 12+ aparece antes el splash del sistema con el icono por defecto).
 - `TODO(dark)`: el Figma no define modo oscuro.
-- Fotos: solo hay las que venían en el `.fig`. Gastronomía, Alojamientos y algunos lugares usan un fondo con el icono de su categoría hasta tener las imágenes de la web (`public/img/…` del repositorio `TurismoValencia`).
+- Fotos: ya están las de la web; si el Figma o la web cambian, regenerar con `tools/web-import` (ver su README). Valorar un tamaño menor o App Bundle si el APK de publicación pesa demasiado.
 - Icono de la app: sigue el icono por defecto; falta el logotipo.
+- El vídeo de la portada de la web (YouTube) no se reproduce en la app; el mapa de contacto abre la app de mapas del móvil en lugar de incrustar Google Maps.
 - `backend/`: crearlo cuando empiece su fase.
 - **Verificar el theme contra `docs/guia-estilo.md`** cuando esté en el repo. Faltan también `docs/figma.md` y `docs/propuesta.md`.
 - Peso Medium (500) de Source Sans 3 si el diseño lo usa: hoy Compose cae a Regular.
@@ -63,6 +75,12 @@
 - **Dependencias añadidas**: `material-icons-extended` (los iconos de las pantallas nuevas; sustituye a la decisión de usar solo vectores propios; `ic_my_location` e `ic_database` siguen siendo vectores), `navigation-compose` 2.10.2, `zxing-core` 3.5.4 (QR real, sin la librería de cámara) y `desugar_jdk_libs` 2.1.5 (`java.time` desde minSdk 24).
 - **Mapa dibujado** (`MapCanvas`): un lienzo de 700×1100 dp con zoom y desplazamiento propios y pins como composables. Los lugares con `onMap = false` (platos menores, temas sostenibles…) no salen como pin para no saturar el mapa.
 - **ValBot por reglas** (`ValBotEngine`): detecta palabras clave (paella, gratis, playa, museos, ruta…) y responde con texto y tarjetas de lugares reales; sin conexión muestra el aviso del diseño. El sustituto real es Gemini detrás del backend, nunca con la clave en la app.
+- **Contenido de la web como JSON**: `tools/web-import/convert.mjs` evalúa los arrays de datos de cada página JSX y los normaliza en bloques `Items` / `Facts` / `Bullets` (modelo `WebPage` en `data/model/WebContent.kt`), de modo que 65 páginas con esquemas distintos se pintan con un único conjunto de componentes (`WebBlocks.kt`). Los textos largos (`historia`, `curiosidad`…) pasan a «notas» y los campos cortos a filas «etiqueta · valor». `org.json` (incluido en Android) lee los JSON sin añadir dependencias.
+- **Fotos como `assets/`, no como `R.drawable`**: conservan la ruta de la web, se decodifican a ≤ 1080 px y se guardan en una caché LRU de 32 MB (`AssetImage.kt`). Sin Coil: la app debe funcionar sin conexión y no necesita la red para las fotos.
+- **Ficha ↔ página**: `WebContentRepository` enlaza cada ficha de la app con su página de la web (`mercado-central` ↔ `MercadoCentral`…) y cada oferta con la foto de su guía. Las fichas de la app mantienen el diseño del Figma y reciben debajo la guía completa.
+- **Foto de la tarjeta = su foto**: `rememberAssetImage` reiniciaba mal su estado al reutilizarse una tarjeta con otra ruta (cambio de chip), y se quedaba la foto anterior. Ahora el estado depende de la ruta. `verify_img.py` lo vigila.
+- **Orden por sección**: solo «Qué ver» se ordena por cercanía (diseño); Gastronomía, Alojamientos y Eventos conservan el orden del índice de la web («Orden de la web»).
+- **Chips de la portada**: elegir una sección no se deshace al volver a pulsarla.
 - **Teclado**: `MainApp` oculta la barra inferior y aplica `imePadding()` al contenido cuando el teclado está abierto.
 - **Depuración**: `MainActivity` acepta los extras `route`, `offline` y `emptyFavorites` solo en builds de depuración (ver `CLAUDE.md`); sirven para abrir cualquier pantalla con adb y compararla con el Figma.
 - **Pesos de fuente**: los pesos Medium del Figma se aproximan con SemiBold/Regular porque la fuente empaquetada no tiene Medium.

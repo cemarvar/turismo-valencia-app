@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.cmarcillovargas.turismovalencia.data.AppContainer
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
+import com.cmarcillovargas.turismovalencia.data.model.HomeTile
 import com.cmarcillovargas.turismovalencia.data.model.SortMode
+import com.cmarcillovargas.turismovalencia.data.model.WebFamily
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +27,22 @@ data class InicioUiState(
     val downloaded: Set<String> = emptySet(),
     val hasUnread: Boolean = false,
     val language: String = "ES",
+    /** Título y texto del listado cuando la sección no es «Qué ver» (en «Qué ver» se usa «Cerca de ti»). */
+    val sectionTitle: String? = null,
+    val sectionSubtitle: String? = null,
+    val esencial: List<HomeTile> = emptyList(),
+    val planes: List<HomeTile> = emptyList(),
+    val sostenible: List<HomeTile> = emptyList(),
 )
+
+/** A dónde lleva una tarjeta de las rejillas de la portada. */
+sealed interface HomeTarget {
+    data object Tickets : HomeTarget
+
+    data class Item(val id: String) : HomeTarget
+
+    data class Page(val id: String) : HomeTarget
+}
 
 private data class UserSnapshot(
     val favorites: Set<String>,
@@ -53,13 +70,18 @@ class InicioViewModel(private val container: AppContainer) : ViewModel() {
         InicioUiState(
             loading = isLoading,
             offline = !snapshot.online,
-            featured = container.content.featured(),
+            featured = container.content.featuredFor(category),
             selected = category,
             items = itemsFor(category),
+            sectionTitle = sectionOf(category)?.title,
+            sectionSubtitle = sectionOf(category)?.subtitle,
             favorites = snapshot.favorites,
             downloaded = snapshot.downloaded,
             hasUnread = snapshot.hasUnread,
             language = snapshot.language,
+            esencial = container.web.index.esencial,
+            planes = container.web.index.planes,
+            sostenible = container.web.index.sostenible,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InicioUiState())
 
@@ -73,10 +95,13 @@ class InicioViewModel(private val container: AppContainer) : ViewModel() {
 
     private fun itemsFor(category: Category?): List<ContentItem> = when (category) {
         null, Category.QueVer -> container.content.nearby()
-        else -> container.content.sorted(container.content.byCategory(category), SortMode.Distance).take(4)
+        else -> container.content.sorted(container.content.byCategory(category), SortMode.Distance).take(SectionItems)
     }
 
-    fun onSelectCategory(category: Category?) = selected.update { if (it == category) null else category }
+    private fun sectionOf(category: Category?) = category?.takeIf { it != Category.QueVer }?.let(container.content::sectionIndex)
+
+    /** Elegir una sección cambia el carrusel y el listado; volver a pulsarla no la quita. */
+    fun onSelectCategory(category: Category?) = selected.update { category ?: Category.QueVer }
 
     fun onToggleFavorite(id: String) = container.favorites.toggle(id)
 
@@ -84,7 +109,18 @@ class InicioViewModel(private val container: AppContainer) : ViewModel() {
 
     fun onRetry() = container.network.retry()
 
+    /** «Visitas y tours» abre las entradas; las páginas con ficha propia abren la ficha; el resto, su página. */
+    fun targetOf(route: String): HomeTarget = when {
+        route == "Entradas" -> HomeTarget.Tickets
+        container.web.meta(route)?.family in PageFamilies -> HomeTarget.Page(route)
+        else -> container.web.contentIdFor(route)?.let { HomeTarget.Item(it) } ?: HomeTarget.Page(route)
+    }
+
     private companion object {
         const val LoadingMillis = 1_100L
+        const val SectionItems = 6
+
+        /** Las tarjetas de estas familias abren su página de la web; el resto abre la ficha de la app. */
+        val PageFamilies = setOf(WebFamily.Esencial, WebFamily.Planes)
     }
 }

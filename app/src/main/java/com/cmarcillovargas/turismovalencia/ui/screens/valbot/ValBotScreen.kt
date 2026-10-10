@@ -77,8 +77,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmarcillovargas.turismovalencia.R
 import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.fake.FakeQueVer
+import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ChatMessage
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
+import com.cmarcillovargas.turismovalencia.data.model.WebPageMeta
 import com.cmarcillovargas.turismovalencia.ui.components.OfflineSnackbar
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
@@ -103,6 +105,7 @@ fun ValBotRoute(
     question: String?,
     onBack: () -> Unit,
     onOpenItem: (String) -> Unit,
+    onOpenPage: (String) -> Unit,
     onOpenFavorites: () -> Unit,
     onOpenMap: () -> Unit,
     viewModel: ValBotViewModel = viewModel(factory = containerFactory { ValBotViewModel(it) }),
@@ -121,6 +124,7 @@ fun ValBotRoute(
         onSend = { viewModel.send() },
         onSuggestion = viewModel::send,
         onOpenItem = onOpenItem,
+        onOpenPage = onOpenPage,
         onOpenFavorites = onOpenFavorites,
         onOpenMap = onOpenMap,
         onNewConversation = viewModel::onNewConversation,
@@ -148,6 +152,7 @@ fun ValBotScreen(
     onSend: () -> Unit,
     onSuggestion: (String) -> Unit,
     onOpenItem: (String) -> Unit,
+    onOpenPage: (String) -> Unit,
     onOpenFavorites: () -> Unit,
     onOpenMap: () -> Unit,
     onNewConversation: () -> Unit,
@@ -178,7 +183,7 @@ fun ValBotScreen(
                     }
                 }
                 items(uiState.messages, key = { it.id }) { message ->
-                    if (message.fromUser) UserBubble(message) else BotBubble(message, uiState.items, onOpenItem)
+                    if (message.fromUser) UserBubble(message) else BotBubble(message, uiState.items, uiState.pages, onOpenItem, onOpenPage)
                 }
                 if (uiState.typing) item { TypingBubble() }
                 if (!uiState.online) {
@@ -268,12 +273,13 @@ private fun BotRow(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun BotBubble(message: ChatMessage, items: Map<String, ContentItem>, onOpenItem: (String) -> Unit) {
+private fun BotBubble(message: ChatMessage, items: Map<String, ContentItem>, pages: Map<String, WebPageMeta>, onOpenItem: (String) -> Unit, onOpenPage: (String) -> Unit) {
     BotRow {
         Surface(shape = BotBubbleShape, color = MaterialTheme.colorScheme.surface, shadowElevation = Spacing.xxs / 2) {
             Column(Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 Text(message.text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                 message.cardIds.mapNotNull(items::get).forEach { MiniCard(it) { onOpenItem(it.id) } }
+                message.pageIds.mapNotNull(pages::get).forEach { MiniPageCard(it) { onOpenPage(it.id) } }
                 Text(message.time, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal), color = MaterialTheme.colorScheme.outline)
             }
         }
@@ -294,6 +300,25 @@ private fun UserBubble(message: ChatMessage) {
 }
 
 @Composable
+private fun MiniPageCard(page: WebPageMeta, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(Spacing.m)).clickable(role = Role.Button, onClick = onClick),
+        shape = RoundedCornerShape(Spacing.m),
+        color = MaterialTheme.colorScheme.background,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Row(Modifier.padding(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
+            PlaceImage(null, Category.QueVer, Modifier.size(Spacing.xxl).clip(RoundedCornerShape(Spacing.s)), page.title, assetPath = page.thumb ?: page.hero)
+            Spacer(Modifier.width(Spacing.s))
+            Column(Modifier.weight(1f)) {
+                Text(page.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 2)
+                page.eyebrow?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1) }
+            }
+        }
+    }
+}
+
+@Composable
 private fun MiniCard(item: ContentItem, onClick: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(Spacing.m)).clickable(role = Role.Button, onClick = onClick),
@@ -302,7 +327,7 @@ private fun MiniCard(item: ContentItem, onClick: () -> Unit) {
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(Modifier.padding(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
-            PlaceImage(item.thumb, item.category, Modifier.size(Spacing.xxl).clip(RoundedCornerShape(Spacing.s)), item.title)
+            PlaceImage(item.thumb, item.category, Modifier.size(Spacing.xxl).clip(RoundedCornerShape(Spacing.s)), item.title, assetPath = item.thumbAsset ?: item.heroAsset)
             Spacer(Modifier.width(Spacing.s))
             Column(Modifier.weight(1f)) {
                 Text(item.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
@@ -476,7 +501,7 @@ private fun ValBotPreview() {
     TurismoValenciaTheme {
         ValBotScreen(
             ValBotUiState(messages = PreviewMessages, typing = true, suggestions = listOf("¿Qué ver hoy gratis en Valencia?", "Restaurantes de paella cerca"), items = PreviewItems),
-            {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
         )
     }
 }
@@ -492,7 +517,7 @@ private fun ValBotOfflinePreview() {
                 suggestions = listOf("¿Qué ver hoy gratis en Valencia?", "Restaurantes de paella cerca"),
                 items = PreviewItems,
             ),
-            {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
         )
     }
 }

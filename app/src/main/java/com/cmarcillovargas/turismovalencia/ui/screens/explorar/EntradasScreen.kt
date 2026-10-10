@@ -48,9 +48,11 @@ import com.cmarcillovargas.turismovalencia.data.model.OfferKind
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
+import com.cmarcillovargas.turismovalencia.ui.components.SectionTitle
 import com.cmarcillovargas.turismovalencia.ui.components.SegmentedTabs
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
+import com.cmarcillovargas.turismovalencia.ui.components.WebPageCard
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
@@ -64,10 +66,11 @@ fun EntradasRoute(
     initialTab: OfferTab,
     onBack: () -> Unit,
     onReserve: (String) -> Unit,
+    onOpenPage: (String) -> Unit,
     viewModel: EntradasViewModel = viewModel(key = "entradas", factory = containerFactory { EntradasViewModel(it, initialTab) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    EntradasScreen(uiState, onBack, onReserve, viewModel::onSelectTab, viewModel::onSearching, viewModel::onQueryChange)
+    EntradasScreen(uiState, onBack, onReserve, viewModel::onSelectTab, viewModel::onSearching, viewModel::onQueryChange, onOpenPage)
 }
 
 @Composable
@@ -78,6 +81,7 @@ fun EntradasScreen(
     onSelectTab: (OfferTab) -> Unit,
     onSearching: (Boolean) -> Unit,
     onQueryChange: (String) -> Unit,
+    onOpenPage: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -114,6 +118,10 @@ fun EntradasScreen(
                 )
             }
             items(uiState.offers, key = { it.id }) { offer -> OfferCard(offer, onReserve = { onReserve(offer.id) }) }
+            if (uiState.guides.isNotEmpty()) {
+                item { SectionTitle(stringResource(R.string.tickets_guides), Modifier.padding(top = Spacing.s)) }
+                items(uiState.guides, key = { it.id }) { guide -> WebPageCard(guide, { onOpenPage(guide.id) }) }
+            }
             if (uiState.offers.isEmpty()) {
                 item {
                     Text(
@@ -133,7 +141,7 @@ private fun OfferCard(offer: Offer, onReserve: () -> Unit, modifier: Modifier = 
     Surface(modifier.fillMaxWidth(), shape = OfferShape, color = MaterialTheme.colorScheme.surface, shadowElevation = Spacing.xxs / 2) {
         Column {
             Box(Modifier.fillMaxWidth().height(BannerHeight)) {
-                PlaceImage(offer.image, offer.category(), Modifier.fillMaxSize(), offer.title)
+                PlaceImage(offer.image, offer.category(), Modifier.fillMaxSize(), offer.title, assetPath = offer.assetImage)
                 StatusChip(
                     text = offer.tag,
                     tone = StatusTone.Brand,
@@ -167,7 +175,8 @@ private fun OfferCard(offer: Offer, onReserve: () -> Unit, modifier: Modifier = 
                     Spacer(Modifier.width(Spacing.s))
                     AppButton(stringResource(R.string.tickets_reserve), onReserve, compact = true)
                 }
-                Row(verticalAlignment = Alignment.Bottom) {
+                // «desde» va centrado con el precio (más cifras que letras), no pegado a su línea base.
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.tickets_from), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(Spacing.xxs))
                     Text(formatEuro(offer.priceFrom), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
@@ -190,7 +199,7 @@ private fun EntradasPreview() {
     TurismoValenciaTheme {
         EntradasScreen(
             uiState = EntradasUiState(OfferTab.Experiencias, FakeOfertas.filter { it.kind == OfferKind.Experiencia }.take(3)),
-            onBack = {}, onReserve = {}, onSelectTab = {}, onSearching = {}, onQueryChange = {},
+            onBack = {}, onReserve = {}, onSelectTab = {}, onSearching = {}, onQueryChange = {}, onOpenPage = {},
         )
     }
 }

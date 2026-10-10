@@ -125,7 +125,7 @@ private fun TopicCard(topic: ContentItem, onClick: () -> Unit) {
         shadowElevation = Spacing.xxs / 2,
     ) {
         Row(Modifier.padding(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
-            PlaceImage(topic.thumb ?: topic.hero, topic.category, Modifier.size(ThumbSize).clip(ThumbShape), topic.title)
+            PlaceImage(topic.thumb ?: topic.hero, topic.category, Modifier.size(ThumbSize).clip(ThumbShape), topic.title, assetPath = topic.thumbAsset ?: topic.heroAsset)
             Spacer(Modifier.width(Spacing.m))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

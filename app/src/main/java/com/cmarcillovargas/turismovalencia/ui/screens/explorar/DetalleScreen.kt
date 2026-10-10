@@ -17,11 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -39,6 +38,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,12 +62,15 @@ import com.cmarcillovargas.turismovalencia.ui.components.AppButton
 import com.cmarcillovargas.turismovalencia.ui.components.AppButtonStyle
 import com.cmarcillovargas.turismovalencia.ui.components.AppSwitch
 import com.cmarcillovargas.turismovalencia.ui.components.BottomActionBar
+import com.cmarcillovargas.turismovalencia.ui.components.ContactSummaryCard
 import com.cmarcillovargas.turismovalencia.ui.components.DetailHero
 import com.cmarcillovargas.turismovalencia.ui.components.InfoItemRow
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.SectionTitle
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
+import com.cmarcillovargas.turismovalencia.ui.components.webBlocks
+import com.cmarcillovargas.turismovalencia.util.openUrl
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
@@ -83,6 +87,7 @@ fun DetalleRoute(
     onBack: () -> Unit,
     onOpenRoute: (String) -> Unit,
     onOpenMap: (String) -> Unit,
+    onOpenContact: () -> Unit,
     viewModel: DetalleViewModel = viewModel(key = "detalle-$id", factory = containerFactory { DetalleViewModel(it, id) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,6 +102,8 @@ fun DetalleRoute(
         onCalendar = { uiState.item?.let { addToCalendar(context, it) } },
         onOpenRoute = { onOpenRoute(id) },
         onOpenMap = { onOpenMap(id) },
+        onOpenUrl = context::openUrl,
+        onOpenContact = onOpenContact,
     )
 }
 
@@ -111,8 +118,11 @@ fun DetalleScreen(
     onCalendar: () -> Unit,
     onOpenRoute: () -> Unit,
     onOpenMap: () -> Unit,
+    onOpenUrl: (String) -> Unit,
+    onOpenContact: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val filters = remember { mutableStateMapOf<Int, String>() }
     val item = uiState.item
     if (item == null) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -121,7 +131,8 @@ fun DetalleScreen(
         return
     }
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
+            item(key = "hero") {
             DetailHero(
                 image = item.hero ?: item.thumb,
                 category = item.category,
@@ -134,8 +145,11 @@ fun DetalleScreen(
                 onToggleFavorite = onToggleFavorite,
                 imageDescription = item.title,
                 accent = if (item.category == Category.Sostenible) MaterialTheme.appColors.ecoLight else MaterialTheme.appColors.gold,
+                assetPath = item.heroAsset ?: item.thumbAsset,
             )
-            Column(Modifier.padding(horizontal = Spacing.m).padding(top = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
+            }
+            item(key = "summary") {
+            Column(Modifier.padding(horizontal = Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
                 if (item.category != Category.Eventos) Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     if (item.isFree) StatusChip(stringResource(R.string.detail_free), StatusTone.Success, height = Spacing.l, small = true)
                     StatusChip(
@@ -168,7 +182,12 @@ fun DetalleScreen(
                         item.info.forEach { row -> InfoItemRow(row.kind.icon(), row.title, row.text) }
                     }
                 }
-                Spacer(Modifier.height(Spacing.m))
+            }
+            }
+            uiState.page?.let { page ->
+                item(key = "guide") { SectionTitle(stringResource(R.string.detail_guide), Modifier.padding(horizontal = Spacing.m).padding(top = Spacing.s)) }
+                webBlocks(page.blocks, filters, onOpenUrl)
+                item(key = "contact") { ContactSummaryCard(onOpenContact, Modifier.padding(horizontal = Spacing.m).padding(bottom = Spacing.m)) }
             }
         }
         BottomActionBar {
@@ -278,7 +297,7 @@ private fun DetallePlacePreview() {
     TurismoValenciaTheme {
         DetalleScreen(
             DetalleUiState(item = FakeQueVer.first { it.id == "mercado-central" }, downloaded = true, favorite = true),
-            {}, {}, {}, {}, {}, {}, {}, {},
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
         )
     }
 }
@@ -287,6 +306,6 @@ private fun DetallePlacePreview() {
 @Composable
 private fun DetalleEventPreview() {
     TurismoValenciaTheme {
-        DetalleScreen(DetalleUiState(item = FakeEventos.first { it.id == "fallas" }, favorite = true), {}, {}, {}, {}, {}, {}, {}, {})
+        DetalleScreen(DetalleUiState(item = FakeEventos.first { it.id == "fallas" }, favorite = true), {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
     }
 }

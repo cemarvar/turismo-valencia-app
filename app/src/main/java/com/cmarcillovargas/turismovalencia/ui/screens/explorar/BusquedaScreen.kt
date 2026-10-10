@@ -32,6 +32,7 @@ import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
@@ -84,6 +85,7 @@ fun BusquedaRoute(
     onOpenOffer: (String) -> Unit,
     onOpenMap: (String) -> Unit,
     onAskValBot: (String) -> Unit,
+    onOpenGuide: (String) -> Unit,
     viewModel: BusquedaViewModel = viewModel(factory = containerFactory { BusquedaViewModel(it) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,6 +99,7 @@ fun BusquedaRoute(
                 SearchSuggestion.Kind.Dish, SearchSuggestion.Kind.Place -> onOpenItem(suggestion.target)
                 SearchSuggestion.Kind.Offer -> onOpenOffer(suggestion.target)
                 SearchSuggestion.Kind.Map -> onOpenMap(suggestion.target)
+                SearchSuggestion.Kind.Guide -> onOpenGuide(suggestion.target)
             }
         },
         onAskValBot = onAskValBot,
@@ -270,6 +273,7 @@ private fun SearchSuggestion.Kind.icon(): ImageVector = when (this) {
     SearchSuggestion.Kind.Place -> Icons.Outlined.AccountBalance
     SearchSuggestion.Kind.Offer -> Icons.Outlined.ConfirmationNumber
     SearchSuggestion.Kind.Map -> Icons.Outlined.LocationOn
+    SearchSuggestion.Kind.Guide -> Icons.AutoMirrored.Outlined.MenuBook
 }
 
 private fun trendIcon(index: Int): ImageVector = when (index) {

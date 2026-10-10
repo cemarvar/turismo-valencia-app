@@ -220,8 +220,8 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         distanceMeters = 3000,
         rating = 4.5,
         ratingCount = "1,1 k",
-        thumb = R.drawable.thumb_oceanografic,
-        hero = R.drawable.onboarding_1,
+        thumb = null,
+        hero = null,
         summary = "Cuatro hoteles frente a la obra más icónica de Valencia.",
         description = "El Oceanogràfic, el Palau de les Arts y el Museu de les Ciències a tu puerta, con el Jardín del Turia " +
             "como paseo hasta el centro.",
@@ -241,8 +241,8 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         distanceMeters = 4600,
         rating = 4.6,
         ratingCount = "1,6 k",
-        thumb = R.drawable.card_playa,
-        hero = R.drawable.card_playa,
+        thumb = null,
+        hero = null,
         summary = "Tres hoteles en primera línea de playa.",
         description = "Desde el gran resort de lujo histórico hasta el boutique con la luz de Sorolla y el clásico familiar con " +
             "historia desde 1916.",

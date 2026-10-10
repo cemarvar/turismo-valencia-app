@@ -68,6 +68,11 @@ data class ContentItem(
     val mapCategory: Category? = null,
     /** Si la ficha se dibuja como marcador en el mapa. */
     val onMap: Boolean = true,
+    /** Página de la web con la guía completa de esta ficha (la rellena `ContentRepository`). */
+    val pageId: String? = null,
+    /** Fotos de la web (ruta dentro de `assets/img/`), para las fichas que no tienen foto en el diseño. */
+    val thumbAsset: String? = null,
+    val heroAsset: String? = null,
 ) {
     val isEvent: Boolean get() = category == Category.Eventos
 }
@@ -94,4 +99,6 @@ data class Offer(
     @param:DrawableRes val ticket: Int? = null,
     /** Ficha del lugar donde empieza la actividad, para «Cómo llegar». */
     val placeId: String? = null,
+    /** Foto de la web (ruta dentro de `assets/img/`) para las ofertas que no tienen foto en el diseño. */
+    val assetImage: String? = null,
 )

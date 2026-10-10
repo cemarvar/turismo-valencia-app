@@ -142,7 +142,7 @@ fun CategoriaScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = stringResource(uiState.sort.label()),
+                        text = stringResource(uiState.sort.label(uiState.category)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
@@ -218,7 +218,7 @@ fun CategoriaScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = stringResource(mode.optionLabel()),
+                            text = stringResource(mode.optionLabel(uiState.category)),
                             style = MaterialTheme.typography.bodyLarge,
                             color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f),
@@ -263,14 +263,14 @@ private fun Category.texts() = when (this) {
     Category.Sostenible -> CategoryTexts(R.string.cat_sostenible, R.string.cat_sost_banner, R.string.cat_sost_tagline, R.string.cat_unit_topics)
 }
 
-private fun SortMode.label() = when (this) {
-    SortMode.Distance -> R.string.cat_sorted_distance
+private fun SortMode.label(category: Category) = when (this) {
+    SortMode.Distance -> if (category == Category.QueVer) R.string.cat_sorted_distance else R.string.cat_sorted_web
     SortMode.Rating -> R.string.cat_sorted_rating
     SortMode.Name -> R.string.cat_sorted_name
 }
 
-private fun SortMode.optionLabel() = when (this) {
-    SortMode.Distance -> R.string.cat_sort_distance
+private fun SortMode.optionLabel(category: Category) = when (this) {
+    SortMode.Distance -> if (category == Category.QueVer) R.string.cat_sort_distance else R.string.cat_sort_web
     SortMode.Rating -> R.string.cat_sort_rating
     SortMode.Name -> R.string.cat_sort_name
 }

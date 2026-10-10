@@ -75,9 +75,14 @@ fun PlaceImage(
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop,
+    /** Foto de la web (ruta dentro de `assets/img/`) que se usa si no hay recurso propio. */
+    assetPath: String? = null,
 ) {
+    val asset = if (image == null) rememberAssetImage(assetPath) else null
     if (image != null) {
         Image(painterResource(image), contentDescription, modifier, contentScale = contentScale)
+    } else if (asset != null) {
+        Image(asset, contentDescription, modifier, contentScale = contentScale)
     } else {
         Box(
             modifier = modifier.background(MaterialTheme.appColors.brandSoft).semantics { if (contentDescription != null) this.contentDescription = contentDescription },
@@ -207,7 +212,7 @@ fun PlaceGridCard(
     ) {
         Column {
             Box(Modifier.fillMaxWidth().height(GridImageHeight)) {
-                PlaceImage(item.thumbForCard(), item.category, Modifier.fillMaxSize(), item.title)
+                PlaceImage(item.thumbForCard(), item.category, Modifier.fillMaxSize(), item.title, assetPath = item.thumbAsset ?: item.heroAsset)
                 FavoriteButton(
                     favorite = favorite,
                     onToggle = onToggleFavorite,
@@ -266,6 +271,7 @@ fun PlaceListCard(
                 category = item.category,
                 modifier = Modifier.size(ListThumbSize).clip(ThumbShape),
                 contentDescription = item.title,
+                assetPath = item.thumbAsset ?: item.heroAsset,
             )
             Spacer(Modifier.width(Spacing.s))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxs / 2)) {

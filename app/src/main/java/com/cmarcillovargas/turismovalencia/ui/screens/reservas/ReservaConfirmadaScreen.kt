@@ -160,7 +160,7 @@ private fun Ticket(reservation: Reservation, offer: Offer?) {
     Surface(Modifier.fillMaxWidth(), shape = TicketShape, color = MaterialTheme.colorScheme.surface, shadowElevation = Spacing.xxs / 2) {
         Column {
             Box(Modifier.fillMaxWidth().height(TicketHeader)) {
-                PlaceImage(offer?.ticket ?: offer?.image, Category.Sostenible, Modifier.fillMaxSize(), reservation.title)
+                PlaceImage(offer?.ticket ?: offer?.image, Category.Sostenible, Modifier.fillMaxSize(), reservation.title, assetPath = offer?.assetImage)
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.2f to Color.Transparent, 1f to MaterialTheme.colorScheme.scrim.copy(alpha = 0.7f))))
                 Column(Modifier.align(Alignment.BottomStart).padding(Spacing.m)) {
                     Text("${offer?.tag.orEmpty()} · ${reservation.place}".uppercase(), style = MaterialTheme.typography.eyebrow, color = MaterialTheme.appColors.gold)

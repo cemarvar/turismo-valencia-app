@@ -64,9 +64,15 @@ fun DetailHero(
     onToggleFavorite: (() -> Unit)? = null,
     onShare: (() -> Unit)? = null,
     imageDescription: String? = null,
+    /** Foto de la web (ruta dentro de `assets/img/`) si no hay recurso propio. */
+    assetPath: String? = null,
 ) {
     Box(modifier.fillMaxWidth().height(height)) {
-        PlaceImage(image, category, Modifier.fillMaxSize(), imageDescription)
+        if (image == null && rememberAssetImage(assetPath) == null) {
+            Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondary))
+        } else {
+            PlaceImage(image, category, Modifier.fillMaxSize(), imageDescription, assetPath = assetPath)
+        }
         Box(
             Modifier.fillMaxSize().background(
                 Brush.verticalGradient(

@@ -126,7 +126,7 @@ private fun ReservationCard(row: ReservationRow, onOpen: (String) -> Unit) {
         shadowElevation = Spacing.xxs / 2,
     ) {
         Row(Modifier.padding(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
-            PlaceImage(row.offer?.let { it.thumb ?: it.image }, Category.Sostenible, Modifier.size(ThumbSize).clip(ThumbShape), reservation.title)
+            PlaceImage(row.offer?.let { it.thumb ?: it.image }, Category.Sostenible, Modifier.size(ThumbSize).clip(ThumbShape), reservation.title, assetPath = row.offer?.assetImage)
             Spacer(Modifier.width(Spacing.m))
             Column(Modifier.weight(1f)) {
                 Text(reservation.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 2)

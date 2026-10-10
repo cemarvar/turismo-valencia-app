@@ -15,6 +15,7 @@ object Routes {
     const val Descargas = "descargas"
     const val Perfil = "perfil"
     const val Notificaciones = "notificaciones"
+    const val Contacto = "contacto"
 
     // Patrones con argumentos.
     const val MapaPattern = "mapa?focus={focus}&q={q}"
@@ -25,6 +26,7 @@ object Routes {
     const val RutaPattern = "ruta/{id}"
     const val ReservarPattern = "reservar/{offerId}"
     const val ReservaPattern = "reserva/{id}"
+    const val PaginaPattern = "pagina/{id}"
 
     fun mapa(focus: String? = null, query: String? = null) = "mapa?focus=${Uri.encode(focus.orEmpty())}&q=${Uri.encode(query.orEmpty())}"
 
@@ -41,6 +43,9 @@ object Routes {
     fun reservar(offerId: String) = "reservar/$offerId"
 
     fun reserva(id: String) = "reserva/$id"
+
+    /** Página de la web (lo esencial, planes, guías de entradas, textos legales). */
+    fun pagina(id: String) = "pagina/$id"
 
     /** Pestaña de la barra inferior a la que pertenece una ruta, o `null` si la pantalla no muestra la barra. */
     fun tabOf(route: String?): String? = when {

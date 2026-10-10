@@ -120,7 +120,7 @@ fun ReservarScreen(
         ) {
             Surface(Modifier.fillMaxWidth(), shape = SummaryShape, color = MaterialTheme.colorScheme.surface, shadowElevation = Spacing.xxs / 2) {
                 Row(Modifier.padding(Spacing.s), verticalAlignment = Alignment.CenterVertically) {
-                    PlaceImage(offer.thumb ?: offer.image, Category.Sostenible, Modifier.size(Spacing.xxl + Spacing.l).clip(ThumbShape), offer.title)
+                    PlaceImage(offer.thumb ?: offer.image, Category.Sostenible, Modifier.size(Spacing.xxl + Spacing.l).clip(ThumbShape), offer.title, assetPath = offer.assetImage)
                     Spacer(Modifier.width(Spacing.s))
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                         Eyebrow("${offer.tag} · ${offer.place}")

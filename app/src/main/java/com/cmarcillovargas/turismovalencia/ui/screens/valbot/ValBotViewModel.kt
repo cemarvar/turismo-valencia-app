@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cmarcillovargas.turismovalencia.data.AppContainer
 import com.cmarcillovargas.turismovalencia.data.model.ChatMessage
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
+import com.cmarcillovargas.turismovalencia.data.model.WebPageMeta
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +24,7 @@ data class ValBotUiState(
     val input: String = "",
     val suggestions: List<String> = emptyList(),
     val items: Map<String, ContentItem> = emptyMap(),
+    val pages: Map<String, WebPageMeta> = emptyMap(),
 )
 
 class ValBotViewModel(private val container: AppContainer) : ViewModel() {
@@ -39,6 +41,7 @@ class ValBotViewModel(private val container: AppContainer) : ViewModel() {
             input = text,
             suggestions = container.valbot.suggestions,
             items = container.content.all.associateBy { it.id },
+            pages = container.web.index.pages,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ValBotUiState())
 
@@ -58,7 +61,7 @@ class ValBotViewModel(private val container: AppContainer) : ViewModel() {
             // TODO(api): llamar al backend (Gemini) en lugar de las respuestas de ejemplo.
             val reply = container.valbot.reply(question)
             typing.value = false
-            messages.update { it + ChatMessage(nextId++, false, reply.text, now(), reply.cardIds) }
+            messages.update { it + ChatMessage(nextId++, false, reply.text, now(), reply.cardIds, reply.pageIds) }
         }
     }
 

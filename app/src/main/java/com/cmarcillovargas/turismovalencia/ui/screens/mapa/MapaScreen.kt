@@ -308,7 +308,7 @@ private fun SelectedSheet(
             )
             Spacer(Modifier.height(Spacing.s))
             Row(verticalAlignment = Alignment.Top) {
-                PlaceImage(item.thumb, item.category, Modifier.size(84.dp).clip(ThumbShape), item.title)
+                PlaceImage(item.thumb, item.category, Modifier.size(84.dp).clip(ThumbShape), item.title, assetPath = item.thumbAsset ?: item.heroAsset)
                 Spacer(Modifier.width(Spacing.s))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                     Eyebrow("${stringResource((item.mapCategory ?: item.category).label())} · ${item.area}")

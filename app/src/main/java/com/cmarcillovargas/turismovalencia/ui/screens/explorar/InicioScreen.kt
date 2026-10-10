@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -42,7 +43,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,8 +68,10 @@ import com.cmarcillovargas.turismovalencia.data.fake.FakeEventos
 import com.cmarcillovargas.turismovalencia.data.fake.FakeQueVer
 import com.cmarcillovargas.turismovalencia.data.fake.FakeSostenible
 import com.cmarcillovargas.turismovalencia.data.model.Category
+import com.cmarcillovargas.turismovalencia.data.model.HomeTile
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.ui.components.AppFilterChip
+import com.cmarcillovargas.turismovalencia.ui.components.ContactSummaryCard
 import com.cmarcillovargas.turismovalencia.ui.components.ChipStyle
 import com.cmarcillovargas.turismovalencia.ui.components.FavoriteButton
 import com.cmarcillovargas.turismovalencia.ui.components.FavoriteStyle
@@ -106,6 +111,8 @@ fun InicioRoute(
     onOpenCategory: (Category) -> Unit,
     onOpenTickets: () -> Unit,
     onOpenSustainable: () -> Unit,
+    onOpenPage: (String) -> Unit,
+    onOpenContact: () -> Unit,
     viewModel: InicioViewModel = viewModel(factory = containerFactory { InicioViewModel(it) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -120,6 +127,14 @@ fun InicioRoute(
         onSeeAll = { onOpenCategory(uiState.selected ?: Category.QueVer) },
         onOpenTickets = onOpenTickets,
         onOpenSustainable = onOpenSustainable,
+        onOpenTile = { tile ->
+            when (val target = viewModel.targetOf(tile.route)) {
+                HomeTarget.Tickets -> onOpenTickets()
+                is HomeTarget.Item -> onOpenItem(target.id)
+                is HomeTarget.Page -> onOpenPage(target.id)
+            }
+        },
+        onOpenContact = onOpenContact,
         onToggleFavorite = viewModel::onToggleFavorite,
         onToggleDownload = viewModel::onToggleDownload,
         onRetry = viewModel::onRetry,
@@ -138,6 +153,8 @@ fun InicioScreen(
     onSeeAll: () -> Unit,
     onOpenTickets: () -> Unit,
     onOpenSustainable: () -> Unit,
+    onOpenTile: (HomeTile) -> Unit,
+    onOpenContact: () -> Unit,
     onToggleFavorite: (String) -> Unit,
     onToggleDownload: (String) -> Unit,
     onRetry: () -> Unit,
@@ -152,13 +169,16 @@ fun InicioScreen(
             } else {
                 LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = Spacing.xxl + Spacing.l)) {
                     item { HomeSearchField(onOpenSearch, Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s)) }
-                    item {
-                        FeaturedCarousel(
-                            items = uiState.featured,
-                            favorites = uiState.favorites,
-                            onOpenItem = onOpenItem,
-                            onToggleFavorite = onToggleFavorite,
-                        )
+                    item(key = "featured") {
+                        // Se vuelve a crear al cambiar de sección para que el carrusel empiece en su primera tarjeta.
+                        key(uiState.selected) {
+                            FeaturedCarousel(
+                                items = uiState.featured,
+                                favorites = uiState.favorites,
+                                onOpenItem = onOpenItem,
+                                onToggleFavorite = onToggleFavorite,
+                            )
+                        }
                     }
                     item {
                         CategoryChips(
@@ -169,9 +189,9 @@ fun InicioScreen(
                             modifier = Modifier.padding(top = Spacing.m),
                         )
                     }
-                    item {
+                    item(key = "section") {
                         SectionTitle(
-                            text = stringResource(R.string.home_nearby),
+                            text = uiState.sectionTitle ?: stringResource(R.string.home_nearby),
                             modifier = Modifier.padding(start = GridPadding, end = Spacing.m, top = Spacing.l, bottom = Spacing.s),
                             trailing = {
                                 TextButton(onClick = onSeeAll) {
@@ -184,7 +204,17 @@ fun InicioScreen(
                             },
                         )
                     }
-                    items(uiState.items.chunked(2)) { pair ->
+                    uiState.sectionSubtitle?.let { text ->
+                        item(key = "section-text") {
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = GridPadding).padding(bottom = Spacing.s),
+                            )
+                        }
+                    }
+                    items(uiState.items.chunked(2), key = { pair -> pair.first().id }) { pair ->
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = GridPadding).padding(bottom = GridPadding),
                             horizontalArrangement = Arrangement.spacedBy(GridPadding),
@@ -204,6 +234,39 @@ fun InicioScreen(
                             }
                             if (pair.size == 1) Spacer(Modifier.weight(1f))
                         }
+                    }
+                    item {
+                        HomeTileSection(
+                            title = stringResource(R.string.home_esencial_title),
+                            text = stringResource(R.string.home_esencial_text),
+                            tiles = uiState.esencial,
+                            category = Category.QueVer,
+                            onOpenTile = onOpenTile,
+                            modifier = Modifier.padding(top = Spacing.m),
+                        )
+                    }
+                    item {
+                        HomeTileSection(
+                            title = stringResource(R.string.home_planes_title),
+                            text = stringResource(R.string.home_planes_text),
+                            tiles = uiState.planes,
+                            category = Category.Eventos,
+                            onOpenTile = onOpenTile,
+                            modifier = Modifier.padding(top = Spacing.l),
+                        )
+                    }
+                    item {
+                        HomeTileSection(
+                            title = stringResource(R.string.home_sostenible_title),
+                            text = stringResource(R.string.home_sostenible_text),
+                            tiles = uiState.sostenible,
+                            category = Category.Sostenible,
+                            onOpenTile = onOpenTile,
+                            modifier = Modifier.padding(top = Spacing.l),
+                        )
+                    }
+                    item {
+                        ContactSummaryCard(onOpenContact, Modifier.padding(horizontal = GridPadding).padding(top = Spacing.l))
                     }
                 }
             }
@@ -337,7 +400,7 @@ private fun FeaturedCarousel(
                 .clip(FeatureShape)
                 .clickable(onClick = { onOpenItem(item.id) }),
         ) {
-            PlaceImage(item.feature, item.category, Modifier.fillMaxSize(), item.title)
+            PlaceImage(item.feature, item.category, Modifier.fillMaxSize(), item.title, assetPath = item.heroAsset ?: item.thumbAsset)
             Box(
                 Modifier.fillMaxSize().background(
                     Brush.verticalGradient(
@@ -353,28 +416,33 @@ private fun FeaturedCarousel(
                 style = FavoriteStyle.OnPhotoDark,
                 circleSize = Spacing.xxl - Spacing.xs,
             )
-            Column(Modifier.align(Alignment.BottomStart).padding(Spacing.m)) {
-                Text(
-                    text = (item.featureLabel ?: item.eyebrow).uppercase(),
-                    style = MaterialTheme.typography.eyebrow,
-                    color = MaterialTheme.appColors.gold,
-                    maxLines = 1,
-                )
-                Text(text = item.title, style = MaterialTheme.typography.headlineMedium, color = Color.White)
-                Text(
-                    text = item.featureSubtitle ?: item.summary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    maxLines = 1,
+            Row(
+                modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(Spacing.m),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = (item.featureLabel ?: item.eyebrow).uppercase(),
+                        style = MaterialTheme.typography.eyebrow,
+                        color = MaterialTheme.appColors.gold,
+                        maxLines = 1,
+                    )
+                    Text(text = item.title, style = MaterialTheme.typography.headlineMedium, color = Color.White, maxLines = 1)
+                    Text(
+                        text = item.featureSubtitle ?: item.summary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
+                        maxLines = 1,
+                    )
+                }
+                Spacer(Modifier.width(Spacing.s))
+                PageIndicator(
+                    pageCount = items.size,
+                    currentPage = pagerState.currentPage,
+                    activeColor = Color.White,
+                    inactiveColor = Color.White.copy(alpha = 0.5f),
                 )
             }
-            PageIndicator(
-                pageCount = items.size,
-                currentPage = pagerState.currentPage,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(Spacing.m),
-                activeColor = Color.White,
-                inactiveColor = Color.White.copy(alpha = 0.5f),
-            )
         }
     }
 }
@@ -387,7 +455,14 @@ private fun CategoryChips(
     onOpenSustainable: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val state = rememberLazyListState()
+    // La sección elegida queda siempre a la vista, aunque su chip estuviera cortado por el borde.
+    LaunchedEffect(selected) {
+        val index = SectionChips.indexOf(selected)
+        if (index >= 0) state.animateScrollToItem((index - 1).coerceAtLeast(0))
+    }
     LazyRow(
+        state = state,
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = Spacing.m),
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
@@ -400,6 +475,9 @@ private fun CategoryChips(
         item { CategoryChip(R.string.cat_sostenible, Icons.Outlined.Eco, false, onOpenSustainable) }
     }
 }
+
+/** Secciones de los chips, en su orden (los dos últimos chips abren otras pantallas). */
+private val SectionChips = listOf(Category.QueVer, Category.Gastronomia, Category.Alojamientos, Category.Eventos)
 
 @Composable
 private fun CategoryChip(label: Int, icon: ImageVector, selected: Boolean, onClick: () -> Unit) {
@@ -421,7 +499,7 @@ private val PreviewFeatured = (FakeEventos + FakeQueVer).filter { it.feature != 
 @Composable
 private fun InicioPreview(state: InicioUiState) {
     TurismoValenciaTheme {
-        InicioScreen(state, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+        InicioScreen(state, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
     }
 }
 

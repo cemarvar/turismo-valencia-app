@@ -31,6 +31,10 @@ Catálogo de lo que hay en `ui/components` y de los tokens del theme. **Antes de
 | `SkeletonBox` | `States.kt` | Bloque gris que late (inicio cargando) | `shape` |
 | `AppSwitch` | `States.kt` | Interruptor naranja con check | `checked`, `onCheckedChange` |
 | `SectionLabel` | `States.kt` | Etiqueta en mayúsculas de lista («ESTA SEMANA», «PREFERENCIAS») | `text` |
+| `PlaceImage` (asset) | `AssetImage.kt`, `Cards.kt` | `rememberAssetImage(path)` decodifica una foto de `assets/img/` (caché de 32 MB); `PlaceImage(assetPath = …)` la usa cuando no hay recurso propio | `assetPath` |
+| `webBlocks` / `WebItemCard` | `WebBlocks.kt` | Pinta en una `LazyColumn` los bloques de una página de la web: tarjetas numeradas con foto, datos, puntos, notas, etiquetas y enlace; filas «etiqueta · valor»; consejos; texto legal | `blocks`, `filters` (estado de los filtros), `onOpenUrl`, `legal` |
+| `WebPageCard` | `WebPageCard.kt` | Tarjeta horizontal de una página de la web (guías de Tickets & Tours) | `page`, `onClick` |
+| `ContactSummaryCard` | `ContactCard.kt` | Resumen de contacto con acceso a la pantalla completa (portada y pie de cada guía) | `onOpenContact` |
 | `QrCode` | `QrCode.kt` | Código QR real (ZXing) dibujado en un `Canvas` | `content` |
 | `PageIndicator` | `PageIndicator.kt` | Puntos de página; la activa se estira a píldora | `pageCount`, `currentPage`, colores |
 | `Eyebrow` | `Eyebrow.kt` | Etiqueta superior en mayúsculas con tracking | `text`, `color` |
@@ -49,6 +53,7 @@ Hoy solo se usan en un sitio. Cuando se repitan, se mueven a `ui/components` y s
 | `SkipButton` (píldora translúcida sobre foto) | `OnboardingScreen.kt` | Cabeceras sobre foto |
 | `LanguageRow` + `RadioMark` | `IdiomaScreen.kt` | Cualquier lista de opciones con radio |
 | `SettingRow` | `PerfilScreen.kt`, `DescargasScreen.kt` | Dos versiones casi iguales; unificar si aparece una tercera |
+| `HomeTileSection` | `HomeSections.kt` | Rejilla de dos columnas con foto y título; hoy solo la portada |
 
 ## Tokens del theme (`ui/theme`)
 
@@ -75,6 +80,7 @@ Cada pantalla tiene, en `ui/screens/<grupo>/`:
 ## Datos (`data/`)
 - `AppContainer` (creado por `TurismoApp`) guarda los repositorios: `content`, `favorites`, `downloads`, `reservations`, `settings`, `notifications`, `searchHistory`, `network` y `valbot`.
 - `ContentRepository` sirve `ContentItem` (lugares y eventos) y `Offer` (tickets, tours y experiencias) desde `data/fake`. Un `ContentItem` con `onMap = false` no se dibuja como marcador en el mapa.
+- `WebContentRepository` lee `assets/web/index.json` y `assets/web/pages/<Pagina>.json` (65 páginas: modelo `WebPage` con bloques `Items`, `Facts` y `Bullets`) y enlaza fichas, ofertas y fotos con sus páginas. `ContentItem.pageId/thumbAsset/heroAsset` y `Offer.assetImage` los rellena `ContentRepository`.
 - `NetworkMonitor.isOnline` refleja la conexión real; `force(Boolean?)` la simula (lo usa el extra `--ez offline true`).
 
 ## Reglas de accesibilidad

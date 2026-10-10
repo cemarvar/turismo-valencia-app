@@ -19,3 +19,5 @@ local.properties
 .env.*
 !.env.example
 node_modules/
+/tools/web-import/work/
+__pycache__/

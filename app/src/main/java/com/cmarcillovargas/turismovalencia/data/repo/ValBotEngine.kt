@@ -6,13 +6,13 @@ import com.cmarcillovargas.turismovalencia.util.formatDistance
 import com.cmarcillovargas.turismovalencia.util.normalizeText
 import com.cmarcillovargas.turismovalencia.util.walkMinutes
 
-data class BotReply(val text: String, val cardIds: List<String> = emptyList())
+data class BotReply(val text: String, val cardIds: List<String> = emptyList(), val pageIds: List<String> = emptyList())
 
 /**
  * Respuestas de ValBot con reglas sobre el contenido de ejemplo.
  * TODO(api): el asistente real es la función chat de la web (Gemini) detrás del backend; la app nunca guarda la clave.
  */
-class ValBotEngine(private val content: ContentRepository) {
+class ValBotEngine(private val content: ContentRepository, private val web: WebContentRepository) {
 
     val greeting = "¡Hola! Soy ValBot, tu asistente de turismo en Valencia. ¿En qué puedo ayudarte?"
 
@@ -22,6 +22,7 @@ class ValBotEngine(private val content: ContentRepository) {
         "¿Cómo llego al Jardín del Turia?",
         "¿Qué hago con niños?",
         "Planes si llueve",
+        "Valencia en 3 días",
     )
 
     fun reply(question: String): BotReply {
@@ -43,6 +44,27 @@ class ValBotEngine(private val content: ContentRepository) {
                     listOf("paella", "albufera"),
                 )
 
+            q.hasAny("navidad", "belen", "luces") ->
+                BotReply("En Navidad, Valencia se llena de luces, mercados y belenes. Aquí tienes la guía completa:", pageIds = listOf("Navidad"))
+
+            q.hasAny("3 dias", "tres dias", "itinerario", "imprescindible", "que ver") ->
+                BotReply("Para organizarte, estas guías te sirven de base:", pageIds = listOf("ValenciaTresDias", "VisitasImprescindibles"))
+
+            q.hasAny("muralla", "torres de", "serranos", "quart", "patrimonio", "unesco") ->
+                BotReply("La Valencia monumental está en estas guías:", pageIds = listOf("CiudadAmurallada", "PatrimonioHumanidad"))
+
+            q.hasAny("tour", "visita guiada", "bus turistico", "tourist card", "tarjeta", "entrada", "ticket") ->
+                BotReply("Para tickets y tours, mira estas guías y reserva desde Tickets & Tours:", pageIds = listOf("ValenciaCard", "BusTuristico", "CentroHistorico"))
+
+            q.hasAny("deporte", "correr", "running", "surf", "futbol") ->
+                BotReply("Valencia es ciudad de deporte: carreras, bici, playa y mucho más.", pageIds = listOf("Deportes"))
+
+            q.hasAny("exposicion", "exposiciones", "arte") ->
+                BotReply("Para exposiciones y arte, empieza por aquí:", pageIds = listOf("Exposicion", "MonumentosMuseos"))
+
+            q.hasAny("contacto", "telefono", "email", "correo", "oficina") ->
+                BotReply("Puedes contactar con la oficina de turismo de lunes a viernes de 9:00 a 18:00 en el +34 963 000 000 o en info@valencia.com.")
+
             q.hasAny("fallas", "mascleta", "falles", "pirotecn") ->
                 BotReply("Las Fallas se celebran del 1 al 19 de marzo. La mascletà es cada día a las 14:00 en la Plaza del Ayuntamiento; llega 30 minutos antes.", listOf("fallas"))
 
@@ -63,8 +85,9 @@ class ValBotEngine(private val content: ContentRepository) {
 
             else -> {
                 val found = content.all.filter { content.matches(it, question) }.take(2)
-                if (found.isNotEmpty()) {
-                    BotReply("Esto es lo que he encontrado:", found.map { it.id })
+                val guides = web.search(question).take(2).map { it.id }
+                if (found.isNotEmpty() || guides.isNotEmpty()) {
+                    BotReply("Esto es lo que he encontrado:", found.map { it.id }, guides)
                 } else {
                     BotReply("No tengo claro eso todavía. Prueba a preguntarme por lugares, eventos, gastronomía, alojamientos o cómo llegar a un sitio. Para dudas concretas, contacta con la oficina de turismo de Valencia.")
                 }

@@ -16,10 +16,12 @@ import com.cmarcillovargas.turismovalencia.data.repo.ReservationsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SearchHistoryRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SettingsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.ValBotEngine
+import com.cmarcillovargas.turismovalencia.data.repo.WebContentRepository
 
 /** Dependencias de la app, creadas una vez en `TurismoApp`. */
 class AppContainer(application: Application) {
-    val content = ContentRepository()
+    val web = WebContentRepository(application)
+    val content = ContentRepository(web)
     val favorites = FavoritesRepository()
     val downloads = DownloadsRepository(content)
     val reservations = ReservationsRepository(content)
@@ -27,7 +29,7 @@ class AppContainer(application: Application) {
     val notifications = NotificationsRepository()
     val searchHistory = SearchHistoryRepository()
     val network = NetworkMonitor(application)
-    val valbot = ValBotEngine(content)
+    val valbot = ValBotEngine(content, web)
 }
 
 /** Crea un `ViewModel` con acceso al `AppContainer`. */
