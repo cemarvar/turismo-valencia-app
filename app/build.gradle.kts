@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 android {
@@ -23,7 +25,11 @@ android {
         release {
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                // R8 solo procesa estos paquetes; lo de fuera (la app, ZXing) se deja intacto. Toda librería de Kotlin que
+                // use la biblioteca estándar tiene que estar dentro: si no, R8 fija miembros de `kotlin.text` por lo que
+                // ella referencia y reubica solo parte de `StringsKt` (IllegalAccessError al abrir la app). Al añadir
+                // otra (Retrofit, Coil…), incluirla aquí; probar con `tools/verify/verify_release.py`.
+                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**", "okhttp3.**", "okio.**")
             }
         }
     }
@@ -35,6 +41,11 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+room {
+    // Esquemas exportados (versión a versión) para escribir y probar las migraciones.
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -50,9 +61,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.zxing.core)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.org.json)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

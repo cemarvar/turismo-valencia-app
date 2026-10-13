@@ -68,4 +68,6 @@ data class ChatMessage(
     val pageIds: List<String> = emptyList(),
     val isError: Boolean = false,
     val offlineLinks: Boolean = false,
+    /** Respuesta de las reglas de la app porque el asistente en línea no ha respondido. */
+    val basic: Boolean = false,
 )

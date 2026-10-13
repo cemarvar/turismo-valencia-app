@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -42,6 +43,7 @@ class ReservarViewModel(private val container: AppContainer, private val offerId
     private val adults = MutableStateFlow(2)
     private val children = MutableStateFlow(0)
     private val email = MutableStateFlow(DefaultEmail)
+    private var confirming = false
 
     private val party = combine(adults, children, email) { a, c, e -> Triple(a, c, e) }
 
@@ -84,13 +86,21 @@ class ReservarViewModel(private val container: AppContainer, private val offerId
         email.value = value
     }
 
-    /** Crea la reserva y devuelve su id para abrir la confirmación. */
-    // TODO(api): enviar la reserva al backend (tabla Reserva) y esperar su confirmación y el pago.
-    fun confirm(): String? {
+    /** Guarda la reserva y, cuando ya está guardada, llama a `onConfirmed` con su id para abrir la confirmación. */
+    fun confirm(onConfirmed: (String) -> Unit) {
         val state = uiState.value
-        val chosenTime = state.time ?: return null
-        if (!state.canConfirm) return null
-        return container.reservations.create(offerId, state.date, chosenTime, state.adults, state.children, state.email.trim()).id
+        val chosenTime = state.time ?: return
+        // Un segundo toque mientras se guarda no crea otra reserva.
+        if (!state.canConfirm || confirming) return
+        confirming = true
+        viewModelScope.launch {
+            try {
+                val saved = container.reservations.create(offerId, state.date, chosenTime, state.adults, state.children, state.email.trim())
+                onConfirmed(saved.id)
+            } finally {
+                confirming = false
+            }
+        }
     }
 
     /** El último horario de la lista está completo, para mostrar un hueco no disponible. */

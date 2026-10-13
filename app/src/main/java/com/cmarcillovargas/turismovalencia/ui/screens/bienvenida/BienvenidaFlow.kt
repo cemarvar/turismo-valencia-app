@@ -15,9 +15,9 @@ private enum class Paso { Splash, Onboarding, Permiso }
 
 /**
  * Recorrido de bienvenida: splash → onboarding → permiso de ubicación. Al terminar llama a `onFinished`.
- * Es un host en memoria sin la librería de navegación: no guarda nada y arranca siempre desde el splash.
+ * Es un host en memoria sin la librería de navegación y arranca siempre desde el splash; que ya se haya hecho
+ * se guarda aparte (`SettingsRepository.onboardingDone`) y `AppRoot` decide si se muestra.
  */
-// TODO(room): recordar que el onboarding ya se vio para no repetirlo en cada arranque.
 @Composable
 fun BienvenidaFlow(onFinished: () -> Unit) {
     var paso by rememberSaveable { mutableStateOf(Paso.Splash) }

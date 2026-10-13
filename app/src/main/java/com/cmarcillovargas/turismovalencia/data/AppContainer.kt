@@ -1,12 +1,17 @@
 package com.cmarcillovargas.turismovalencia.data
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.cmarcillovargas.turismovalencia.TurismoApp
+import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
+import com.cmarcillovargas.turismovalencia.data.local.DemoData
+import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
+import com.cmarcillovargas.turismovalencia.data.remote.ChatApi
 import com.cmarcillovargas.turismovalencia.data.repo.ContentRepository
 import com.cmarcillovargas.turismovalencia.data.repo.DownloadsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.FavoritesRepository
@@ -16,20 +21,54 @@ import com.cmarcillovargas.turismovalencia.data.repo.ReservationsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SearchHistoryRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SettingsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.ValBotEngine
+import com.cmarcillovargas.turismovalencia.data.repo.ValBotRepository
 import com.cmarcillovargas.turismovalencia.data.repo.WebContentRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.runBlocking
 
-/** Dependencias de la app, creadas una vez en `TurismoApp`. */
-class AppContainer(application: Application) {
+/**
+ * Dependencias de la app, creadas una vez en `TurismoApp`: el contenido (assets), la base de datos local con lo del
+ * usuario (Room) y los repositorios que las unen. `database` se puede cambiar para probar con una en memoria.
+ */
+class AppContainer(application: Application, private val database: AppDatabase = AppDatabase.create(application)) {
+    /**
+     * Ámbito de las escrituras y de los estados que siguen a Room: vive tanto como la app. La paralelización limitada a 1
+     * mantiene las escrituras en el orden en que se piden; un fallo al guardar se registra en vez de cerrar la app.
+     */
+    private val scope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default.limitedParallelism(1) +
+            CoroutineExceptionHandler { _, error -> Log.e(Tag, "No se pudo guardar en la base de datos", error) },
+    )
+
     val web = WebContentRepository(application)
     val content = ContentRepository(web)
-    val favorites = FavoritesRepository()
-    val downloads = DownloadsRepository(content)
-    val reservations = ReservationsRepository(content)
-    val settings = SettingsRepository()
-    val notifications = NotificationsRepository()
-    val searchHistory = SearchHistoryRepository()
+    private val demo = DemoData(content)
+
+    init {
+        // Primer arranque: datos de demostración. Después se lee lo guardado.
+        runBlocking { demo.seedIfFirstRun(database) }
+    }
+
+    private val settingsStore = SettingsStore(database.settings(), scope)
+
+    val favorites = FavoritesRepository(database.favorites(), scope)
+    val downloads = DownloadsRepository(content, database.downloads(), settingsStore, scope)
+    val reservations = ReservationsRepository(content, database.reservations(), scope)
+    val settings = SettingsRepository(settingsStore)
+    val notifications = NotificationsRepository(database.notifications(), scope)
+    val searchHistory = SearchHistoryRepository(database.recentSearches(), scope)
     val network = NetworkMonitor(application)
-    val valbot = ValBotEngine(content, web)
+    val valbot = ValBotRepository(ChatApi(), ValBotEngine(content, web))
+
+    /** Solo depuración (`--ez resetData true`): vuelve a los datos de demostración, como en el primer arranque. */
+    fun resetToDemo() = runBlocking { demo.populate(database) }
+
+    private companion object {
+        const val Tag = "TurismoDb"
+    }
 }
 
 /** Crea un `ViewModel` con acceso al `AppContainer`. */

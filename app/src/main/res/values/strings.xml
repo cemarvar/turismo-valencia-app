@@ -166,6 +166,7 @@
     <string name="valbot_menu">Más opciones</string>
     <string name="valbot_new_chat">Nueva conversación</string>
     <string name="valbot_free">Gratis</string>
+    <string name="valbot_basic_reply">Respuesta básica · ValBot en línea no disponible</string>
     <string name="valbot_unavailable">Ahora mismo ValBot no está operativo. Sentimos las molestias.</string>
     <string name="valbot_offline_meanwhile">Mientras tanto puedes consultar sin conexión:</string>
     <string name="valbot_my_favorites">Mis favoritos</string>

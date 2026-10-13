@@ -7,8 +7,8 @@ Qué ver, eventos, gastronomía y alojamientos; mapa y rutas a pie; tickets, tou
 un asistente (ValBot) y contenido guardado para usar **sin conexión**. Hecha con Kotlin y Jetpack Compose,
 siguiendo el diseño de Figma pantalla a pantalla.
 
-> **Estado:** frontend completo y funcional con datos en memoria. Aún no hay backend conectado, base de datos local ni mapa real
-> (ver [Hoja de ruta](#hoja-de-ruta)).
+> **Estado:** frontend completo y funcional; ValBot conectado a la web y lo del usuario guardado en local con Room. Aún no hay
+> reservas en servidor ni mapa real (ver [Hoja de ruta](#hoja-de-ruta)).
 
 ## Qué incluye
 
@@ -18,7 +18,7 @@ siguiendo el diseño de Figma pantalla a pantalla.
 | **Explorar** | Portada con carrusel de destacados y chips de sección, búsqueda con sugerencias, listados por sección, fichas de lugar y de evento, Tickets & Tours, turismo sostenible |
 | **Contenido de la web** | Las 65 páginas de la web: Lo esencial, Planes, Qué ver, Eventos, Gastronomía, Alojamientos, Sostenible, guías de entradas, tours y experiencias, y los textos legales; más Contacto. Los índices de sección siguen el orden de la web (15 lugares, 6 eventos, 9 platos, 6 alojamientos) |
 | **Mapa** | Mapa con filtros por categoría y ruta a pie con cuatro modos de transporte |
-| **ValBot** | Chat con tarjetas de lugares y guías, dictado por voz, modo sin conexión |
+| **ValBot** | Asistente con IA (Gemini, a través de la web) con tarjetas de lugares y guías, dictado por voz, respuestas básicas si el servidor no responde y modo sin conexión |
 | **Favoritos y descargas** | Favoritos, fichas y mapa guardados, cuota de espacio, solo Wi-Fi |
 | **Reservas** | Reservar en dos pasos, reserva confirmada con código QR, historial |
 | **Perfil** | Idioma, notificaciones, ubicación, tamaño del texto, cerrar sesión |
@@ -32,11 +32,11 @@ Las 27 pantallas del [diseño de Figma](docs/Figma) están implementadas y compa
 - **Arquitectura MVVM**: una pantalla = `Screen` + `UiState` + `ViewModel`, con `Route` que los conecta
 - **Navigation Compose** (barra inferior solo en las rutas que la llevan en el diseño)
 - Tipografía **Source Sans 3** empaquetada, para que la app funcione sin conexión
-- **ZXing** (código QR real) y `desugar_jdk_libs` (`java.time` desde Android 7)
+- **Room** (base de datos local con lo del usuario), **OkHttp** (llamada a `/api/chat` de ValBot), **ZXing** (código QR real) y `desugar_jdk_libs` (`java.time` desde Android 7)
 - Android: `minSdk 24`, `targetSdk 37`, solo tema claro
 
-Datos: repositorios en memoria (`data/`) y el contenido de la web como JSON en `assets/web/`, con 479 fotos en `assets/img/`.
-Ninguna clave viaja en el APK.
+Datos: el contenido de la web como JSON en `assets/web/` (con 479 fotos en `assets/img/`) y lo del usuario (favoritos, descargas,
+reservas, ajustes…) en una base de datos Room que sigue ahí al cerrar la app. ValBot es lo único que usa Internet. Ninguna clave viaja en el APK.
 
 ## Cómo ejecutarla
 
@@ -54,7 +54,8 @@ O abre la carpeta en Android Studio, espera a que sincronice Gradle y pulsa **Ru
 |---|---|
 | `./gradlew assembleDebug` | Compilar el APK de depuración |
 | `./gradlew lint` | Análisis estático |
-| `./gradlew test` | Tests unitarios |
+| `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room) |
+| `./gradlew connectedDebugAndroidTest` | Tests de Room en el emulador o móvil (cierran y reabren la base de datos) |
 
 ### Abrir una pantalla concreta (solo depuración)
 
@@ -62,6 +63,8 @@ O abre la carpeta en Android Studio, espera a que sincronice Gradle y pulsa **Ru
 adb shell am start -n com.cmarcillovargas.turismovalencia/.MainActivity --es route detalle/mercado-central
 # --ez offline true       simula que no hay conexión
 # --ez emptyFavorites true vacía los favoritos
+# --ez chatFake true        ValBot contesta como Gemini sin llamar al servidor
+# --ez resetData true       vuelve a los datos de demostración (lo guardado persiste entre arranques)
 ```
 
 Rutas: `inicio`, `mapa`, `valbot`, `favoritos`, `reservas`, `busqueda`, `categoria/que-ver`, `detalle/<id>`,
@@ -73,7 +76,7 @@ Rutas: `inicio`, `mapa`, `valbot`, `favoritos`, `reservas`, `busqueda`, `categor
 ```text
 app/src/main/
 ├─ java/com/cmarcillovargas/turismovalencia/
-│  ├─ data/          modelos, contenido de ejemplo y repositorios (favoritos, descargas, reservas, ValBot…)
+│  ├─ data/          modelos, contenido, repositorios (favoritos, descargas, reservas, ValBot…), Room (`local/`) y cliente de ValBot (`remote/`)
 │  ├─ navigation/    rutas y grafo de navegación
 │  ├─ ui/
 │  │  ├─ theme/      colores, tipografía, formas y espaciado
@@ -114,13 +117,15 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - **Datos:** las 65 páginas de la web están en la app y se llega a todas desde alguna pantalla, y cada ficha de los índices tiene su equivalente.
 - **Web publicada:** títulos, fotos, orden y textos de la portada y de los índices frente a lo que muestra la web en directo.
 - **Interfaz (emulador):** chips, secciones, las 21 tarjetas de la portada, contacto, guías, fichas y buscador.
+- **Persistencia (emulador):** favoritos, descargas, reservas, ajustes, búsquedas, avisos y bienvenida siguen ahí tras cerrar y abrir la app.
+- **Publicación (emulador):** la versión minificada con R8 arranca y guarda en Room (`verify_release.py`).
 - **Fotos:** tras cambiar de sección, cada tarjeta muestra su propia foto.
 
 ## Hoja de ruta
 
-- [ ] **ValBot real**: conectar con la función `/api/chat` de la web (Gemini); la clave se queda en el servidor
+- [x] **ValBot en línea**: conectado a la función `/api/chat` de la web (Gemini); la clave se queda en el servidor y, si no responde, contesta con reglas
 - [ ] **Actividades y reservas** desde la base de datos (y endpoint de escritura para crear reservas)
-- [ ] **Persistencia local** con Room: favoritos, descargas, reservas y primer arranque
+- [x] **Persistencia local** con Room: favoritos, descargas, reservas, ajustes, búsquedas, avisos y primer arranque
 - [ ] **Mapa real** con osmdroid y mapa sin conexión
 - [ ] **Permisos** de ubicación y notificaciones (aviso de la mascletà)
 - [ ] Icono de la app, SplashScreen del sistema e **idiomas** ES · VA · EN · FR

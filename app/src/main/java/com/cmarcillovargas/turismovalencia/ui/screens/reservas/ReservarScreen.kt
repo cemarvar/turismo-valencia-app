@@ -94,7 +94,7 @@ fun ReservarRoute(
         onAdults = viewModel::onAdults,
         onChildren = viewModel::onChildren,
         onEmailChange = viewModel::onEmailChange,
-        onConfirm = { viewModel.confirm()?.let(onConfirmed) },
+        onConfirm = { viewModel.confirm(onConfirmed) },
     )
 }
 

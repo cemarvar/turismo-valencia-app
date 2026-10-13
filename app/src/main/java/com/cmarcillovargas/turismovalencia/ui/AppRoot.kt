@@ -16,18 +16,30 @@ import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
  * Raíz de la app: el recorrido de bienvenida y, al terminarlo, la app principal.
  * `startRoute` salta la bienvenida y abre esa pantalla (solo se usa al depurar).
  */
-// TODO(room): recordar que la bienvenida ya se hizo para no repetirla en cada arranque.
 @Composable
 fun AppRoot(startRoute: String? = null) {
     val container = (LocalContext.current.applicationContext as TurismoApp).container
     val textScale by container.settings.textScale.collectAsStateWithLifecycle()
-    var welcomeDone by rememberSaveable { mutableStateOf(startRoute != null) }
+    // La bienvenida ya se hizo (guardado en la base de datos) o se salta al depurar. Se decide al abrir la app; después
+    // lo cambian «Cerrar sesión» y el final de la bienvenida, que además lo guardan.
+    var welcomeDone by rememberSaveable { mutableStateOf(startRoute != null || container.settings.onboardingDone.value) }
 
     TurismoValenciaTheme(fontScaleFactor = textScale.factor) {
         if (welcomeDone) {
-            MainApp(onLogout = { welcomeDone = false }, startRoute = startRoute)
+            MainApp(
+                onLogout = {
+                    welcomeDone = false
+                    container.settings.setOnboardingDone(false)
+                },
+                startRoute = startRoute,
+            )
         } else {
-            BienvenidaFlow(onFinished = { welcomeDone = true })
+            BienvenidaFlow(
+                onFinished = {
+                    welcomeDone = true
+                    container.settings.setOnboardingDone(true)
+                },
+            )
         }
     }
 }

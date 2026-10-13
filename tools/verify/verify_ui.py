@@ -1,5 +1,7 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda)"""
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist)
+Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
+guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado."""
 import io
 import json
 import os
@@ -44,7 +46,13 @@ def nodes():
         m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", n.get("bounds") or "")
         if not m:
             continue
-        out.append({"t": n.get("text") or "", "d": n.get("content-desc") or "", "b": tuple(map(int, m.groups()))})
+        out.append({
+            "t": n.get("text") or "",
+            "d": n.get("content-desc") or "",
+            "b": tuple(map(int, m.groups())),
+            "chk": n.get("checkable") == "true",
+            "on": n.get("checked") == "true",
+        })
     return out
 
 
@@ -56,9 +64,11 @@ def shot():
     return Image.open(io.BytesIO(adb("exec-out", "screencap", "-p", binary=True))).convert("RGB")
 
 
-def start(route=None, *extra):
+def start(route=None, *extra, reset=True):
     adb("shell", "am", "force-stop", PKG)
     args = ["shell", "am", "start", "-n", PKG + "/.MainActivity"]
+    if reset:
+        args += ["--ez", "resetData", "true"]
     if route:
         args += ["--es", "route", route]
     adb(*args, *extra)
@@ -325,7 +335,132 @@ def g_busqueda():
             check("buscar «%s» no se rompe" % q, find("Atrás", ns=ns) is not None)
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda}
+def tap_last(text):
+    """Pulsa el último nodo con ese texto (el de la capa de encima, p. ej. el botón de un diálogo)."""
+    hits = [n for n in nodes() if n["t"] == text or n["d"] == text]
+    if hits:
+        tap(hits[-1])
+    return bool(hits)
+
+
+def switch_near(label):
+    """Interruptor de la fila cuyo texto es `label`."""
+    ns = nodes()
+    row = find(label, ns=ns)
+    if not row:
+        return None
+    cy = (row["b"][1] + row["b"][3]) // 2
+    return next((n for n in ns if n["chk"] and n["b"][1] - 40 <= cy <= n["b"][3] + 40), None)
+
+
+def bell_dot():
+    """El aviso rojo/naranja de la campana de Inicio (hay avisos sin leer)."""
+    img = shot()
+    box = img.crop((700, 112, 748, 150))
+    orange = sum(1 for r, g, b in getattr(box, "get_flattened_data", box.getdata)() if r > 200 and 60 < g < 140 and b < 60)
+    return orange > 20
+
+
+def g_persist():
+    print("\n## Persistencia (Room): lo guardado sigue ahí al cerrar y abrir la app")
+
+    # Favoritos
+    start("favoritos")
+    check("demo: 6 lugares guardados", find("6 lugares guardados") is not None)
+    tap_text("Quitar de favoritos")
+    check("quitar un favorito: quedan 5", find("5 lugares guardados") is not None)
+    start("favoritos", reset=False)
+    ns = nodes()
+    check("tras cerrar y abrir siguen siendo 5", find("5 lugares guardados", ns=ns) is not None)
+    check("el quitado no vuelve (Mercado Central)", find("Mercado Central", ns=ns) is None)
+
+    # Descargas y sus ajustes
+    start("descargas")
+    sw = switch_near("Descargar solo con Wi-Fi")
+    check("demo: «solo Wi-Fi» activado", sw is not None and sw["on"])
+    if sw:
+        tap(sw)
+    check("«solo Wi-Fi» se desactiva al tocarlo", (switch_near("Descargar solo con Wi-Fi") or {}).get("on") is False)
+    tap_text("Eliminar descarga")
+    left = len([t for t in texts() if t == "DESCARGADO"])
+    start("descargas", reset=False)
+    sw = switch_near("Descargar solo con Wi-Fi")
+    check("tras reiniciar «solo Wi-Fi» sigue desactivado", sw is not None and not sw["on"])
+    check("tras reiniciar «Actualizar automáticamente» sigue activado", (switch_near("Actualizar automáticamente") or {}).get("on") is True)
+    check("la descarga eliminada no vuelve", len([t for t in texts() if t == "DESCARGADO"]) <= left, "quedan %d" % len([t for t in texts() if t == "DESCARGADO"]))
+
+    # Reservas
+    start("reservas")
+    check("demo: 3 reservas · 1 pendiente", find("3 reservas · 1 pendiente") is not None)
+    start("reservar/albufera-barca", reset=False)
+    tap_text("Confirmar reserva")
+    time.sleep(0.8)
+    locator = next((t for t in texts() if re.fullmatch(r"TV-\d{4}-\d{4}", t)), "")
+    check("la reserva nueva sale con su localizador (TV-…-0416)", locator.endswith("0416"), locator)
+    start("reservas", reset=False)
+    check("tras reiniciar hay 4 reservas", find("4 reservas · 1 pendiente") is not None)
+    start("perfil", reset=False)
+    check("Perfil cuenta 4 reservas", find("4 reservas") is not None)
+
+    # Ajustes
+    tap_text("Tamaño del texto")
+    time.sleep(0.6)
+    tap_text("Grande")
+    time.sleep(0.8)
+    check("tamaño del texto: Grande", find("Grande") is not None)
+    start("perfil", reset=False)
+    check("tras reiniciar el tamaño del texto sigue en Grande", find("Grande") is not None)
+
+    # Búsquedas recientes
+    start("busqueda")
+    check("demo: recientes «Mercado Central» y «Fallas 2027»", find("Mercado Central") is not None and find("Fallas 2027") is not None)
+    adb("shell", "input", "text", "bioparc")
+    time.sleep(1.2)
+    tap_text("Bioparc")
+    time.sleep(1.0)
+    start("busqueda", reset=False)
+    ts = texts()
+    check("la búsqueda hecha aparece la primera en recientes", "Bioparc" in ts or "bioparc" in ts, str([t for t in ts[:6]]))
+
+    # Avisos sin leer
+    start("inicio")
+    check("demo: la campana tiene avisos sin leer", bell_dot())
+    start("notificaciones", reset=False)
+    tap_text("Mascletà a las 14:00")  # abre la ficha de Fallas y lo marca como leído
+    start("inicio", reset=False)
+    check("leído 1 de 2 avisos y tras reiniciar la campana sigue con punto", bell_dot())
+    start("notificaciones", reset=False)
+    tap_text("Reserva confirmada")  # abre Mis reservas y lo marca como leído
+    start("inicio", reset=False)
+    check("leídos los 2 avisos y tras reiniciar no hay punto en la campana", not bell_dot())
+
+    # Bienvenida y cerrar sesión
+    start(None)
+    time.sleep(2.2)
+    check("primer arranque: se muestra la bienvenida", find("Saltar") is not None)
+    tap_text("Saltar")
+    time.sleep(1.2)
+    tap_text("Mientras se usa la app")
+    time.sleep(2.0)
+    check("terminada la bienvenida se entra en Inicio", find("Buscar en Valencia…") is not None)
+    start(None, reset=False)
+    time.sleep(1.5)
+    ns = nodes()
+    check("al reabrir no se repite la bienvenida", find("Buscar en Valencia…", ns=ns) is not None and find("Saltar", ns=ns) is None)
+    start("perfil", reset=False)
+    swipe_up(2)
+    tap_text("Cerrar sesión")
+    time.sleep(0.8)
+    tap_last("Cerrar sesión")  # el botón del diálogo, no la fila de debajo
+    time.sleep(3.0)
+    check("cerrar sesión vuelve a la bienvenida", find("Saltar") is not None)
+    start(None, reset=False)
+    time.sleep(2.2)
+    check("y al reabrir sigue la bienvenida (se guardó)", find("Saltar") is not None)
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     chosen = sys.argv[1:] or list(GROUPS)

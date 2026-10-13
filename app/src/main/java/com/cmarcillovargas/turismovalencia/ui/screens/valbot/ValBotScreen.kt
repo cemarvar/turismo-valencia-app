@@ -91,6 +91,7 @@ import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 import com.cmarcillovargas.turismovalencia.ui.theme.screenTitle
 import com.cmarcillovargas.turismovalencia.util.formatDistance
+import com.cmarcillovargas.turismovalencia.util.parseChatMarkdown
 import com.cmarcillovargas.turismovalencia.util.walkMinutes
 
 private val BubbleRadius = 20.dp
@@ -162,7 +163,8 @@ fun ValBotScreen(
 ) {
     val listState = rememberLazyListState()
     val count = uiState.messages.size + (if (uiState.typing) 1 else 0) + (if (!uiState.online) 2 else 0)
-    LaunchedEffect(count) { if (count > 0) listState.animateScrollToItem(count) }
+    // «Escribiendo…» se sustituye por la respuesta sin cambiar el total, así que también depende de `typing`.
+    LaunchedEffect(count, uiState.typing) { if (count > 0) listState.animateScrollToItem(count) }
     Box(modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             Header(uiState.online, onBack, onNewConversation)
@@ -277,9 +279,13 @@ private fun BotBubble(message: ChatMessage, items: Map<String, ContentItem>, pag
     BotRow {
         Surface(shape = BotBubbleShape, color = MaterialTheme.colorScheme.surface, shadowElevation = Spacing.xxs / 2) {
             Column(Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
-                Text(message.text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                val text = remember(message.text) { parseChatMarkdown(message.text) }
+                Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                 message.cardIds.mapNotNull(items::get).forEach { MiniCard(it) { onOpenItem(it.id) } }
                 message.pageIds.mapNotNull(pages::get).forEach { MiniPageCard(it) { onOpenPage(it.id) } }
+                if (message.basic) {
+                    Text(stringResource(R.string.valbot_basic_reply), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 Text(message.time, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal), color = MaterialTheme.colorScheme.outline)
             }
         }

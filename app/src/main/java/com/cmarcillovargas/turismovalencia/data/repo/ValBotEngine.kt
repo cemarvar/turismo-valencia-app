@@ -6,17 +6,35 @@ import com.cmarcillovargas.turismovalencia.util.formatDistance
 import com.cmarcillovargas.turismovalencia.util.normalizeText
 import com.cmarcillovargas.turismovalencia.util.walkMinutes
 
-data class BotReply(val text: String, val cardIds: List<String> = emptyList(), val pageIds: List<String> = emptyList())
+data class BotReply(
+    val text: String,
+    val cardIds: List<String> = emptyList(),
+    val pageIds: List<String> = emptyList(),
+    /** Respuesta de las reglas de la app porque el asistente en línea no ha respondido. */
+    val basic: Boolean = false,
+)
+
+/** Lo que ValBot necesita de las reglas de la app: saludo, sugerencias, respuesta sin conexión y fichas de una respuesta en línea. */
+interface ValBotRules {
+    val greeting: String
+    val suggestions: List<String>
+
+    /** Responde con reglas sobre el contenido de la app. */
+    fun reply(question: String): BotReply
+
+    /** Añade a una respuesta en línea las fichas y guías de la app que nombra. */
+    fun decorate(text: String): BotReply
+}
 
 /**
- * Respuestas de ValBot con reglas sobre el contenido de ejemplo.
- * TODO(api): el asistente real es la función chat de la web (Gemini) detrás del backend; la app nunca guarda la clave.
+ * Respuestas de ValBot con reglas sobre el contenido de la app: la alternativa cuando no hay conexión o el servidor
+ * (`/api/chat`, Gemini) no responde. Las respuestas en línea pasan por [decorate] para llevar sus fichas.
  */
-class ValBotEngine(private val content: ContentRepository, private val web: WebContentRepository) {
+class ValBotEngine(private val content: ContentRepository, private val web: WebContentRepository) : ValBotRules {
 
-    val greeting = "¡Hola! Soy ValBot, tu asistente de turismo en Valencia. ¿En qué puedo ayudarte?"
+    override val greeting = "¡Hola! Soy ValBot, tu asistente de turismo en Valencia. ¿En qué puedo ayudarte?"
 
-    val suggestions = listOf(
+    override val suggestions = listOf(
         "¿Qué ver hoy gratis en Valencia?",
         "Restaurantes de paella cerca",
         "¿Cómo llego al Jardín del Turia?",
@@ -25,7 +43,7 @@ class ValBotEngine(private val content: ContentRepository, private val web: WebC
         "Valencia en 3 días",
     )
 
-    fun reply(question: String): BotReply {
+    override fun reply(question: String): BotReply {
         val q = normalizeText(question)
         return when {
             q.hasAny("hola", "buenas", "buenos dias", "hello") ->
@@ -95,6 +113,17 @@ class ValBotEngine(private val content: ContentRepository, private val web: WebC
         }
     }
 
+    override fun decorate(text: String): BotReply {
+        val places = content.all
+            .filter { it.category in LinkedCategories && it.id !in GenericIds }
+            .map { it.id to it.title }
+        val itemIds = findMentions(text, places, MaxLinks)
+        val linkedPages = content.all.filter { it.id in itemIds }.mapNotNull { it.pageId }.toSet()
+        val guides = web.index.pages.values.map { it.id to it.title }
+        val pageIds = findMentions(text, guides, MaxLinks).filter { it !in linkedPages }.take(MaxLinks - itemIds.size)
+        return BotReply(text, itemIds, pageIds)
+    }
+
     private fun routeReply(q: String): BotReply {
         val target: ContentItem? = content.all.firstOrNull { item ->
             val title = normalizeText(item.title)
@@ -111,4 +140,31 @@ class ValBotEngine(private val content: ContentRepository, private val web: WebC
     }
 
     private fun String.hasAny(vararg words: String) = words.any { contains(it) }
+
+    private companion object {
+        /** Alojamientos y Sostenible tienen títulos genéricos («Centro histórico», «Ecoturismo»): darían fichas fuera de lugar. */
+        val LinkedCategories = setOf(Category.QueVer, Category.Gastronomia, Category.Eventos)
+        val GenericIds = setOf("deportes", "festivos")
+        const val MaxLinks = 2
+    }
+}
+
+private val LeadingArticle = Regex("""^(?:(?:el|la|los|las|the)\s+|l['’])""")
+
+/**
+ * Ids de [names] (id → título) cuyo título aparece en [text], en el orden en que aparecen, hasta [limit].
+ * Se ignora el artículo inicial («La Marina» → «marina») y los títulos de menos de 5 letras.
+ */
+fun findMentions(text: String, names: List<Pair<String, String>>, limit: Int): List<String> {
+    val haystack = normalizeText(text)
+    return names
+        .mapNotNull { (id, title) ->
+            val core = normalizeText(title).replace(LeadingArticle, "").trim()
+            val at = if (core.length >= 5) haystack.indexOf(core) else -1
+            if (at >= 0) id to at else null
+        }
+        .sortedBy { it.second }
+        .map { it.first }
+        .distinct()
+        .take(limit)
 }
