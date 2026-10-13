@@ -40,4 +40,10 @@ class MainActivity : ComponentActivity() {
         }
         setContent { AppRoot(startRoute = startRoute) }
     }
+
+    override fun onResume() {
+        super.onResume()
+        // El usuario pudo conceder o quitar el permiso de ubicación desde los Ajustes del sistema.
+        (application as TurismoApp).container.location.refreshPermission()
+    }
 }

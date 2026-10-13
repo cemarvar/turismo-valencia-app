@@ -8,7 +8,7 @@ import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Price
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Schedule
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Transport
 import com.cmarcillovargas.turismovalencia.data.model.InfoRow
-import com.cmarcillovargas.turismovalencia.data.model.MapPoint
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Stat
 
 // TODO(api): contenido de ejemplo basado en las páginas de la web (src/Que_Ver). Vendrá de la API y de Room.
@@ -30,7 +30,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "Declarada Patrimonio de la Humanidad en 1996, la Lonja fue el escenario de las transacciones que " +
             "convirtieron a Valencia en el mayor puerto comercial del Mediterráneo occidental. Su Sala de Columnas, " +
             "con pilares helicoidales que parecen palmeras de piedra, es uno de los espacios más fotografiados de la ciudad.",
-        mapPoint = MapPoint(250f, 148f),
+        location = LatLon(39.4744, -0.3783), // Lonja de la Seda
         stats = listOf(Stat("1996", "UNESCO"), Stat("S. XV", "CONSTRUCCIÓN"), Stat("4,8", "VALORACIÓN")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Lun–Sáb 10:00–19:00 · Dom 10:00–15:00"),
@@ -57,7 +57,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "La Capilla del Santo Cáliz alberga una de las reliquias más valiosas del mundo cristiano: la copa " +
             "que, según la tradición, utilizó Jesucristo en la Última Cena. La Catedral celebra el Tercer Año Jubilar " +
             "del Santo Cáliz hasta el 29 de octubre de 2026. Desde el Micalet (207 escalones) se ve toda la ciudad.",
-        mapPoint = MapPoint(110f, 178f),
+        location = LatLon(39.4756, -0.3751), // Catedral de Valencia
         stats = listOf(Stat("S. XIII", "CONSTRUCCIÓN"), Stat("207", "ESCALONES DEL MICALET"), Stat("2026", "AÑO JUBILAR")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Lun–Sáb 10:00–18:30 · Dom culto"),
@@ -86,7 +86,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         summary = "El mayor mercado de productos frescos de Europa.",
         description = "El mayor mercado de productos frescos de Europa. Una catedral modernista de hierro, vidrieras y " +
             "azulejos donde los aromas de la huerta y del Mediterráneo llenan cada rincón desde 1928.",
-        mapPoint = MapPoint(193f, 305f),
+        location = LatLon(39.4735, -0.3789), // Mercado Central
         gallery = listOf(R.drawable.gallery_mercado_1, R.drawable.gallery_mercado_2, R.drawable.gallery_mercado_3),
         stats = listOf(Stat("8.000 m²", "DE SUPERFICIE"), Stat("+250", "PUESTOS FRESCOS"), Stat("1928", "INAUGURACIÓN")),
         info = listOf(
@@ -115,7 +115,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "El barrio más antiguo, más bohemio y más vibrante de Valencia. Un cóctel único de murallas " +
             "medievales, arte urbano, museos de vanguardia y plazas llenas de vida mediterránea. Las Torres de " +
             "Serranos (1392–1398) y las Torres de Quart tienen entrada gratuita todo el año.",
-        mapPoint = MapPoint(160f, 232f),
+        location = LatLon(39.4782, -0.381), // Barrio del Carmen
         stats = listOf(Stat("+1.000", "AÑOS DE HISTORIA"), Stat("2", "TORRES MEDIEVALES"), Stat("S. XIV", "MURALLAS")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Calles abiertas las 24 h · Torres de Serranos 10:00–19:00"),
@@ -145,7 +145,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "110.000 m² y 42 millones de litros de agua salada. El mayor acuario de Europa reúne los " +
             "ecosistemas marinos más importantes del mundo, el túnel submarino más largo del continente y la única " +
             "familia de belugas de Europa. Inaugurado el 14 de febrero de 2003.",
-        mapPoint = MapPoint(520f, 560f),
+        location = LatLon(39.453, -0.3472), // L'Oceanogràfic
         stats = listOf(Stat("110.000 m²", "DE SUPERFICIE"), Stat("42 M", "LITROS DE AGUA"), Stat("8", "ECOSISTEMAS")),
         info = listOf(
             InfoRow(Schedule, "Horario", "10:00–19:00 · según temporada"),
@@ -172,7 +172,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "A solo 15 minutos de Valencia, la naturaleza en estado puro: zona Ramsar, parque natural desde 1986 " +
             "y el atardecer más espectacular del Mediterráneo. El paseo en barca es la experiencia más completa; el otoño, " +
             "con los arrozales maduros y la máxima concentración de aves, es el momento más especial.",
-        mapPoint = MapPoint(330f, 860f),
+        location = LatLon(39.3298, -0.3194), // Embarcadero Cañas y Barro, parque natural de la Albufera
         stats = listOf(Stat("21.000 ha", "DE PARQUE"), Stat("300+", "ESPECIES DE AVES"), Stat("1986", "PARQUE NATURAL")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Acceso libre · embarcaderos de 9:00 al atardecer"),
@@ -200,7 +200,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "Casi 2.000 m² de frescos barrocos diseñados por Palomino cubren una estructura gótica del siglo XV " +
             "en el monumento más sorprendente del centro histórico. Hay una proyección multimedia cada hora desde las " +
             "11:00 h; llega 10 minutos antes para el mejor sitio.",
-        mapPoint = MapPoint(210f, 215f),
+        location = LatLon(39.4762, -0.3788), // Iglesia de San Nicolás, calle de Caballeros
         stats = listOf(Stat("2.000 m²", "DE FRESCOS"), Stat("S. XV", "ESTRUCTURA GÓTICA"), Stat("45 min", "DE RECORRIDO")),
         info = listOf(
             InfoRow(Schedule, "Horario", "10:30–18:30 · lunes cerrado al turismo"),
@@ -226,7 +226,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "9 kilómetros de parque verde que atraviesan Valencia de oeste a este por el antiguo cauce de su río. " +
             "Conecta el Parque de Cabecera y el Bioparc con la Ciudad de las Artes y las Ciencias y nunca cierra: es el " +
             "gimnasio al aire libre y el pulmón verde de la ciudad. Valencia fue Capital Verde Europea 2024.",
-        mapPoint = MapPoint(95f, 440f),
+        location = LatLon(39.4707, -0.3651), // Jardín del Turia, Puente de las Flores
         stats = listOf(Stat("9 km", "SIN COCHES"), Stat("6", "ZONAS"), Stat("24 h", "ABIERTO")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Abierto las 24 h todo el año"),
@@ -254,7 +254,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "Un antiguo puerto reinventado donde la arquitectura vanguardista del Veles e Vents, los Tinglados " +
             "históricos y el Edificio del Reloj conviven con más de 15 restaurantes con vistas al mar y unas 40 empresas " +
             "de actividades náuticas. El acceso es completamente gratuito.",
-        mapPoint = MapPoint(610f, 420f),
+        location = LatLon(39.4611, -0.3242), // La Marina, Veles e Vents
         stats = listOf(Stat("15+", "RESTAURANTES"), Stat("40", "EMPRESAS NÁUTICAS"), Stat("Gratis", "ACCESO")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Abierto las 24 h · restaurantes según local"),
@@ -281,7 +281,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "El coliseo blanquinegro, inaugurado en 1923: el estadio más veterano de la élite del fútbol español, " +
             "con más de cien años de historia y casa del Valencia CF. Tanto si eres aficionado como si no, la visita " +
             "al estadio y al museo es una de las más recomendadas de Valencia.",
-        mapPoint = MapPoint(470f, 330f),
+        location = LatLon(39.4745, -0.3582), // Estadio de Mestalla
         stats = listOf(Stat("1923", "INAUGURACIÓN"), Stat("+100", "AÑOS DE HISTORIA"), Stat("L5", "METRO ARAGÓN")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Visitas 10:00–18:00 · no hay visita en días de partido"),
@@ -306,7 +306,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         summary = "La segunda pinacoteca más importante de España.",
         description = "Del gótico valenciano a Sorolla, pasando por Velázquez, Goya, El Greco, Botticelli y Van Dyck, en " +
             "un palacio barroco del siglo XVII junto al Jardín del Turia. La visita es completamente gratuita.",
-        mapPoint = MapPoint(150f, 95f),
+        location = LatLon(39.4793, -0.371), // Museo de Bellas Artes
         stats = listOf(Stat("S. XIV–XIX", "COLECCIÓN"), Stat("1683", "EDIFICIO"), Stat("Gratis", "ENTRADA")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Mar–Dom 10:00–20:00"),
@@ -334,7 +334,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "Del Cabanyal a la Devesa, del paseo marítimo más animado de España a las dunas vírgenes del Parque " +
             "Natural de la Albufera. Valencia es una de las pocas grandes ciudades donde puedes ir a la playa en metro: " +
             "la L4 te deja en Les Arenes y el bus 19 llega a la Malvarrosa.",
-        mapPoint = MapPoint(640f, 700f),
+        location = LatLon(39.473, -0.3236), // Playa de la Malvarrosa
         stats = listOf(Stat("19,5 km", "DE ARENA"), Stat("8", "BANDERAS AZULES"), Stat("300+", "DÍAS DE SOL")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Acceso libre · socorristas en temporada"),
@@ -362,7 +362,7 @@ internal val FakeQueVer: List<ContentItem> = listOf(
         description = "Del jardín árabe del siglo IX al epicentro de la gastronomía de autor, el arte contemporáneo y la vida " +
             "nocturna más creativa de la ciudad. Es un barrio multicultural donde los bares de toda la vida compiten con " +
             "restaurantes de cocineros con estrella Michelin. No tiene horarios de visita: funciona a cualquier hora.",
-        mapPoint = MapPoint(275f, 470f),
+        location = LatLon(39.4623, -0.3721), // Barrio de Ruzafa
         stats = listOf(Stat("S. IX", "ORIGEN ÁRABE"), Stat("10 min", "A PIE DEL CENTRO"), Stat("24 h", "AMBIENTE")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Sin horario · del esmorzaret a la última copa"),

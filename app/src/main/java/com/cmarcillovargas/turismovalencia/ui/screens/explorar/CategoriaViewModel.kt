@@ -31,11 +31,15 @@ class CategoriaViewModel(private val container: AppContainer, private val catego
     private val sort = MutableStateFlow(SortMode.Distance)
     private val grid = MutableStateFlow(false)
 
-    private val all = container.content.byCategory(category)
+    private val saved = combine(container.favorites.ids, container.downloads.ids, container.content.origin) { favorites, downloads, _ ->
+        favorites to downloads
+    }
 
     val uiState: StateFlow<CategoriaUiState> = combine(
-        filter, sort, grid, container.favorites.ids, container.downloads.ids,
-    ) { selected, mode, isGrid, favorites, downloaded ->
+        filter, sort, grid, saved,
+    ) { selected, mode, isGrid, (favorites, downloaded) ->
+        // Se vuelve a leer en cada cambio: las distancias dependen de la ubicación.
+        val all = container.content.byCategory(category)
         val filtered = all.filter { selected == null || it.subcategory == selected }
         CategoriaUiState(
             category = category,

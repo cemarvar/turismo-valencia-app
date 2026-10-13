@@ -12,9 +12,12 @@ import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.DemoData
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
 import com.cmarcillovargas.turismovalencia.data.remote.ChatApi
+import com.cmarcillovargas.turismovalencia.data.remote.OsrmApi
+import com.cmarcillovargas.turismovalencia.data.remote.RouteService
 import com.cmarcillovargas.turismovalencia.data.repo.ContentRepository
 import com.cmarcillovargas.turismovalencia.data.repo.DownloadsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.FavoritesRepository
+import com.cmarcillovargas.turismovalencia.data.repo.LocationRepository
 import com.cmarcillovargas.turismovalencia.data.repo.NetworkMonitor
 import com.cmarcillovargas.turismovalencia.data.repo.NotificationsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.ReservationsRepository
@@ -27,7 +30,9 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 
 /**
  * Dependencias de la app, creadas una vez en `TurismoApp`: el contenido (assets), la base de datos local con lo del
@@ -58,10 +63,18 @@ class AppContainer(application: Application, private val database: AppDatabase =
     val downloads = DownloadsRepository(content, database.downloads(), settingsStore, scope)
     val reservations = ReservationsRepository(content, database.reservations(), scope)
     val settings = SettingsRepository(settingsStore)
+    val location = LocationRepository(application, settings, scope)
+
+    init {
+        // Las distancias de las fichas se miden desde donde esté el usuario (o el centro de Valencia).
+        scope.launch { location.origin.collect(content::updateOrigin) }
+    }
     val notifications = NotificationsRepository(database.notifications(), scope)
     val searchHistory = SearchHistoryRepository(database.recentSearches(), scope)
     val network = NetworkMonitor(application)
-    val valbot = ValBotRepository(ChatApi(), ValBotEngine(content, web))
+    private val http = OkHttpClient()
+    val valbot = ValBotRepository(ChatApi(ChatApi.defaultClient(http)), ValBotEngine(content, web))
+    val routes: RouteService = OsrmApi(OsrmApi.defaultClient(http))
 
     /** Solo depuración (`--ez resetData true`): vuelve a los datos de demostración, como en el primer arranque. */
     fun resetToDemo() = runBlocking { demo.populate(database) }

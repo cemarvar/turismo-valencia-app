@@ -5,7 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.cmarcillovargas.turismovalencia.data.AppContainer
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
+import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.ui.components.MapMarker
+import com.cmarcillovargas.turismovalencia.util.ValenciaCenter
+import com.cmarcillovargas.turismovalencia.util.distanceMeters
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +23,14 @@ data class MapaUiState(
     val filter: Category? = null,
     val onlySaved: Boolean = false,
     val markers: List<MapMarker> = emptyList(),
+    /** Dónde está el usuario (o el punto de ejemplo, ver `LocationRepository`). */
+    val user: LatLon = ValenciaCenter,
+    /** Metros en línea recta desde [user] hasta la ficha elegida. */
+    val selectedMeters: Int = 0,
+    /** El permiso de ubicación del sistema está concedido. */
+    val hasPermission: Boolean = false,
+    /** `user` es la posición real y no el punto de ejemplo. */
+    val hasFix: Boolean = false,
     val selected: ContentItem? = null,
     val favorite: Boolean = false,
     val downloaded: Boolean = false,
@@ -29,9 +42,27 @@ class MapaViewModel(private val container: AppContainer, focusId: String?) : Vie
     private val onlySaved = MutableStateFlow(false)
     private val selectedId = MutableStateFlow(focusId ?: DefaultSelected)
 
+    private class UserData(
+        val favorites: List<String>,
+        val downloads: List<String>,
+        val origin: LatLon,
+        val hasPermission: Boolean,
+        val hasFix: Boolean,
+    )
+
+    private val user = combine(
+        container.favorites.ids,
+        container.downloads.ids,
+        container.content.origin,
+        container.location.permissionGranted,
+        container.location.hasFix,
+    ) { favorites, downloads, origin, permission, fix -> UserData(favorites, downloads, origin, permission, fix) }
+
     val uiState: StateFlow<MapaUiState> = combine(
-        query, filter, onlySaved, selectedId, combine(container.favorites.ids, container.downloads.ids) { f, d -> f to d },
-    ) { text, category, saved, selected, (favorites, downloads) ->
+        query, filter, onlySaved, selectedId, user,
+    ) { text, category, saved, selected, data ->
+        val favorites = data.favorites
+        val downloads = data.downloads
         val visible = container.content.all.filter { item ->
             item.onMap &&
                 (category == null || (item.mapCategory ?: item.category) == category) &&
@@ -43,7 +74,11 @@ class MapaViewModel(private val container: AppContainer, focusId: String?) : Vie
             query = text,
             filter = category,
             onlySaved = saved,
-            markers = visible.map { MapMarker(it.id, it.mapPoint, it.mapCategory ?: it.category, it.title) },
+            markers = visible.mapNotNull { item -> item.location?.let { MapMarker(item.id, it, item.mapCategory ?: item.category, item.title) } },
+            user = data.origin,
+            selectedMeters = item?.location?.let { distanceMeters(data.origin, it).roundToInt() } ?: item?.distanceMeters ?: 0,
+            hasPermission = data.hasPermission,
+            hasFix = data.hasFix,
             selected = item?.takeIf { it.id in visible.map(ContentItem::id) },
             favorite = selected in favorites,
             downloaded = selected in downloads,
@@ -73,6 +108,18 @@ class MapaViewModel(private val container: AppContainer, focusId: String?) : Vie
     }
 
     fun onToggleFavorite() = container.favorites.toggle(selectedId.value)
+
+    /** El mapa se ve: empieza a seguir la ubicación del usuario (si hay permiso). */
+    fun onVisible() = container.location.start()
+
+    fun onHidden() = container.location.stop()
+
+    /** Resultado del diálogo del sistema que pide la ubicación desde el botón «Centrar en mi ubicación». */
+    fun onLocationResult(granted: Boolean) {
+        container.settings.setLocation(if (granted) LocationMode.WhileUsing else LocationMode.Denied)
+        container.location.refreshPermission()
+        if (granted) container.location.start()
+    }
 
     fun setQuery(text: String) {
         query.value = text

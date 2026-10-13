@@ -1,5 +1,5 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist)
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa)
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
 guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado."""
 import io
@@ -66,6 +66,8 @@ def shot():
 
 def start(route=None, *extra, reset=True):
     adb("shell", "am", "force-stop", PKG)
+    # Un diálogo de permisos que quedara abierto de la prueba anterior taparía la app.
+    adb("shell", "am", "force-stop", "com.google.android.permissioncontroller")
     args = ["shell", "am", "start", "-n", PKG + "/.MainActivity"]
     if reset:
         args += ["--ez", "resetData", "true"]
@@ -335,6 +337,13 @@ def g_busqueda():
             check("buscar «%s» no se rompe" % q, find("Atrás", ns=ns) is not None)
 
 
+def accept_location_dialog():
+    """La pantalla de permiso de la bienvenida abre el diálogo real del sistema (en inglés en el emulador): lo acepta."""
+    if wait_for("While using the app", 5):
+        tap_text("While using the app")
+    time.sleep(1.5)
+
+
 def tap_last(text):
     """Pulsa el último nodo con ese texto (el de la capa de encima, p. ej. el botón de un diálogo)."""
     hits = [n for n in nodes() if n["t"] == text or n["d"] == text]
@@ -441,7 +450,8 @@ def g_persist():
     tap_text("Saltar")
     time.sleep(1.2)
     tap_text("Mientras se usa la app")
-    time.sleep(2.0)
+    accept_location_dialog()
+    time.sleep(1.0)
     check("terminada la bienvenida se entra en Inicio", find("Buscar en Valencia…") is not None)
     start(None, reset=False)
     time.sleep(1.5)
@@ -460,7 +470,189 @@ def g_persist():
     start(None)  # deja la app como un primer arranque
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist}
+PERMISSIONS = ("android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION")
+# Valencia (Plaza de la Virgen) y la bandeja del emulador en California: con esto se prueba la ubicación real y la de ejemplo.
+GEO_VALENCIA = ("-0.3755", "39.4745")
+
+
+def set_location_permission(granted):
+    for permission in PERMISSIONS:
+        adb("shell", "pm", "grant" if granted else "revoke", PKG, permission)
+
+
+def has_location_permission():
+    return "ACCESS_FINE_LOCATION: granted=true" in adb("shell", "dumpsys", "package", PKG)
+
+
+def set_network(on):
+    """Modo avión del sistema: corta o devuelve la conexión del emulador."""
+    adb("shell", "cmd", "connectivity", "airplane-mode", "disable" if on else "enable")
+    time.sleep(9 if on else 3)
+
+
+def pix(image):
+    return list(getattr(image, "get_flattened_data", image.getdata)())
+
+
+def wait_for(text, seconds=8.0, exact=True):
+    end = time.time() + seconds
+    while time.time() < end:
+        if find(text, exact=exact):
+            return True
+        time.sleep(0.7)
+    return False
+
+
+def map_detail(box=(0, 520, 780, 1000)):
+    """Desviación típica de la luminosidad de la zona del mapa: un mapa con teselas y marcadores tiene mucha; en blanco, casi nada."""
+    return ImageStat.Stat(shot().crop(box).convert("L")).stddev[0]
+
+
+def count_pixels(img, box, predicate, exclude=None):
+    """Píxeles de la zona que cumplen la condición, sin contar los de `exclude` (otra zona dentro de ella)."""
+    total = sum(1 for r, g, b in pix(img.crop(box)) if predicate(r, g, b))
+    if exclude:
+        total -= sum(1 for r, g, b in pix(img.crop(exclude)) if predicate(r, g, b))
+    return total
+
+
+def is_orange(r, g, b):
+    return r > 215 and 60 < g < 130 and b < 60
+
+
+def is_user_blue(r, g, b):
+    return b > 190 and r < 90 and 100 < g < 190
+
+
+def pin_nodes(title, ns=None):
+    return [n for n in (ns if ns is not None else nodes()) if n["d"] == title]
+
+
+def g_mapa():
+    print("\n## Mapa real (osmdroid), ubicación y rutas")
+    set_location_permission(False)
+
+    # Teselas y marcadores
+    start("mapa")
+    wait_for("© Colaboradores de OpenStreetMap", 10)
+    time.sleep(4)  # teselas
+    detail = map_detail()
+    check("el mapa muestra teselas de OpenStreetMap (no está en blanco)", detail > 28, "desviación %.1f" % detail)
+    check("atribución obligatoria de OpenStreetMap", find("© Colaboradores de OpenStreetMap") is not None)
+    ns = nodes()
+    titles = ["Lonja de la Seda", "Catedral y Santo Cáliz", "Mercado Central", "Barrio del Carmen", "Iglesia de San Nicolás"]
+    found = [t for t in titles if pin_nodes(t, ns)]
+    check("los marcadores del centro están sobre el mapa (accesibles por su nombre)", len(found) >= 4, str(found))
+
+    # Seleccionar un marcador
+    candidates = pin_nodes("Lonja de la Seda", ns)
+    lonja = min(candidates, key=lambda n: n["b"][3] - n["b"][1]) if candidates else None
+    if lonja:
+        tap(lonja)
+        time.sleep(1.5)
+        sheet = [n for n in nodes() if n["t"] == "Lonja de la Seda" and n["b"][1] > 1050]
+        check("tocar un marcador lo selecciona y abre su hoja", bool(sheet))
+    else:
+        check("tocar un marcador lo selecciona y abre su hoja", False, "no hay marcador de la Lonja")
+
+    # Zoom
+    before = shot().crop((0, 520, 780, 1000))
+    tap_text("Acercar")
+    time.sleep(2.5)
+    after = shot().crop((0, 520, 780, 1000))
+    changed = sum(abs(a - b) for a, b in zip(pix(before.convert("L").resize((40, 20))), pix(after.convert("L").resize((40, 20)))))
+    check("los botones de zoom cambian el mapa", changed > 2500, "diferencia %d" % changed)
+
+    # Hojas con distancias reales: desde el centro de Valencia (emulador fuera de Valencia)
+    start("mapa")
+    time.sleep(4)
+    meters = [int(m.group(1)) for t in texts() for m in [re.match(r"^(\d+) m · \d+ min$", t)] if m]
+    check("hoja del Mercado Central: distancia real desde el centro de Valencia", bool(meters) and 400 <= meters[0] <= 520, str(meters))
+
+    # Permiso de ubicación desde el botón del mapa (diálogo real del sistema)
+    start("mapa")
+    time.sleep(3)
+    tap_text("Centrar en mi ubicación")
+    check("«Centrar en mi ubicación» sin permiso abre el diálogo del sistema", wait_for("While using the app", 6))
+    tap_text("While using the app")
+    time.sleep(2)
+    check("al aceptar queda concedido el permiso de ubicación", has_location_permission())
+
+    # Ubicación real dentro de Valencia
+    adb("emu", "geo", "fix", *GEO_VALENCIA)
+    start("mapa", reset=False)
+    time.sleep(4)
+    tap_text("Centrar en mi ubicación")
+    time.sleep(3.5)
+    img = shot()
+    blue = count_pixels(img, (330, 700, 450, 830), is_user_blue)
+    check("con ubicación real el mapa se centra en el punto azul del usuario", blue > 40, "%d píxeles azules" % blue)
+    meters = [int(m.group(1)) for t in texts() for m in [re.match(r"^(\d+) m · \d+ min$", t)] if m]
+    check("las distancias se recalculan desde la ubicación real", bool(meters) and 200 <= meters[0] <= 400, str(meters))
+
+    # Ruta real (servicio de rutas de OpenStreetMap)
+    start("ruta/mercado-central", reset=False)
+    wait_for("Has llegado: Mercado Central", 10)
+    time.sleep(3)
+    ts = texts()
+    summary = next((t for t in ts if re.match(r"^\d+ m · llegada \d\d:\d\d$", t)), "")
+    check("ruta real: distancia y hora de llegada", bool(summary), summary)
+    check("ruta real: pasos con calles de verdad", any(w in t for t in ts for w in ("Plaça", "Avinguda", "Carrer", "Gira", "Sigue")), str([t for t in ts if "Gira" in t or "Sigue" in t][:3]))
+    check("ruta real: termina con la llegada", "Has llegado: Mercado Central" in ts)
+    destination = pin_nodes("Mercado Central")
+    pin_box = tuple(destination[0]["b"]) if destination else None
+    orange = count_pixels(shot(), (0, 470, 780, 860), is_orange, exclude=pin_box)
+    check("la ruta se dibuja sobre el mapa (puntos naranjas fuera del marcador)", orange > 150, "%d píxeles naranjas" % orange)
+    walk = next((t for t in ts if re.match(r"^\d+ min$", t)), "")
+    bike_tab = [n for n in nodes() if re.match(r"^\d+ min$", n["t"]) and 250 < n["b"][0] < 330 and n["b"][1] < 450]
+    if bike_tab:
+        tap(bike_tab[0])
+        bike_big = next((n["t"] for n in nodes() if re.match(r"^\d+ min$", n["t"]) and n["b"][1] > 600), "")
+        check("la pestaña de bici muestra su propia duración", bool(bike_big) and bike_big == bike_tab[0]["t"], "%s / %s" % (walk, bike_big))
+    else:
+        check("la pestaña de bici muestra su propia duración", False, "sin pestaña")
+
+    # Sin conexión: el mapa y la ruta no se rompen y la ruta pasa a ser aproximada
+    set_network(False)
+    start("ruta/mercado-central", reset=False)
+    time.sleep(6)
+    check("sin conexión la ruta es aproximada y avisa", find("Ruta aproximada: el servicio de rutas no responde") is not None)
+    check("sin conexión se sigue viendo el recorrido y los pasos", find("Has llegado: Mercado Central") is not None)
+    start("mapa", reset=False)
+    time.sleep(3)
+    check("sin conexión el mapa sigue funcionando", find("© Colaboradores de OpenStreetMap") is not None and len(pin_nodes("Mercado Central")) > 0)
+    set_network(True)
+
+    # Perfil: ubicación (diálogo y ajuste)
+    set_location_permission(False)
+    start("perfil")
+    tap_text("Ubicación")
+    tap_text("No permitir")
+    check("Perfil: elegir «No permitir» se guarda", find("No permitir") is not None)
+    start("perfil", reset=False)
+    check("…y sigue así al reiniciar", find("No permitir") is not None)
+    tap_text("Ubicación")
+    tap_text("Solo esta vez")
+    check("Perfil: elegir «Solo esta vez» sin permiso abre el diálogo del sistema", wait_for("Only this time", 6))
+    tap_text("Only this time")
+    time.sleep(2)
+    check("…y al aceptar queda «Solo esta vez»", find("Solo esta vez") is not None and has_location_permission())
+
+    # Bienvenida: la pantalla de permiso lanza la petición real
+    set_location_permission(False)
+    start(None)
+    time.sleep(2.5)
+    tap_text("Saltar")
+    time.sleep(1.2)
+    tap_text("Mientras se usa la app")
+    check("Bienvenida: «Mientras se usa la app» abre el diálogo del sistema", wait_for("While using the app", 6))
+    tap_text("While using the app")
+    time.sleep(2)
+    check("…y al aceptar se entra en Inicio con el permiso concedido", wait_for("Buscar en Valencia…", 6) and has_location_permission())
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     chosen = sys.argv[1:] or list(GROUPS)

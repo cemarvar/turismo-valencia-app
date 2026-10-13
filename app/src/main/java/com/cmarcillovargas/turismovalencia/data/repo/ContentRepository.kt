@@ -10,19 +10,29 @@ import com.cmarcillovargas.turismovalencia.data.fake.FakeQueVerWeb
 import com.cmarcillovargas.turismovalencia.data.fake.FakeSostenible
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Offer
 import com.cmarcillovargas.turismovalencia.data.model.OfferKind
 import com.cmarcillovargas.turismovalencia.data.model.SearchSuggestion
 import com.cmarcillovargas.turismovalencia.data.model.SortMode
 import com.cmarcillovargas.turismovalencia.data.model.WebFamily
+import com.cmarcillovargas.turismovalencia.util.ValenciaCenter
+import com.cmarcillovargas.turismovalencia.util.distanceMeters as metersBetween
 import com.cmarcillovargas.turismovalencia.util.formatEuro
 import com.cmarcillovargas.turismovalencia.util.normalizeText
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlin.math.roundToInt
 
-/** Contenido de solo lectura. */
+/**
+ * Contenido de solo lectura. Las distancias de las fichas se miden desde [origin] (la ubicación del usuario o el centro de
+ * Valencia) con las coordenadas reales de cada lugar; quien las muestre debe volver a leer cuando [origin] cambie.
+ */
 // TODO(api): sustituir el contenido de ejemplo por la API (Retrofit) con caché en Room (TODO(room)).
 class ContentRepository(private val web: WebContentRepository) {
     /** Fichas con el orden, los títulos y las fotos de los índices de la web; las del diseño del Figma conservan su título y su foto. */
-    val all: List<ContentItem> = (FakeQueVer + FakeQueVerWeb + FakeGastronomia + FakeAlojamientos + FakeEventos + FakeEventosWeb + FakeSostenible).map { item ->
+    private val base: List<ContentItem> = (FakeQueVer + FakeQueVerWeb + FakeGastronomia + FakeAlojamientos + FakeEventos + FakeEventosWeb + FakeSostenible).map { item ->
         val pageId = web.pageIdFor(item.id)
         val meta = pageId?.let(web::meta)
         val tile = pageId?.let { web.tileOf(item.category, it) }
@@ -37,13 +47,45 @@ class ContentRepository(private val web: WebContentRepository) {
     }
     val offers: List<Offer> = FakeOfertas.map { it.copy(assetImage = web.offerImage(it.id)) }
 
-    private val byId = all.associateBy { it.id }
+    private class Snapshot(val items: List<ContentItem>) {
+        val byId = items.associateBy { it.id }
+    }
 
-    fun item(id: String): ContentItem? = byId[id]
+    private val _origin = MutableStateFlow(ValenciaCenter)
+
+    /** Punto desde el que se miden las distancias. */
+    val origin: StateFlow<LatLon> = _origin.asStateFlow()
+
+    @Volatile
+    private var snapshot = snapshotFor(ValenciaCenter)
+
+    /** Todas las fichas, con la distancia desde [origin]. */
+    val all: List<ContentItem> get() = snapshot.items
+
+    /** Cambia el punto de partida y recalcula las distancias. */
+    fun updateOrigin(point: LatLon) {
+        if (point == _origin.value) return
+        snapshot = snapshotFor(point)
+        _origin.value = point
+    }
+
+    private fun snapshotFor(point: LatLon) = Snapshot(base.map { it.measuredFrom(point) })
+
+    /**
+     * Las fichas con distancia en el diseño la calculan desde sus coordenadas; las que no la llevan (platos, eventos, temas)
+     * siguen sin ella, y `0` significa «sin distancia».
+     */
+    private fun ContentItem.measuredFrom(point: LatLon): ContentItem {
+        val place = location ?: return this
+        if (distanceMeters <= 0) return this
+        return copy(distanceMeters = metersBetween(point, place).roundToInt().coerceAtLeast(1))
+    }
+
+    fun item(id: String): ContentItem? = snapshot.byId[id]
 
     fun offer(id: String): Offer? = offers.firstOrNull { it.id == id }
 
-    fun items(ids: Collection<String>): List<ContentItem> = ids.mapNotNull(byId::get)
+    fun items(ids: Collection<String>): List<ContentItem> = ids.mapNotNull { snapshot.byId[it] }
 
     /** Fichas de una sección en el orden de su índice en la web. */
     fun byCategory(category: Category): List<ContentItem> =

@@ -8,7 +8,7 @@ import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Schedule
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Tip
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Transport
 import com.cmarcillovargas.turismovalencia.data.model.InfoRow
-import com.cmarcillovargas.turismovalencia.data.model.MapPoint
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Stat
 
 // TODO(api): fichas que la web lista en sus índices pero que no salen en el Figma: Bioparc y Ciudad de las Artes y las Ciencias
@@ -31,7 +31,7 @@ internal val FakeQueVerWeb: List<ContentItem> = listOf(
         summary = "Un pedazo de África en Valencia.",
         description = "Más de 6.000 animales de 150 especies en 100.000 m² de hábitats africanos donde las barreras son " +
             "prácticamente invisibles. Un zoológico de nueva generación a orillas del antiguo cauce del Turia.",
-        mapPoint = MapPoint(40f, 420f),
+        location = LatLon(39.4783, -0.4112), // Bioparc Valencia
         stats = listOf(Stat("6.000", "ANIMALES"), Stat("150", "ESPECIES"), Stat("100.000 m²", "HÁBITATS")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Abierto los 365 días del año"),
@@ -57,7 +57,7 @@ internal val FakeQueVerWeb: List<ContentItem> = listOf(
         summary = "Seis recintos únicos en casi dos kilómetros del antiguo cauce del Turia.",
         description = "Obra de Santiago Calatrava y Félix Candela, combina ciencia interactiva, el mayor acuario de Europa, " +
             "cine en 3D y un palau de les arts. Se recomienda dedicarle un día completo y comprar las entradas online.",
-        mapPoint = MapPoint(470f, 605f),
+        location = LatLon(39.4558, -0.3526), // Ciudad de las Artes y las Ciencias
         stats = listOf(Stat("6", "RECINTOS"), Stat("2 km", "DE LARGO"), Stat("47,75 €", "PACK 3 RECINTOS")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Según recinto · consulta los horarios online"),
@@ -89,7 +89,6 @@ internal val FakeEventosWeb: List<ContentItem> = listOf(
         description = "El clima mediterráneo, 9 kilómetros de parque lineal, 20 km de playa y 160 km de carril bici hacen de " +
             "Valencia el destino ideal para practicar deporte durante todo el año. Maratón, carreras populares, vela y mucho más.",
         dateLabel = "Todo el año",
-        mapPoint = MapPoint(300f, 500f),
         stats = listOf(Stat("9 km", "JARDÍN DEL TURIA"), Stat("20 km", "DE PLAYA"), Stat("160 km", "CARRIL BICI")),
         info = listOf(
             InfoRow(Schedule, "Cuándo", "Todo el año · el Maratón de Valencia es el 6 de diciembre"),

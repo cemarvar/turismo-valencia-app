@@ -1,4 +1,4 @@
-"""Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, ValBot (OkHttp) y reserva.
+"""Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, ValBot (OkHttp), mapa, ruta y reserva.
 Una versión minificada puede romperse sin que la de depuración lo note (p. ej. al añadir una librería de Kotlin fuera de
 `packageScope`), así que conviene pasarla tras tocar dependencias o `app/build.gradle.kts`.
 
@@ -40,7 +40,7 @@ def wait_for(text, seconds=8.0, exact=True):
 
 
 def main():
-    print("\n## Versión de publicación (R8): arranque, Room, ValBot y reservas")
+    print("\n## Versión de publicación (R8): arranque, Room, ValBot, mapa, ruta y reservas")
     if len(sys.argv) > 1:
         out = v.adb("install", "-r", sys.argv[1])
         v.check("APK instalado", "Success" in out, out.strip()[:80])
@@ -53,7 +53,10 @@ def main():
     v.check("primer arranque: se muestra la bienvenida", wait_for("Saltar", 6))
     v.tap_text("Saltar")
     v.tap_text("Mientras se usa la app")
-    v.check("terminada la bienvenida se entra en Inicio", wait_for("Buscar en Valencia…", 6))
+    # La pantalla de permiso abre después el diálogo real del sistema (en inglés en el emulador).
+    if wait_for("While using the app", 5):
+        v.tap_text("While using the app")
+    v.check("terminada la bienvenida se entra en Inicio", wait_for("Buscar en Valencia…", 8))
     v.check("Inicio lee las descargas de Room (Mercado Central sin conexión)", v.find("Sin conexión") is not None)
 
     # Favoritos: quitar uno y que siga quitado tras reiniciar
@@ -73,6 +76,21 @@ def main():
     got = wait_for("Mira estas opciones:", 14, exact=False) or wait_for("paella", 2, exact=False)
     answered = any("paella" in t.lower() and t != "Restaurantes de paella cerca" for t in v.texts())
     v.check("ValBot: contesta (en línea o con el respaldo básico)", got and answered, "")
+
+    # Mapa (osmdroid) y ruta (OkHttp + org.json) bajo R8
+    tab("mapa")
+    v.check("Mapa: atribución de OpenStreetMap", wait_for("© Colaboradores de OpenStreetMap", 10))
+    time.sleep(4)
+    detail = v.map_detail()
+    v.check("Mapa: muestra teselas de OpenStreetMap", detail > 28, "desviación %.1f" % detail)
+    pins = [t for t in ("Lonja de la Seda", "Catedral y Santo Cáliz", "Mercado Central", "Barrio del Carmen") if v.pin_nodes(t)]
+    v.check("Mapa: marcadores accesibles sobre el mapa", len(pins) >= 3, str(pins))
+    v.tap_text("Cómo llegar")
+    v.check("Ruta: se calcula con el servicio y acaba en la llegada", wait_for("Has llegado: Mercado Central", 14))
+    time.sleep(2)
+    v.check("Ruta: distancia y hora de llegada", any(re.match(r"^\d+ m · llegada \d\d:\d\d$", t) or re.match(r"^\d[\d,]* km · llegada", t) for t in v.texts()))
+    v.back()
+    tab("inicio")
 
     # Reserva: transacción de Room bajo R8 y localizador correlativo
     tab("inicio")

@@ -8,7 +8,7 @@ import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Schedule
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Tip
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Transport
 import com.cmarcillovargas.turismovalencia.data.model.InfoRow
-import com.cmarcillovargas.turismovalencia.data.model.MapPoint
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Offer
 import com.cmarcillovargas.turismovalencia.data.model.OfferKind
 import com.cmarcillovargas.turismovalencia.data.model.Stat
@@ -30,7 +30,7 @@ internal val FakeSostenible: List<ContentItem> = listOf(
         summary = "Paseo en barca eléctrica por el lago.",
         description = "El paseo en barca es la experiencia más completa para conocer La Albufera: barcas eléctricas, guías " +
             "bilingües y la mejor luz del día al atardecer, entre arrozales y aves migratorias.",
-        mapPoint = MapPoint(360f, 900f),
+        location = LatLon(39.312, -0.3197), // Embarcadero del Palmar
         stats = listOf(Stat("1 h", "DE PASEO"), Stat("Eléctricas", "BARCAS"), Stat("ES · EN", "GUÍAS")),
         info = listOf(
             InfoRow(Schedule, "Horario", "Todos los días hasta el atardecer"),
@@ -57,7 +57,7 @@ internal val FakeSostenible: List<ContentItem> = listOf(
         summary = "Rutas naturales y espacios protegidos",
         description = "Valencia es mucho más que ciudad y playa: 21.000 hectáreas de Albufera, más de 300 especies de aves y " +
             "cuatro parques naturales a un paso del centro. Rutas señalizadas y llanas, observatorios y centros de interpretación.",
-        mapPoint = MapPoint(60f, 318f),
+        location = LatLon(39.3877, -0.3273), // Devesa del Saler
         stats = listOf(Stat("21.000", "HECTÁREAS ALBUFERA"), Stat("300+", "ESPECIES DE AVES"), Stat("4", "PARQUES NATURALES")),
         info = listOf(InfoRow(Tip, "Consejo", "El otoño, con los arrozales maduros, es el mejor momento para las aves")),
         isEco = true,
@@ -80,7 +80,6 @@ internal val FakeSostenible: List<ContentItem> = listOf(
         summary = "Transporte público, Valenbisi y zonas peatonales",
         description = "Casi 200 km de carril bici, terreno llano, metro y tranvía hasta la playa y el Jardín del Turia libre " +
             "de coches. La ciudad se recorre mejor a pie, en bici o en transporte público.",
-        mapPoint = MapPoint(110f, 360f),
         stats = listOf(Stat("200 km", "CARRIL BICI"), Stat("9 km", "JARDÍN DEL TURIA"), Stat("Metro", "Y TRANVÍA A LA PLAYA")),
         info = listOf(InfoRow(Tip, "Consejo", "Valenbisi: abono semanal para visitantes en cualquier estación")),
         isEco = true,
@@ -103,7 +102,6 @@ internal val FakeSostenible: List<ContentItem> = listOf(
         summary = "Impacto positivo en la comunidad local",
         description = "Ser un turista responsable en Valencia no requiere esfuerzo: son pequeñas decisiones cotidianas que suman. " +
             "Estos son los compromisos que puedes adoptar durante tu estancia.",
-        mapPoint = MapPoint(140f, 410f),
         stats = listOf(Stat("Local", "CONSUMO"), Stat("0", "PLÁSTICOS"), Stat("A pie", "DESPLAZAMIENTOS")),
         info = listOf(InfoRow(Tip, "Compromiso", "Elige comercios y restaurantes de proximidad")),
         isEco = true,
@@ -126,7 +124,6 @@ internal val FakeSostenible: List<ContentItem> = listOf(
         summary = "Mercados de barrio y pequeño comercio",
         description = "Mercados de barrio, tiendas de toda la vida y pequeño comercio de proximidad: comprar aquí es la forma " +
             "más directa de que el turismo deje valor en la ciudad.",
-        mapPoint = MapPoint(205f, 330f),
         stats = listOf(Stat("Mercados", "DE BARRIO"), Stat("Km 0", "PRODUCTO"), Stat("Familiar", "COMERCIO")),
         info = listOf(InfoRow(Tip, "Consejo", "Los mercados abren por la mañana: ve temprano")),
         isEco = true,
@@ -149,7 +146,6 @@ internal val FakeSostenible: List<ContentItem> = listOf(
         summary = "Guía práctica para el viajero",
         description = "Una guía práctica con consejos para reducir tu huella durante el viaje: agua, energía, residuos y respeto " +
             "a los espacios naturales.",
-        mapPoint = MapPoint(250f, 380f),
         stats = listOf(Stat("Agua", "AHORRO"), Stat("Residuos", "RECICLAJE"), Stat("Respeto", "ESPACIOS NATURALES")),
         info = listOf(InfoRow(Tip, "Consejo", "Lleva una botella reutilizable: hay fuentes por toda la ciudad")),
         isEco = true,
@@ -172,7 +168,6 @@ internal val FakeSostenible: List<ContentItem> = listOf(
         summary = "Capital Verde Europea 2024",
         description = "Valencia no solo es sostenible: es inteligente. Capital Verde Europea 2024 y Capital del Turismo " +
             "Inteligente 2022, la ciudad combina tecnología, naturaleza y cultura para viajar mejor.",
-        mapPoint = MapPoint(300f, 440f),
         stats = listOf(Stat("2024", "CAPITAL VERDE"), Stat("2022", "TURISMO INTELIGENTE"), Stat("Verde", "CIUDAD")),
         info = listOf(InfoRow(Tip, "Dato", "Capital Verde Europea 2024 y Capital del Turismo Inteligente 2022")),
         isEco = true,

@@ -24,6 +24,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,12 +42,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmarcillovargas.turismovalencia.R
+import com.cmarcillovargas.turismovalencia.data.containerFactory
+import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
 import com.cmarcillovargas.turismovalencia.ui.components.AppButtonStyle
 import com.cmarcillovargas.turismovalencia.ui.components.Eyebrow
 import com.cmarcillovargas.turismovalencia.ui.components.MapPlaceholder
 import com.cmarcillovargas.turismovalencia.ui.components.Scrim
 import com.cmarcillovargas.turismovalencia.ui.components.SystemBarIcons
+import com.cmarcillovargas.turismovalencia.ui.components.rememberLocationPermissionRequest
 import com.cmarcillovargas.turismovalencia.ui.theme.BottomSheetShape
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
@@ -59,16 +65,33 @@ private val RestingBorder = 1.dp
 private const val PreciseFillAlpha = 0.25f
 
 @Composable
-fun PermisoUbicacionRoute(onContinue: () -> Unit, viewModel: PermisoUbicacionViewModel = viewModel()) {
+fun PermisoUbicacionRoute(
+    onContinue: () -> Unit,
+    viewModel: PermisoUbicacionViewModel = viewModel(factory = containerFactory { PermisoUbicacionViewModel(it) }),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // TODO(permisos): pedir el permiso real según la precisión elegida («mientras se usa» / «solo esta vez» /
-    // «no permitir») y recordar la decisión. Hoy las tres opciones solo avanzan.
+    // Esta pantalla explica y recoge la elección (precisión y «mientras se usa» / «solo esta vez» / «no permitir»); las dos
+    // primeras abren después el diálogo real del sistema, cuya respuesta es la que cuenta y la que se guarda.
+    var chosen by remember { mutableStateOf(LocationMode.WhileUsing) }
+    val request = rememberLocationPermissionRequest { granted ->
+        viewModel.onDecision(chosen, granted)
+        onContinue()
+    }
     PermisoUbicacionScreen(
         uiState = uiState,
         onAccuracyChange = viewModel::onAccuracyChange,
-        onWhileUsing = onContinue,
-        onOnlyOnce = onContinue,
-        onDeny = onContinue,
+        onWhileUsing = {
+            chosen = LocationMode.WhileUsing
+            request(uiState.accuracy == LocationAccuracy.Precise)
+        },
+        onOnlyOnce = {
+            chosen = LocationMode.OnlyOnce
+            request(uiState.accuracy == LocationAccuracy.Precise)
+        },
+        onDeny = {
+            viewModel.onDecision(LocationMode.Denied, granted = false)
+            onContinue()
+        },
     )
 }
 

@@ -8,7 +8,7 @@ import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Address
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Schedule
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Tip
 import com.cmarcillovargas.turismovalencia.data.model.InfoRow
-import com.cmarcillovargas.turismovalencia.data.model.MapPoint
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Stat
 
 // TODO(api): contenido de ejemplo basado en src/Eventos y src/Alojamientos de la web.
@@ -34,7 +34,7 @@ internal val FakeEventos: List<ContentItem> = listOf(
         description = "19 días de pólvora, arte efímero, flores y fuego. La fiesta más grande de Valencia combina sátira, " +
             "tradición y el espectáculo pirotécnico más impresionante de Europa.",
         dateLabel = "15–19 marzo",
-        mapPoint = MapPoint(215f, 270f),
+        location = LatLon(39.4706, -0.3768), // Plaza del Ayuntamiento, donde se dispara la mascletà
         stats = listOf(Stat("+400", "MONUMENTOS"), Stat("19", "DÍAS DE FIESTA"), Stat("+1M", "VISITANTES")),
         info = listOf(
             InfoRow(Schedule, "Cuándo", "1–19 de marzo · Patrimonio Cultural Inmaterial UNESCO 2016"),
@@ -67,7 +67,6 @@ internal val FakeEventos: List<ContentItem> = listOf(
         description = "Procesión histórica, danzas medievales, las once Rocas tiradas por caballos y la lucha entre la " +
             "Virtud y los Siete Pecados Capitales. Se celebra 60 días después de Pascua.",
         dateLabel = "60 días tras Pascua",
-        mapPoint = MapPoint(120f, 195f),
         stats = listOf(Stat("S. XIV", "ORIGEN"), Stat("11", "ROCAS"), Stat("60", "DÍAS TRAS PASCUA")),
         info = listOf(InfoRow(Schedule, "Cuándo", "Domingo siguiente al jueves de Corpus")),
         isFree = true,
@@ -91,7 +90,6 @@ internal val FakeEventos: List<ContentItem> = listOf(
         description = "Conciertos bajo las estrellas en Viveros, fuegos artificiales cada sábado, el Festival de Jazz, " +
             "el Certamen de Bandas y la Batalla de Flores. Todo el mes de julio, desde 1871.",
         dateLabel = "Todo julio",
-        mapPoint = MapPoint(180f, 130f),
         stats = listOf(Stat("1871", "DESDE"), Stat("31", "DÍAS"), Stat("Sábados", "FUEGOS ARTIFICIALES")),
         info = listOf(InfoRow(Schedule, "Cuándo", "Todo el mes de julio")),
         offlineMb = 5,
@@ -114,7 +112,6 @@ internal val FakeEventos: List<ContentItem> = listOf(
         description = "Nueve festivales que convierten la Comunitat Valenciana en el epicentro musical del Mediterráneo cada " +
             "verano. Del indie urbano al reggae, de la playa al CAC, del techno a los grandes nombres internacionales.",
         dateLabel = "Abril–septiembre",
-        mapPoint = MapPoint(520f, 590f),
         stats = listOf(Stat("9", "FESTIVALES"), Stat("6", "MESES"), Stat("2026", "TEMPORADA")),
         info = listOf(InfoRow(Schedule, "Cuándo", "Abril–septiembre de 2026")),
         offlineMb = 5,
@@ -137,7 +134,6 @@ internal val FakeEventos: List<ContentItem> = listOf(
         description = "El calendario completo de días no laborables en la ciudad de Valencia para 2026, con las tradiciones y " +
             "celebraciones de cada fecha.",
         dateLabel = "Todo 2026",
-        mapPoint = MapPoint(240f, 310f),
         stats = listOf(Stat("14", "DÍAS FESTIVOS"), Stat("2026", "CALENDARIO"), Stat("Local", "ÁMBITO")),
         info = listOf(InfoRow(Tip, "Consejo", "Muchos museos y mercados cierran en festivo: comprueba el horario")),
         offlineMb = 2,
@@ -161,7 +157,7 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         summary = "Cuatro opciones para todos los presupuestos.",
         description = "Cuatro opciones para todos los presupuestos en el corazón de la ciudad, a pocos pasos de la Catedral, " +
             "el Mercado Central y la Lonja de la Seda.",
-        mapPoint = MapPoint(285f, 383f),
+        location = LatLon(39.4736, -0.3747), // Calle de la Paz, centro histórico
         stats = listOf(Stat("4", "OPCIONES"), Stat("5 min", "A LA CATEDRAL"), Stat("L3 · L5", "METRO")),
         info = listOf(InfoRow(Address, "Zona", "Plaza del Ayuntamiento · Ciutat Vella")),
         offlineMb = 4,
@@ -183,7 +179,6 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         summary = "El Eixample elegante de Valencia.",
         description = "Grandes avenidas con edificios modernistas, el Jardín del Turia a la puerta y la mejor zona " +
             "gastronómica de la ciudad a un paso.",
-        mapPoint = MapPoint(180f, 520f),
         stats = listOf(Stat("Modernista", "ARQUITECTURA"), Stat("Turia", "A LA PUERTA"), Stat("Gastro", "ZONA")),
         info = listOf(InfoRow(Address, "Zona", "Gran Vía Marqués del Turia · L'Eixample")),
         offlineMb = 4,
@@ -204,7 +199,7 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         summary = "El SoHo de Valencia.",
         description = "El barrio más creativo y cosmopolita de Valencia: galerías de arte, bares de diseño, cocina del mundo " +
             "y la energía de un vecindario que no para. A 10 minutos a pie de todo.",
-        mapPoint = MapPoint(300f, 500f),
+        location = LatLon(39.4609, -0.373), // Ruzafa, junto al mercado
         stats = listOf(Stat("10 min", "A PIE DEL CENTRO"), Stat("Arte", "GALERÍAS"), Stat("Noche", "AMBIENTE")),
         info = listOf(InfoRow(Address, "Zona", "C/ Cádiz y alrededores · Ensanche")),
         offlineMb = 4,
@@ -225,7 +220,7 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         summary = "Cuatro hoteles frente a la obra más icónica de Valencia.",
         description = "El Oceanogràfic, el Palau de les Arts y el Museu de les Ciències a tu puerta, con el Jardín del Turia " +
             "como paseo hasta el centro.",
-        mapPoint = MapPoint(520f, 610f),
+        location = LatLon(39.4601, -0.3507), // Avenida de Francia, junto a la Ciudad de las Artes y las Ciencias
         stats = listOf(Stat("4", "HOTELES"), Stat("0 min", "AL OCEANOGRÀFIC"), Stat("30 min", "A PIE AL CENTRO")),
         info = listOf(InfoRow(Address, "Zona", "Av. de França · Ciudad de las Artes y las Ciencias")),
         offlineMb = 5,
@@ -246,7 +241,7 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         summary = "Tres hoteles en primera línea de playa.",
         description = "Desde el gran resort de lujo histórico hasta el boutique con la luz de Sorolla y el clásico familiar con " +
             "historia desde 1916.",
-        mapPoint = MapPoint(650f, 640f),
+        location = LatLon(39.4644, -0.3238), // Paseo de Neptuno
         stats = listOf(Stat("3", "HOTELES"), Stat("1916", "CLÁSICO FAMILIAR"), Stat("1.ª línea", "DE PLAYA")),
         info = listOf(InfoRow(Address, "Zona", "Paseo de Neptuno · Playa de las Arenas")),
         offlineMb = 4,
@@ -268,7 +263,6 @@ internal val FakeAlojamientos: List<ContentItem> = listOf(
         summary = "Hoteles exclusivos y económicos, todos bien ubicados.",
         description = "Desde el lujo histórico frente al mar hasta las mejores opciones con precio ajustado. Hoteles " +
             "exclusivos y económicos, todos bien ubicados.",
-        mapPoint = MapPoint(230f, 610f),
         stats = listOf(Stat("5★", "GRAN LUJO"), Stat("€", "PRECIO AJUSTADO"), Stat("Todos", "BIEN UBICADOS")),
         info = listOf(InfoRow(Tip, "Consejo", "Reserva con antelación en Fallas y en verano")),
         offlineMb = 3,

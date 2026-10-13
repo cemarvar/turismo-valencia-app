@@ -48,5 +48,11 @@ class PerfilViewModel(private val container: AppContainer) : ViewModel() {
 
     fun onLocation(value: LocationMode) = container.settings.setLocation(value)
 
+    /** ¿Tiene la app el permiso de ubicación del sistema? (se vuelve a mirar: pudo cambiarse en Ajustes). */
+    fun locationPermissionGranted(): Boolean {
+        container.location.refreshPermission()
+        return container.location.permissionGranted.value
+    }
+
     fun onTextScale(value: TextScale) = container.settings.setTextScale(value)
 }

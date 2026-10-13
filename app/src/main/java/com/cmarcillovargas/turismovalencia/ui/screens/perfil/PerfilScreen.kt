@@ -70,6 +70,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.SectionLabel
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
+import com.cmarcillovargas.turismovalencia.ui.components.rememberLocationPermissionRequest
 import com.cmarcillovargas.turismovalencia.ui.screens.bienvenida.IdiomaSheetHost
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
@@ -91,6 +92,9 @@ fun PerfilRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showLanguage by remember { mutableStateOf(false) }
+    // Elegir «Mientras se usa» o «Solo esta vez» sin tener el permiso del sistema abre su diálogo; lo que responda decide el ajuste.
+    var pendingMode by remember { mutableStateOf(LocationMode.WhileUsing) }
+    val askLocation = rememberLocationPermissionRequest { granted -> viewModel.onLocation(if (granted) pendingMode else LocationMode.Denied) }
     PerfilScreen(
         uiState = uiState,
         onBack = onBack,
@@ -99,7 +103,14 @@ fun PerfilRoute(
         onOpenContact = onOpenContact,
         onOpenPage = onOpenPage,
         onNotifications = viewModel::onNotifications,
-        onLocation = viewModel::onLocation,
+        onLocation = { mode ->
+            if (mode != LocationMode.Denied && !viewModel.locationPermissionGranted()) {
+                pendingMode = mode
+                askLocation(true)
+            } else {
+                viewModel.onLocation(mode)
+            }
+        },
         onTextScale = viewModel::onTextScale,
         onLogout = onLogout,
     )

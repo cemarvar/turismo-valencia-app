@@ -26,8 +26,8 @@ class DetalleViewModel(private val container: AppContainer, private val id: Stri
     private val page = MutableStateFlow<WebPage?>(null)
 
     val uiState: StateFlow<DetalleUiState> = combine(
-        container.favorites.ids, container.downloads.ids, reminder, page,
-    ) { favorites, downloads, reminderOn, webPage ->
+        container.favorites.ids, container.downloads.ids, reminder, page, container.content.origin,
+    ) { favorites, downloads, reminderOn, webPage, _ ->
         DetalleUiState(
             item = container.content.item(id),
             favorite = id in favorites,

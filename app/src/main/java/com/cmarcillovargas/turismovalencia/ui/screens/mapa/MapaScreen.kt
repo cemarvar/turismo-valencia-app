@@ -47,10 +47,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -71,13 +69,16 @@ import com.cmarcillovargas.turismovalencia.ui.components.Eyebrow
 import com.cmarcillovargas.turismovalencia.ui.components.FavoriteButton
 import com.cmarcillovargas.turismovalencia.ui.components.FavoriteStyle
 import com.cmarcillovargas.turismovalencia.ui.components.MapCamera
-import com.cmarcillovargas.turismovalencia.ui.components.MapCanvas
+import com.cmarcillovargas.turismovalencia.ui.components.MapAttribution
 import com.cmarcillovargas.turismovalencia.ui.components.MapMarker
+import com.cmarcillovargas.turismovalencia.ui.components.OnScreenVisible
+import com.cmarcillovargas.turismovalencia.ui.components.OsmMap
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.RatingRow
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
 import com.cmarcillovargas.turismovalencia.ui.components.dotColor
+import com.cmarcillovargas.turismovalencia.ui.components.rememberLocationPermissionRequest
 import com.cmarcillovargas.turismovalencia.ui.components.rememberMapCamera
 import com.cmarcillovargas.turismovalencia.ui.theme.BottomSheetShape
 import com.cmarcillovargas.turismovalencia.ui.theme.PillShape
@@ -91,7 +92,8 @@ private val SearchHeight = 48.dp
 private val ControlSize = 44.dp
 private val ThumbShape = RoundedCornerShape(16.dp)
 private val ZoomShape = RoundedCornerShape(12.dp)
-private const val ZoomStep = 1.35f
+private const val ZoomStep = 1.0
+private const val FocusZoom = 16.0
 
 @Composable
 fun MapaRoute(
@@ -103,13 +105,30 @@ fun MapaRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val camera = rememberMapCamera()
-    val density = LocalDensity.current.density
+    OnScreenVisible(onStart = viewModel::onVisible, onStop = viewModel::onHidden)
+    // Tras conceder el permiso, el mapa se centra en el usuario cuando llega su primera posición real.
+    var centerOnFix by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.hasFix, centerOnFix) {
+        if (centerOnFix && uiState.hasFix) {
+            camera.centerOn(uiState.user, FocusZoom)
+            centerOnFix = false
+        }
+    }
+    val askLocation = rememberLocationPermissionRequest { granted ->
+        viewModel.onLocationResult(granted)
+        if (granted) {
+            camera.centerOn(uiState.user, FocusZoom)
+            centerOnFix = true
+        }
+    }
     LaunchedEffect(initialQuery) { if (!initialQuery.isNullOrBlank()) viewModel.setQuery(initialQuery) }
     // Si llegamos desde una ficha, el mapa se abre centrado en ella.
     var centered by remember(focus) { mutableStateOf(false) }
-    LaunchedEffect(focus, camera.viewport) {
-        if (!centered && focus != null && camera.viewport != Size.Zero) {
-            viewModel.uiState.value.selected?.let { camera.centerOn(it.mapPoint, density) }
+    val focused = uiState.selected?.takeIf { focus != null && it.id == focus }
+    LaunchedEffect(focused?.id) {
+        val point = focused?.location
+        if (!centered && point != null) {
+            camera.centerOn(point, FocusZoom, animate = false)
             centered = true
         }
     }
@@ -124,6 +143,7 @@ fun MapaRoute(
         onToggleFavorite = viewModel::onToggleFavorite,
         onOpenItem = onOpenItem,
         onOpenRoute = onOpenRoute,
+        onLocate = { if (uiState.hasPermission) camera.centerOn(uiState.user, FocusZoom) else askLocation(true) },
     )
 }
 
@@ -139,16 +159,19 @@ fun MapaScreen(
     onToggleFavorite: () -> Unit,
     onOpenItem: (String) -> Unit,
     onOpenRoute: (String) -> Unit,
+    onLocate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val density = LocalDensity.current.density
     Box(modifier.fillMaxSize()) {
-        MapCanvas(
+        OsmMap(
             modifier = Modifier.fillMaxSize(),
             markers = uiState.markers,
             selectedId = uiState.selected?.id,
-            onMarkerClick = onSelect,
-            showUser = true,
+            onMarkerClick = { id ->
+                onSelect(id)
+                uiState.markers.firstOrNull { it.id == id }?.let { camera.centerOn(it.point) }
+            },
+            user = uiState.user,
             camera = camera,
         )
         Column(Modifier.align(Alignment.TopStart).statusBarsPadding().padding(top = Spacing.s)) {
@@ -157,8 +180,8 @@ fun MapaScreen(
             CategoryChips(uiState.filter, onFilter)
             Spacer(Modifier.height(Spacing.s))
             ZoomControl(
-                onZoomIn = { camera.zoomBy(ZoomStep, density) },
-                onZoomOut = { camera.zoomBy(1 / ZoomStep, density) },
+                onZoomIn = { camera.zoomBy(ZoomStep) },
+                onZoomOut = { camera.zoomBy(-ZoomStep) },
                 modifier = Modifier.padding(start = Spacing.m),
             )
         }
@@ -173,14 +196,15 @@ fun MapaScreen(
                         .shadow(Spacing.xxs, ThumbShape)
                         .clip(ThumbShape)
                         .background(MaterialTheme.colorScheme.primaryContainer)
-                        .clickable(role = Role.Button) { camera.centerOn(com.cmarcillovargas.turismovalencia.ui.components.UserLocation, density) },
+                        .clickable(role = Role.Button, onClick = onLocate),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(Icons.Outlined.MyLocation, stringResource(R.string.map_locate), tint = MaterialTheme.appColors.brand)
                 }
             }
+            MapAttribution(Modifier.align(Alignment.Start).padding(start = Spacing.xs, bottom = Spacing.xxs))
             uiState.selected?.let { item ->
-                SelectedSheet(item, uiState.favorite, uiState.downloaded, onToggleFavorite, { onOpenRoute(item.id) }, { onOpenItem(item.id) })
+                SelectedSheet(item, uiState.selectedMeters, uiState.favorite, uiState.downloaded, onToggleFavorite, { onOpenRoute(item.id) }, { onOpenItem(item.id) })
             }
         }
     }
@@ -291,6 +315,7 @@ private fun RoundControl(selected: Boolean, onClick: () -> Unit, description: St
 @Composable
 private fun SelectedSheet(
     item: ContentItem,
+    meters: Int,
     favorite: Boolean,
     downloaded: Boolean,
     onToggleFavorite: () -> Unit,
@@ -321,7 +346,7 @@ private fun SelectedSheet(
                         Icon(Icons.AutoMirrored.Outlined.DirectionsWalk, null, tint = MaterialTheme.appColors.brand, modifier = Modifier.size(Spacing.m + Spacing.xxs))
                         Spacer(Modifier.width(Spacing.xxs))
                         Text(
-                            "${formatDistance(item.distanceMeters)} · ${walkMinutes(item.distanceMeters)} min",
+                            "${formatDistance(meters)} · ${walkMinutes(meters)} min",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -364,13 +389,13 @@ private fun MapaPreview() {
         val item = FakeQueVer.first { it.id == "mercado-central" }
         MapaScreen(
             uiState = MapaUiState(
-                markers = com.cmarcillovargas.turismovalencia.data.fake.FakeQueVer.map { MapMarker(it.id, it.mapPoint, it.mapCategory ?: it.category, it.title) },
+                markers = FakeQueVer.mapNotNull { item -> item.location?.let { MapMarker(item.id, it, item.mapCategory ?: item.category, item.title) } },
                 selected = item,
                 favorite = true,
                 downloaded = true,
             ),
             camera = rememberMapCamera(),
-            onQueryChange = {}, onFilter = {}, onToggleSaved = {}, onClearFilters = {}, onSelect = {}, onToggleFavorite = {}, onOpenItem = {}, onOpenRoute = {},
+            onQueryChange = {}, onFilter = {}, onToggleSaved = {}, onClearFilters = {}, onSelect = {}, onToggleFavorite = {}, onOpenItem = {}, onOpenRoute = {}, onLocate = {},
         )
     }
 }

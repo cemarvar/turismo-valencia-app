@@ -82,7 +82,8 @@ class ChatApi(
     companion object {
         private val JsonType = "application/json; charset=utf-8".toMediaType()
 
-        fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
+        /** Cliente con los tiempos de ValBot; parte de [base] para compartir con el resto de la app el mismo grupo de conexiones. */
+        fun defaultClient(base: OkHttpClient = OkHttpClient()): OkHttpClient = base.newBuilder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .callTimeout(40, TimeUnit.SECONDS)

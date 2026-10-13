@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.ChevronLeft
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.DirectionsBus
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.LocationOn
@@ -41,13 +42,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,17 +65,28 @@ import com.cmarcillovargas.turismovalencia.R
 import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.fake.FakeQueVer
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
+import com.cmarcillovargas.turismovalencia.data.model.RouteStep
+import com.cmarcillovargas.turismovalencia.data.model.StepKind
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
-import com.cmarcillovargas.turismovalencia.ui.components.MapCanvas
+import com.cmarcillovargas.turismovalencia.ui.components.MapAttribution
 import com.cmarcillovargas.turismovalencia.ui.components.MapMarker
+import com.cmarcillovargas.turismovalencia.ui.components.OnScreenVisible
+import com.cmarcillovargas.turismovalencia.ui.components.OsmMap
+import com.cmarcillovargas.turismovalencia.ui.components.rememberMapCamera
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
 import com.cmarcillovargas.turismovalencia.ui.theme.BottomSheetShape
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
+import com.cmarcillovargas.turismovalencia.util.ValenciaCenter
 import com.cmarcillovargas.turismovalencia.util.formatDistance
 
+// Márgenes (px) al encuadrar la ruta: arriba cabe el marcador seleccionado (círculo de 64 dp), abajo el punto de ubicación con su halo.
+private const val FitTopMarginPx = 170
+private const val FitBottomMarginPx = 110
+private const val FitSideMarginPx = 110
 private val FieldShape = RoundedCornerShape(16.dp)
 private val StepIconSize = Spacing.xl
 private val ModeShape = RoundedCornerShape(16.dp)
@@ -81,6 +99,7 @@ fun RutaRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    OnScreenVisible(onStart = viewModel::onVisible, onStop = viewModel::onHidden)
     RutaScreen(
         uiState = uiState,
         onBack = onBack,
@@ -100,18 +119,28 @@ fun RutaScreen(
     modifier: Modifier = Modifier,
 ) {
     val item = uiState.item ?: return
+    // Encuadra la ruta (origen y destino) cuando ya se conoce.
+    val camera = rememberMapCamera()
+    var headerPx by remember { mutableIntStateOf(0) }
+    var sheetPx by remember { mutableIntStateOf(0) }
+    LaunchedEffect(uiState.route, headerPx, sheetPx) {
+        if (uiState.route.size >= 2 && headerPx > 0 && sheetPx > 0) {
+            camera.fit(uiState.route, topPx = headerPx + FitTopMarginPx, bottomPx = sheetPx + FitBottomMarginPx, sidePx = FitSideMarginPx)
+        }
+    }
     Box(modifier.fillMaxSize()) {
-        MapCanvas(
+        val marker = item.location?.let { MapMarker(item.id, it, item.mapCategory ?: item.category, item.title) }
+        OsmMap(
             modifier = Modifier.fillMaxSize(),
-            markers = listOf(MapMarker(item.id, item.mapPoint, item.mapCategory ?: item.category, item.title)),
+            markers = listOfNotNull(marker),
             selectedId = item.id,
-            showUser = true,
+            user = uiState.origin,
             route = uiState.route,
-            showLabels = true,
+            camera = camera,
             showSelectedLabel = false,
         )
         Surface(
-            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth(),
+            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().onSizeChanged { headerPx = it.height },
             shape = RoundedCornerShape(bottomStart = Spacing.l, bottomEnd = Spacing.l),
             color = MaterialTheme.colorScheme.surface,
             shadowElevation = Spacing.xs,
@@ -133,8 +162,9 @@ fun RutaScreen(
                 ModeTabs(uiState, onSelectMode, Modifier.padding(horizontal = Spacing.m).padding(top = Spacing.s))
             }
         }
+        MapAttribution(Modifier.align(Alignment.BottomStart).padding(start = Spacing.xs, bottom = with(LocalDensity.current) { sheetPx.toDp() } + Spacing.xxs))
         Surface(
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().onSizeChanged { sheetPx = it.height },
             shape = BottomSheetShape,
             color = MaterialTheme.colorScheme.surface,
             shadowElevation = Spacing.s,
@@ -151,10 +181,15 @@ fun RutaScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = stringResource(R.string.route_summary, formatDistance(item.distanceMeters), uiState.arrival),
+                            text = stringResource(R.string.route_summary, formatDistance(uiState.meters), uiState.arrival),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        when (uiState.status) {
+                            RouteStatus.Loading -> Text(stringResource(R.string.route_loading), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                            RouteStatus.Estimated -> Text(stringResource(R.string.route_estimated), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                            RouteStatus.Ready -> Unit
+                        }
                     }
                     StatusChip(
                         text = stringResource(if (uiState.saved) R.string.route_saved else R.string.route_save),
@@ -237,6 +272,7 @@ private fun StepRow(step: RouteStep, item: ContentItem) {
                 imageVector = when (step.kind) {
                     StepKind.Straight -> Icons.AutoMirrored.Outlined.ArrowForward
                     StepKind.Left -> Icons.Outlined.ChevronLeft
+                    StepKind.Right -> Icons.Outlined.ChevronRight
                     StepKind.Arrive -> Icons.Outlined.LocationOn
                 },
                 contentDescription = null,
@@ -248,8 +284,9 @@ private fun StepRow(step: RouteStep, item: ContentItem) {
         Column {
             Text(
                 text = when (step.kind) {
-                    StepKind.Straight -> stringResource(R.string.route_step_straight, step.street ?: stringResource(R.string.route_street_generic))
-                    StepKind.Left -> stringResource(R.string.route_step_left, step.street ?: item.area)
+                    StepKind.Straight -> step.street?.let { stringResource(R.string.route_step_straight, it) } ?: stringResource(R.string.route_step_straight_plain)
+                    StepKind.Left -> step.street?.let { stringResource(R.string.route_step_left, it) } ?: stringResource(R.string.route_step_left_plain)
+                    StepKind.Right -> step.street?.let { stringResource(R.string.route_step_right, it) } ?: stringResource(R.string.route_step_right_plain)
                     StepKind.Arrive -> stringResource(R.string.route_arrived, item.title)
                 },
                 style = MaterialTheme.typography.bodyLarge,
@@ -271,14 +308,15 @@ private fun TravelMode.icon(): ImageVector = when (this) {
     TravelMode.Metro -> Icons.Outlined.Subway
 }
 
-/** Abre la app de mapas del móvil con la ruta al lugar (consulta por nombre; el mapa dibujado no tiene coordenadas reales). */
+/** Abre la app de mapas del móvil con la navegación hasta las coordenadas del lugar. */
 private fun startNavigation(context: Context, item: ContentItem, mode: TravelMode) {
     val letter = when (mode) {
         TravelMode.Walk -> "w"
         TravelMode.Bike -> "b"
         else -> "d"
     }
-    val uri = Uri.parse("google.navigation:q=${Uri.encode(item.title + ", Valencia")}&mode=$letter")
+    val destination = item.location?.let { "${it.lat},${it.lon}" } ?: Uri.encode(item.title + ", Valencia")
+    val uri = Uri.parse("google.navigation:q=$destination&mode=$letter")
     try {
         context.startActivity(Intent(Intent.ACTION_VIEW, uri))
     } catch (_: ActivityNotFoundException) {
@@ -296,17 +334,14 @@ private fun RutaPreview() {
                 item = item,
                 minutes = mapOf(TravelMode.Walk to 6, TravelMode.Bike to 3, TravelMode.Bus to 9, TravelMode.Metro to null),
                 arrival = "10:42",
+                meters = 484,
+                status = RouteStatus.Ready,
                 steps = listOf(
                     RouteStep(StepKind.Straight, "Av. María Cristina", 300),
                     RouteStep(StepKind.Left, "Pl. Ciudad de Brujas", 150),
                     RouteStep(StepKind.Arrive, item.title, null),
                 ),
-                route = listOf(
-                    com.cmarcillovargas.turismovalencia.data.model.MapPoint(142f, 392f),
-                    com.cmarcillovargas.turismovalencia.data.model.MapPoint(146f, 352f),
-                    com.cmarcillovargas.turismovalencia.data.model.MapPoint(188f, 345f),
-                    com.cmarcillovargas.turismovalencia.data.model.MapPoint(193f, 339f),
-                ),
+                route = listOf(ValenciaCenter, LatLon(39.4735, -0.3789)),
                 saved = true,
             ),
             onBack = {}, onSelectMode = {}, onToggleSaved = {}, onStart = {},

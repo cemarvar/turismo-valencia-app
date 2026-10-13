@@ -7,8 +7,8 @@ Qué ver, eventos, gastronomía y alojamientos; mapa y rutas a pie; tickets, tou
 un asistente (ValBot) y contenido guardado para usar **sin conexión**. Hecha con Kotlin y Jetpack Compose,
 siguiendo el diseño de Figma pantalla a pantalla.
 
-> **Estado:** frontend completo y funcional; ValBot conectado a la web y lo del usuario guardado en local con Room. Aún no hay
-> reservas en servidor ni mapa real (ver [Hoja de ruta](#hoja-de-ruta)).
+> **Estado:** frontend completo y funcional; ValBot conectado a la web, lo del usuario guardado en local con Room y mapa real de
+> OpenStreetMap con ubicación y rutas. Aún no hay reservas en servidor ni mapa descargable por zonas (ver [Hoja de ruta](#hoja-de-ruta)).
 
 ## Qué incluye
 
@@ -17,7 +17,7 @@ siguiendo el diseño de Figma pantalla a pantalla.
 | **Bienvenida** | Splash, onboarding de 3 páginas, permiso de ubicación, selector de idioma (ES · VA · EN · FR) |
 | **Explorar** | Portada con carrusel de destacados y chips de sección, búsqueda con sugerencias, listados por sección, fichas de lugar y de evento, Tickets & Tours, turismo sostenible |
 | **Contenido de la web** | Las 65 páginas de la web: Lo esencial, Planes, Qué ver, Eventos, Gastronomía, Alojamientos, Sostenible, guías de entradas, tours y experiencias, y los textos legales; más Contacto. Los índices de sección siguen el orden de la web (15 lugares, 6 eventos, 9 platos, 6 alojamientos) |
-| **Mapa** | Mapa con filtros por categoría y ruta a pie con cuatro modos de transporte |
+| **Mapa** | Mapa de OpenStreetMap con filtros por categoría, tu ubicación (con permiso), y ruta real a pie o en bici con los pasos por las calles (autobús y metro, estimados) |
 | **ValBot** | Asistente con IA (Gemini, a través de la web) con tarjetas de lugares y guías, dictado por voz, respuestas básicas si el servidor no responde y modo sin conexión |
 | **Favoritos y descargas** | Favoritos, fichas y mapa guardados, cuota de espacio, solo Wi-Fi |
 | **Reservas** | Reservar en dos pasos, reserva confirmada con código QR, historial |
@@ -32,7 +32,7 @@ Las 27 pantallas del [diseño de Figma](docs/Figma) están implementadas y compa
 - **Arquitectura MVVM**: una pantalla = `Screen` + `UiState` + `ViewModel`, con `Route` que los conecta
 - **Navigation Compose** (barra inferior solo en las rutas que la llevan en el diseño)
 - Tipografía **Source Sans 3** empaquetada, para que la app funcione sin conexión
-- **Room** (base de datos local con lo del usuario), **OkHttp** (llamada a `/api/chat` de ValBot), **ZXing** (código QR real) y `desugar_jdk_libs` (`java.time` desde Android 7)
+- **osmdroid** (mapa de OpenStreetMap), **Room** (base de datos local con lo del usuario), **OkHttp** (ValBot y rutas), **ZXing** (código QR real) y `desugar_jdk_libs` (`java.time` desde Android 7)
 - Android: `minSdk 24`, `targetSdk 37`, solo tema claro
 
 Datos: el contenido de la web como JSON en `assets/web/` (con 479 fotos en `assets/img/`) y lo del usuario (favoritos, descargas,
@@ -65,6 +65,7 @@ adb shell am start -n com.cmarcillovargas.turismovalencia/.MainActivity --es rou
 # --ez emptyFavorites true vacía los favoritos
 # --ez chatFake true        ValBot contesta como Gemini sin llamar al servidor
 # --ez resetData true       vuelve a los datos de demostración (lo guardado persiste entre arranques)
+adb emu geo fix -0.3755 39.4745   # (en el emulador) simula estar en Valencia: longitud y latitud
 ```
 
 Rutas: `inicio`, `mapa`, `valbot`, `favoritos`, `reservas`, `busqueda`, `categoria/que-ver`, `detalle/<id>`,
@@ -117,6 +118,7 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - **Datos:** las 65 páginas de la web están en la app y se llega a todas desde alguna pantalla, y cada ficha de los índices tiene su equivalente.
 - **Web publicada:** títulos, fotos, orden y textos de la portada y de los índices frente a lo que muestra la web en directo.
 - **Interfaz (emulador):** chips, secciones, las 21 tarjetas de la portada, contacto, guías, fichas y buscador.
+- **Mapa (emulador):** teselas, marcadores, selección, zoom, ubicación real simulada, ruta real, modo sin conexión y permisos.
 - **Persistencia (emulador):** favoritos, descargas, reservas, ajustes, búsquedas, avisos y bienvenida siguen ahí tras cerrar y abrir la app.
 - **Publicación (emulador):** la versión minificada con R8 arranca y guarda en Room (`verify_release.py`).
 - **Fotos:** tras cambiar de sección, cada tarjeta muestra su propia foto.
@@ -126,8 +128,10 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - [x] **ValBot en línea**: conectado a la función `/api/chat` de la web (Gemini); la clave se queda en el servidor y, si no responde, contesta con reglas
 - [ ] **Actividades y reservas** desde la base de datos (y endpoint de escritura para crear reservas)
 - [x] **Persistencia local** con Room: favoritos, descargas, reservas, ajustes, búsquedas, avisos y primer arranque
-- [ ] **Mapa real** con osmdroid y mapa sin conexión
-- [ ] **Permisos** de ubicación y notificaciones (aviso de la mascletà)
+- [x] **Mapa real** con osmdroid, ubicación del usuario y rutas a pie y en bici
+- [ ] **Mapa sin conexión por zonas** (hoy se ven sin conexión las teselas ya vistas)
+- [x] **Permiso de ubicación** real (pantalla de bienvenida, botón del mapa y Perfil)
+- [ ] **Notificaciones**: permiso y aviso de la mascletà
 - [ ] Icono de la app, SplashScreen del sistema e **idiomas** ES · VA · EN · FR
 - [ ] Modo oscuro (el diseño de Figma solo define el tema claro)
 
@@ -135,3 +139,6 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 
 Proyecto de fin de ciclo (DAM) de **César** ([@cemarvar](https://github.com/cemarvar)). Contenido, textos y fotografías de la web
 [Turismo Valencia](https://github.com/cemarvar/TurismoValencia). Diseño en Figma.
+
+Mapa © [colaboradores de OpenStreetMap](https://www.openstreetmap.org/copyright) (datos bajo licencia ODbL). Rutas calculadas con
+[OSRM](https://project-osrm.org) en el servidor de [OpenStreetMap Alemania](https://routing.openstreetmap.de).

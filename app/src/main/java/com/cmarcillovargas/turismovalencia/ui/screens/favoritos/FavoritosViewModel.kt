@@ -24,7 +24,7 @@ data class FavoritosUiState(
 class FavoritosViewModel(private val container: AppContainer) : ViewModel() {
     private val tab = MutableStateFlow(FavoritesTab.All)
 
-    val uiState: StateFlow<FavoritosUiState> = combine(tab, container.favorites.ids, container.downloads.ids) { current, favorites, downloads ->
+    val uiState: StateFlow<FavoritosUiState> = combine(tab, container.favorites.ids, container.downloads.ids, container.content.origin) { current, favorites, downloads, _ ->
         val all = container.content.items(favorites)
         val offline = all.filter { it.id in downloads }
         FavoritosUiState(

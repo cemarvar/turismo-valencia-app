@@ -5,7 +5,7 @@ import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind.Tip
 import com.cmarcillovargas.turismovalencia.data.model.InfoRow
-import com.cmarcillovargas.turismovalencia.data.model.MapPoint
+import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Stat
 
 // TODO(api): contenido de ejemplo basado en las páginas de la web (src/Gastronomia).
@@ -26,7 +26,7 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         description = "El plato más internacional de la gastronomía valenciana: nuestra contribución a la cocina universal. " +
             "Nacida en la Albufera en el siglo XVIII, hoy es el símbolo gastronómico de Valencia. Se cocina a fuego de leña, " +
             "con pollo, conejo, garrofón y judía verde, y se come directamente de la paella.",
-        mapPoint = MapPoint(255f, 232f),
+        location = LatLon(39.4684, -0.329), // El Cabanyal, calle de la Barraca (la web cita los arroces del Cabanyal)
         stats = listOf(Stat("S. XVIII", "ORIGEN"), Stat("Albufera", "CUNA DEL PLATO"), Stat("Leña", "FUEGO TRADICIONAL")),
         info = listOf(
             InfoRow(Tip, "Dónde probarla", "El Palmar y La Albufera · Malvarrosa y paseo marítimo"),
@@ -51,7 +51,6 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "El plato marinero por excelencia.",
         description = "Nacida por accidente en una barca del Grao de Gandia, la fideuà es la prima marinera de la paella: " +
             "misma técnica, mismo fuego, mismo ritual, pero con fideos en lugar de arroz. Se sirve con alioli.",
-        mapPoint = MapPoint(330f, 260f),
         stats = listOf(Stat("Gandia", "ORIGEN"), Stat("Fideos", "EN LUGAR DE ARROZ"), Stat("Alioli", "ACOMPAÑAMIENTO")),
         info = listOf(InfoRow(Tip, "Dónde probarla", "Restaurantes del Grao y del paseo marítimo")),
         offlineMb = 4,
@@ -73,7 +72,6 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "El gran desconocido de la cocina valenciana.",
         description = "El plato que los valencianos guardan para sí mismos. Nacido del puchero y del horno del panadero, " +
             "el arròs al forn es la cara más auténtica, contundente y hogareña de la cocina de arroces.",
-        mapPoint = MapPoint(300f, 330f),
         stats = listOf(Stat("Horno", "COCCIÓN"), Stat("Puchero", "ORIGEN"), Stat("Casero", "ESTILO")),
         info = listOf(InfoRow(Tip, "Dónde probarlo", "Casas de comidas del centro y de Ruzafa")),
         offlineMb = 4,
@@ -95,7 +93,6 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "El arroz más misterioso de Valencia.",
         description = "Negro como el mar de noche. La tinta de la sepia tiñe cada grano de arroz y concentra el sabor del " +
             "Mediterráneo en un plato que sorprende tanto por el aspecto como por su sabor.",
-        mapPoint = MapPoint(380f, 300f),
         stats = listOf(Stat("Sepia", "INGREDIENTE"), Stat("Tinta", "COLOR"), Stat("Alioli", "ACOMPAÑAMIENTO")),
         info = listOf(InfoRow(Tip, "Dónde probarlo", "Restaurantes del puerto y de La Marina")),
         offlineMb = 4,
@@ -117,7 +114,6 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "El plato de los pescadores de la Albufera.",
         description = "Ajo y pimentón. El guiso de anguila de los pescadores de la Albufera que rivaliza en historia y solera " +
             "con la paella valenciana. Catarroja, El Palmar y el lago que lo vio nacer.",
-        mapPoint = MapPoint(335f, 820f),
         stats = listOf(Stat("Anguila", "INGREDIENTE"), Stat("Ajo y pimentón", "SABOR"), Stat("El Palmar", "ORIGEN")),
         info = listOf(InfoRow(Tip, "Dónde probarlo", "El Palmar y Catarroja")),
         offlineMb = 4,
@@ -139,7 +135,6 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "El secreto mejor guardado de la cocina valenciana.",
         description = "Cuatro ingredientes, las manos y paciencia: el contraste entre el bacalao salado y la dulzura del " +
             "pimiento asado. Una tapa tradicional de Semana Santa que se disfruta todo el año.",
-        mapPoint = MapPoint(230f, 410f),
         stats = listOf(Stat("4", "INGREDIENTES"), Stat("Bacalao", "PROTAGONISTA"), Stat("Todo el año", "TEMPORADA")),
         info = listOf(InfoRow(Tip, "Dónde probarlo", "Bares de tapas del Carmen y del Mercado Central")),
         offlineMb = 3,
@@ -161,7 +156,6 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "El arroz de los señoritos.",
         description = "Todo el marisco pelado: sin cáscaras y sin mancharse. Gambas, calamares, sepia y rape limpios sobre un " +
             "fumet de morralla y salmorreta, donde la comodidad es el lujo.",
-        mapPoint = MapPoint(600f, 470f),
         stats = listOf(Stat("Marisco", "PELADO"), Stat("Fumet", "BASE"), Stat("Costa", "ORIGEN")),
         info = listOf(InfoRow(Tip, "Dónde probarlo", "Restaurantes de la Malvarrosa y La Marina")),
         offlineMb = 4,
@@ -183,7 +177,6 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "El postre más fallero de Valencia.",
         description = "El olor que define las Fallas de Valencia. Esponjosos por dentro, crujientes por fuera, rebozados en " +
             "azúcar y acompañados de chocolate caliente: el dulce más valenciano.",
-        mapPoint = MapPoint(215f, 285f),
         stats = listOf(Stat("Calabaza", "INGREDIENTE"), Stat("Fallas", "TEMPORADA"), Stat("Chocolate", "ACOMPAÑAMIENTO")),
         info = listOf(InfoRow(Tip, "Dónde probarlos", "Puestos callejeros en marzo y buñolerías del centro")),
         offlineMb = 3,
@@ -204,7 +197,7 @@ internal val FakeGastronomia: List<ContentItem> = listOf(
         summary = "La bebida más valenciana del mundo.",
         description = "Blanca, fría, cremosa y dulce. La horchata de chufa de Alboraya es el oro líquido de Valencia: sin " +
             "lactosa, sin gluten y con Denominación de Origen. Se toma con fartons para mojar.",
-        mapPoint = MapPoint(120f, 448f),
+        location = LatLon(39.4738, -0.3763), // Horchatería de Santa Catalina (plaza de Santa Catalina, 6, según la web)
         stats = listOf(Stat("Chufa", "INGREDIENTE"), Stat("D.O.", "ORIGEN PROTEGIDO"), Stat("Alboraya", "CUNA")),
         info = listOf(InfoRow(Tip, "Dónde probarla", "Horchaterías de Alboraya y del centro")),
         offlineMb = 3,

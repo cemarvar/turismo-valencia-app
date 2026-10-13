@@ -66,7 +66,8 @@ class InicioViewModel(private val container: AppContainer) : ViewModel() {
         UserSnapshot(favorites.toSet(), downloaded.toSet(), online, notifications.any { it.unread }, language.code)
     }
 
-    val uiState: StateFlow<InicioUiState> = combine(loading, selected, user) { isLoading, category, snapshot ->
+    // `content.origin` hace que las distancias («Cerca de ti») se recalculen cuando cambia la ubicación.
+    val uiState: StateFlow<InicioUiState> = combine(loading, selected, user, container.content.origin) { isLoading, category, snapshot, _ ->
         InicioUiState(
             loading = isLoading,
             offline = !snapshot.online,

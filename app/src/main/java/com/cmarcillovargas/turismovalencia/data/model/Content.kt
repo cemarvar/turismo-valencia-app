@@ -22,8 +22,8 @@ enum class InfoKind { Schedule, Address, Price, Transport, Tip }
 
 data class InfoRow(val kind: InfoKind, val title: String, val text: String)
 
-/** Punto del mapa dibujado, en dp sobre un lienzo de 700×1100. */
-data class MapPoint(val x: Float, val y: Float)
+/** Coordenadas geográficas (WGS84, grados) de un lugar. */
+data class LatLon(val lat: Double, val lon: Double)
 
 /** Acto de un evento («Mascletà», «Plantà»…). */
 data class Act(val title: String, val whenLabel: String, @param:DrawableRes val image: Int? = null)
@@ -45,7 +45,8 @@ data class ContentItem(
     @param:DrawableRes val hero: Int?,
     val summary: String,
     val description: String,
-    val mapPoint: MapPoint,
+    /** Posición real en el mapa; la tienen todas las fichas que salen en él (`onMap`). */
+    val location: LatLon? = null,
     val gallery: List<Int> = emptyList(),
     val stats: List<Stat> = emptyList(),
     val info: List<InfoRow> = emptyList(),
@@ -74,6 +75,10 @@ data class ContentItem(
     val thumbAsset: String? = null,
     val heroAsset: String? = null,
 ) {
+    init {
+        require(!onMap || location != null) { "«$id» sale en el mapa pero no tiene coordenadas" }
+    }
+
     val isEvent: Boolean get() = category == Category.Eventos
 }
 

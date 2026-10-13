@@ -25,8 +25,10 @@ Catálogo de lo que hay en `ui/components` y de los tokens del theme. **Antes de
 | `UserAvatar` | `Cards.kt` | Círculo azul marino con iniciales | `initials`, `onClick`, `size` |
 | `InfoItemRow` | `Cards.kt` | Fila «Horario / Dirección…» con icono en círculo | `icon`, `title`, `text` |
 | `DetailHero` | `Hero.kt` | Foto de cabecera con atrás/compartir/favorito, etiqueta, título y tres cifras | `image`, `eyebrow`, `title`, `stats`, `accent`, `favorite`, `onShare` |
-| `MapCanvas` / `MapMarker` / `MapCamera` | `MapView.kt` | Mapa dibujado de 700×1100 dp con zoom, desplazamiento, pins, punto del usuario y ruta | `markers`, `selectedId`, `showUser`, `route`, `showLabels`, `showSelectedLabel`, `camera`, `onSelect` |
-| `MapPlaceholder` | `MapView.kt` | Mapa de fondo sin interacción (permiso de ubicación) | — |
+| `OsmMap` / `MapMarker` / `MapCamera` | `OsmMap.kt`, `MapPins.kt` | Mapa de OpenStreetMap (osmdroid) con zoom y arrastre, marcadores por categoría, punto del usuario y ruta punteada. La cámara se mueve desde fuera (`centerOn`, `zoomBy`, `fit`) | `markers`, `selectedId`, `onMarkerClick`, `user`, `route`, `camera`, `interactive`, `showSelectedLabel` |
+| `MapAttribution` | `OsmMap.kt` | Atribución obligatoria de OpenStreetMap (abre su licencia); va en toda pantalla con teselas | — |
+| `rememberLocationPermissionRequest` / `OnScreenVisible` | `LocationEffects.kt` | Pide el permiso de ubicación del sistema; avisa cuando una pantalla se ve y deja de verse (para seguir la ubicación solo entonces) | `onResult`; `onStart`, `onStop` |
+| `MapPlaceholder` | `MapPlaceholder.kt` | Fondo de plano dibujado, sin red ni interacción (pantalla de permiso y Contacto) | — |
 | `EmptyState` | `States.kt` | Círculo suave + título + texto + acción (favoritos vacío, sin resultados) | `icon`, `title`, `text`, `actionText`, `onAction` |
 | `SkeletonBox` | `States.kt` | Bloque gris que late (inicio cargando) | `shape` |
 | `AppSwitch` | `States.kt` | Interruptor naranja con check | `checked`, `onCheckedChange` |
@@ -40,7 +42,7 @@ Catálogo de lo que hay en `ui/components` y de los tokens del theme. **Antes de
 | `Eyebrow` | `Eyebrow.kt` | Etiqueta superior en mayúsculas con tracking | `text`, `color` |
 | `Scrim` / `scrimColor()` | `Scrim.kt` | Velo negro al 60 % bajo diálogos y sheets | — |
 | `SystemBarIcons` | `SystemBarIcons.kt` | Iconos claros u oscuros en las barras del sistema mientras la pantalla está visible | `lightStatusBarIcons`, `lightNavigationBarIcons` |
-| `Category.icon()` / `Category.dotColor()` | `CategoryIcons.kt`, `MapView.kt` | Icono y color de cada sección | — |
+| `Category.icon()` / `Category.dotColor()` | `CategoryIcons.kt`, `OsmMap.kt` | Icono y color de cada sección | — |
 
 Detalles de `AppButton`: `Primary` = relleno `primary` con resplandor y texto de 15sp; `Tonal` = `primaryContainer`; `Plain` = solo texto; `Outlined` = borde naranja; `Danger` = borde rojo (borrar). `compact` baja el alto a 40dp (botón «Reservar» de tickets). El ancho lo decide quien lo usa.
 
@@ -79,7 +81,7 @@ Cada pantalla tiene, en `ui/screens/<grupo>/`:
 
 ## Datos (`data/`)
 - `AppContainer` (creado por `TurismoApp`) guarda los repositorios: `content`, `favorites`, `downloads`, `reservations`, `settings`, `notifications`, `searchHistory`, `network` y `valbot`.
-- `ContentRepository` sirve `ContentItem` (lugares y eventos) y `Offer` (tickets, tours y experiencias) desde `data/fake`. Un `ContentItem` con `onMap = false` no se dibuja como marcador en el mapa.
+- `ContentRepository` sirve `ContentItem` (lugares y eventos) y `Offer` (tickets, tours y experiencias) desde `data/fake`. Un `ContentItem` con `onMap = false` no se dibuja como marcador en el mapa; con `onMap = true` debe llevar `location` (coordenadas reales). Sus distancias se miden desde `ContentRepository.origin`.
 - `WebContentRepository` lee `assets/web/index.json` y `assets/web/pages/<Pagina>.json` (65 páginas: modelo `WebPage` con bloques `Items`, `Facts` y `Bullets`) y enlaza fichas, ofertas y fotos con sus páginas. `ContentItem.pageId/thumbAsset/heroAsset` y `Offer.assetImage` los rellena `ContentRepository`.
 - `NetworkMonitor.isOnline` refleja la conexión real; `force(Boolean?)` la simula (lo usa el extra `--ez offline true`).
 
