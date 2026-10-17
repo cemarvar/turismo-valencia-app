@@ -7,8 +7,10 @@ import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.POST
 import java.util.concurrent.TimeUnit
 
 /**
@@ -20,7 +22,54 @@ interface TurismoApi {
     /** Catálogo de ofertas. Con `If-None-Match` igual al `ETag` recibido antes responde 304 sin cuerpo. */
     @GET("offers")
     suspend fun offers(@Header("If-None-Match") etag: String?): Response<OffersResponse>
+
+    /**
+     * Crea una reserva (201; 200 con `Idempotent-Replayed: true` si la clave ya se había usado con los mismos datos). El servidor pone
+     * el precio y el localizador. Sin cuentas: `X-Device-Id` es el UUID de este móvil e `Idempotency-Key` el de este intento.
+     */
+    @POST("reservations")
+    suspend fun createReservation(
+        @Header("X-Device-Id") deviceId: String,
+        @Header("Idempotency-Key") idempotencyKey: String,
+        @Body request: ReservationRequest,
+    ): Response<ReservationDto>
+
+    /** Las reservas de este móvil (hasta 100, las más recientes primero). */
+    @GET("reservations")
+    suspend fun reservations(@Header("X-Device-Id") deviceId: String): Response<ReservationsResponse>
 }
+
+/** Cuerpo de `POST /reservations` (ver `backend/contract/examples/reservation-request.json`). `date` es `AAAA-MM-DD`; el correo, en cualquier caso. */
+@Serializable
+data class ReservationRequest(
+    val offerId: String,
+    val date: String,
+    val time: String,
+    val adults: Int,
+    val children: Int,
+    val email: String,
+)
+
+/** Una reserva tal como la sirve la API. `status` es `confirmed` o `cancelled`; el dinero va en céntimos; `createdAt`, en ISO-8601 UTC. */
+@Serializable
+data class ReservationDto(
+    val id: String,
+    val locator: String,
+    val offerId: String,
+    val date: String,
+    val time: String,
+    val adults: Int,
+    val totalCents: Int,
+    val title: String = "",
+    val place: String = "",
+    val children: Int = 0,
+    val email: String = "",
+    val status: String = "confirmed",
+    val createdAt: String = "",
+)
+
+@Serializable
+data class ReservationsResponse(val reservations: List<ReservationDto> = emptyList())
 
 @Serializable
 data class OffersResponse(val offers: List<OfferDto> = emptyList())

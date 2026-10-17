@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.cmarcillovargas.turismovalencia.data.fake.FakeOfertas
 import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.DemoData
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
@@ -13,6 +14,7 @@ import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
 import com.cmarcillovargas.turismovalencia.data.remote.NoOffersService
+import com.cmarcillovargas.turismovalencia.data.remote.NoReservationsService
 import com.cmarcillovargas.turismovalencia.data.repo.ContentRepository
 import com.cmarcillovargas.turismovalencia.data.repo.DownloadsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.FavoritesRepository
@@ -21,6 +23,7 @@ import com.cmarcillovargas.turismovalencia.data.repo.ReservationsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SearchHistoryRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SettingsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.WebContentRepository
+import com.cmarcillovargas.turismovalencia.data.work.NoRefreshScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +51,7 @@ class PersistenceTest {
     private lateinit var context: Context
     private lateinit var content: ContentRepository
     private lateinit var dbName: String
+    private lateinit var server: FakeReservationsServer
     private val open = mutableListOf<Session>()
 
     @Before
@@ -55,6 +59,7 @@ class PersistenceTest {
         context = ApplicationProvider.getApplicationContext()
         content = ContentRepository(WebContentRepository(context))
         dbName = "test-${System.nanoTime()}.db"
+        server = FakeReservationsServer { id -> FakeOfertas.first { it.id == id }.priceFromCents }
     }
 
     @After
@@ -66,7 +71,7 @@ class PersistenceTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     private inner class Session(demo: Boolean = false) {
         val db: AppDatabase = Room.databaseBuilder(context, AppDatabase::class.java, dbName).build()
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
+        val scope = testScope()
 
         init {
             if (demo) runBlocking { DemoData(content).seedIfFirstRun(db) }
@@ -75,7 +80,7 @@ class PersistenceTest {
         private val store = SettingsStore(db.settings(), scope)
         val favorites = FavoritesRepository(db.favorites(), scope)
         val downloads = DownloadsRepository(content, db.downloads(), store, scope)
-        val reservations = ReservationsRepository(content, db.reservations(), scope)
+        val reservations = ReservationsRepository(db.reservations(), db.reservationAttempts(), store, server, scope)
         val settings = SettingsRepository(store)
         val notifications = NotificationsRepository(db.notifications(), scope)
         val searches = SearchHistoryRepository(db.recentSearches(), scope)
@@ -85,7 +90,7 @@ class PersistenceTest {
         }
 
         fun close() {
-            scope.cancel()
+            scope.closeAndJoin()
             db.close()
             open -= this
         }
@@ -143,14 +148,17 @@ class PersistenceTest {
     }
 
     @Test
-    fun reservasSeNumeranYPersisten() {
+    fun reservasSePidenAlServidorYPersisten() {
         val first = Session()
         val date = LocalDate.now().plusDays(3)
         val one = runBlocking { first.reservations.create("albufera-barca", date, "18:30", 2, 1, "a@b.es") }
         val two = runBlocking { first.reservations.create("taller-paella", date.plusDays(1), "13:00", 4, 0, "a@b.es") }
 
-        assertEquals("TV-${date.year}-0413", one.locator)
-        assertEquals("TV-${date.plusDays(1).year}-0414", two.locator)
+        // El localizador y el total los pone el servidor.
+        assertEquals("TV-${date.year}-1000", one.locator)
+        assertEquals("TV-${date.plusDays(1).year}-1001", two.locator)
+        assertEquals(3600, one.totalCents)
+        assertEquals(18_000, two.totalCents)
         assertEquals(ReservationStatus.Confirmed, one.status)
         assertEquals(3, one.people)
         // La reserva ya está en la lista cuando `create` devuelve (la pantalla de confirmación la encuentra).
@@ -158,13 +166,13 @@ class PersistenceTest {
         assertEquals(listOf(two.id, one.id), first.reservations.items.value.map { it.id })
         first.close()
 
+        // Sin conexión (otra apertura de la app, sin servidor que responda) siguen ahí.
         val second = Session()
         assertEquals(listOf(two.id, one.id), second.reservations.items.value.map { it.id })
         assertEquals(one, second.reservations.get(one.id))
         val three = runBlocking { second.reservations.create("albufera-barca", date, "16:30", 1, 0, "c@d.es") }
-        assertEquals("TV-${date.year}-0415", three.locator)
+        assertEquals("TV-${date.year}-1002", three.locator)
     }
-
     @Test
     fun lasReservasDeDemoTienenSuEstado() {
         val seeds = Session(demo = true).reservations.items.value.associateBy { it.id }
@@ -282,7 +290,7 @@ class PersistenceTest {
         val app = ApplicationProvider.getApplicationContext<Application>()
         val memory = Room.inMemoryDatabaseBuilder(app, AppDatabase::class.java).build()
         try {
-            val container = AppContainer(app, memory, NoOffersService)
+            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, NoRefreshScheduler)
             assertEquals(6, container.favorites.ids.value.size)
             assertEquals(setOf("fallas"), container.reminders.ids.value)
             container.favorites.clear()

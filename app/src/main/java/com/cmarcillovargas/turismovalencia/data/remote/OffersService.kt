@@ -1,10 +1,5 @@
 package com.cmarcillovargas.turismovalencia.data.remote
 
-import kotlinx.coroutines.CancellationException
-
-/** No se pudo obtener algo de la API (sin red, tiempo agotado, error del servidor o respuesta que la app no entiende). */
-class ApiException(message: String, cause: Throwable? = null) : Exception(message, cause)
-
 /** Resultado de pedir el catálogo al servidor. */
 sealed interface OffersFetch {
     /** El catálogo no ha cambiado desde el `ETag` que se envió (304). */
@@ -21,23 +16,16 @@ interface OffersService {
 }
 
 class RetrofitOffersService(private val api: TurismoApi) : OffersService {
-    override suspend fun fetch(etag: String?): OffersFetch = try {
+    override suspend fun fetch(etag: String?): OffersFetch = guardedApiCall("obtener el catálogo") {
         val response = api.offers(etag)
         when {
             response.code() == 304 -> OffersFetch.NotModified
             response.isSuccessful -> {
-                val body = response.body() ?: throw ApiException("El servidor respondió sin catálogo")
+                val body = response.body() ?: throw ApiException("El servidor respondió sin catálogo", status = response.code())
                 OffersFetch.Fresh(body.offers, response.headers()["ETag"])
             }
-            else -> throw ApiException("El servidor respondió ${response.code()}")
+            else -> throw response.toApiException()
         }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: ApiException) {
-        throw e
-    } catch (e: Exception) {
-        // IOException (sin red, tiempo agotado) y SerializationException (JSON que no es el del contrato): se sigue con lo guardado.
-        throw ApiException("No se pudo obtener el catálogo", e)
     }
 }
 

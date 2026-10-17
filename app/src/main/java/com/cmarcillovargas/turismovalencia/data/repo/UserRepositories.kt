@@ -6,8 +6,9 @@ import com.cmarcillovargas.turismovalencia.data.local.NotificationDao
 import com.cmarcillovargas.turismovalencia.data.local.RecentSearchDao
 import com.cmarcillovargas.turismovalencia.data.local.ReminderDao
 import com.cmarcillovargas.turismovalencia.data.local.ReminderEntity
+import com.cmarcillovargas.turismovalencia.data.local.ReservationAttemptDao
+import com.cmarcillovargas.turismovalencia.data.local.ReservationAttemptEntity
 import com.cmarcillovargas.turismovalencia.data.local.ReservationDao
-import com.cmarcillovargas.turismovalencia.data.local.ReservationEntity
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
 import com.cmarcillovargas.turismovalencia.data.local.asState
 import com.cmarcillovargas.turismovalencia.data.local.toModel
@@ -15,10 +16,12 @@ import com.cmarcillovargas.turismovalencia.data.model.AppNotification
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.Reservation
-import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
 import com.cmarcillovargas.turismovalencia.data.notify.NotificationAccess
 import com.cmarcillovargas.turismovalencia.data.notify.ReminderScheduler
+import com.cmarcillovargas.turismovalencia.data.remote.ApiException
+import com.cmarcillovargas.turismovalencia.data.remote.ReservationRequest
+import com.cmarcillovargas.turismovalencia.data.remote.ReservationsService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +33,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.UUID
 
 // Lo del usuario vive en la base de datos local (Room, `data/local`). Cada repositorio expone el estado como
 // `StateFlow` (ya cargado al crearlo) y las escrituras van a la base de datos: la interfaz se actualiza cuando
@@ -91,10 +95,34 @@ class DownloadsRepository(
     }
 }
 
+/** Resultado de poner las reservas al día con el servidor. */
+sealed interface ReservationsRefresh {
+    data class Updated(val count: Int) : ReservationsRefresh
+
+    /** Este móvil nunca ha reservado (no tiene identificador): no hay nada que pedir y no se manda nada al servidor. */
+    data object NothingToAsk : ReservationsRefresh
+
+    /** No se pudo (sin red o error del servidor): se sigue con las reservas guardadas. */
+    data class Failed(val reason: Throwable) : ReservationsRefresh
+}
+
+/**
+ * Reservas del usuario. Las crea el servidor (el precio y el localizador los pone él) y la app las guarda en Room: se ven sin
+ * conexión, pero **reservar exige conexión**. Las tres de demostración del primer arranque solo existen en el móvil.
+ *
+ * Sin cuentas, el móvil se identifica con un UUID propio (`deviceId`, en los ajustes de Room). Cada intento de reservar lleva una
+ * clave de idempotencia que se guarda en Room hasta tener una respuesta definitiva: si se corta la red antes de recibirla, al
+ * reintentar con los mismos datos se manda la misma clave y el servidor devuelve la misma reserva en vez de crear otra (aunque la
+ * app se haya cerrado entre medias).
+ */
 class ReservationsRepository(
-    private val offers: ContentRepository,
     private val dao: ReservationDao,
+    private val attempts: ReservationAttemptDao,
+    private val settings: SettingsStore,
+    private val service: ReservationsService,
     private val scope: CoroutineScope,
+    private val now: () -> Long = System::currentTimeMillis,
+    private val newKey: () -> String = { UUID.randomUUID().toString() },
 ) {
     /** Las más recientes primero. */
     val items: StateFlow<List<Reservation>> = dao.observeAll().map { rows -> rows.map { it.toModel() } }.asState(scope)
@@ -102,33 +130,52 @@ class ReservationsRepository(
     fun get(id: String): Reservation? = items.value.firstOrNull { it.id == id }
 
     /**
-     * Guarda la reserva con el siguiente número correlativo y devuelve cuando ya aparece en [items], de modo que la
-     * pantalla de confirmación la encuentra. Se guarda aunque quien la pide se cancele (por ejemplo, si se cierra la pantalla).
+     * Reserva en el servidor y guarda lo que él confirma; devuelve cuando ya aparece en [items], de modo que la pantalla de
+     * confirmación la encuentra. Lanza [ReservationFailure] si no se pudo. Sigue aunque quien la pide se cancele (por ejemplo, si
+     * se cierra la pantalla): una reserva que el servidor ya confirmó no se pierde.
      */
-    // TODO(api): enviar la reserva al backend (tabla Reserva) y esperar su confirmación y el pago.
     suspend fun create(offerId: String, date: LocalDate, time: String, adults: Int, children: Int, email: String): Reservation =
         scope.async {
-            val offer = checkNotNull(offers.offer(offerId))
-            val saved = dao.insertNext { number ->
-                ReservationEntity(
-                    id = "res-$number",
-                    offerId = offerId,
-                    title = offer.title,
-                    place = offer.place,
-                    epochDay = date.toEpochDay(),
-                    time = time,
-                    adults = adults,
-                    children = children,
-                    email = email,
-                    total = offer.priceFrom * adults,
-                    status = ReservationStatus.Confirmed,
-                    number = number,
-                    createdAt = System.currentTimeMillis(),
-                )
+            val deviceId = settings.deviceId()
+            val attempt = attempts.findOrStart(ReservationAttemptEntity(newKey(), offerId, date.toEpochDay(), time, adults, children, email, now()))
+            val request = ReservationRequest(offerId, date.toString(), time, adults, children, email)
+            val created = try {
+                service.create(deviceId, attempt.idempotencyKey, request)
+            } catch (e: ApiException) {
+                val failure = e.toReservationFailure()
+                // Con una respuesta definitiva el intento se acaba; si no (sin red, 5xx, 429), se conserva la clave para reintentar.
+                if (failure.reason.definitive) attempts.delete(attempt.idempotencyKey)
+                throw failure
             }
+            val saved = created.reservation.toEntity(now())
+                ?: throw ReservationFailure(ReservationFailure.Reason.Server, cause = ApiException("El servidor devolvió una reserva que la app no entiende"))
+            dao.upsert(saved)
+            attempts.delete(attempt.idempotencyKey)
             items.first { list -> list.any { it.id == saved.id } }
             saved.toModel()
         }.await()
+
+    /**
+     * Pone las reservas de este móvil al día con el servidor (por ejemplo, la que se confirmó pero cuya respuesta se perdió). Un móvil
+     * que nunca ha reservado no tiene identificador y no tiene nada que pedir: no se crea uno ni se manda nada al servidor.
+     */
+    suspend fun refresh(): ReservationsRefresh {
+        attempts.deleteOlderThan(now() - AttemptLifetimeMillis)
+        val deviceId = settings.deviceIdOrNull() ?: return ReservationsRefresh.NothingToAsk
+        val listed = try {
+            service.list(deviceId)
+        } catch (e: ApiException) {
+            return ReservationsRefresh.Failed(e)
+        }
+        val entities = listed.mapNotNull { it.toEntity(now()) }
+        dao.upsertAll(entities)
+        return ReservationsRefresh.Updated(entities.size)
+    }
+
+    private companion object {
+        /** Un intento sin respuesta se olvida pasado un día (el servidor ya no lo daría por el mismo si cambió el aforo o la fecha). */
+        const val AttemptLifetimeMillis = 24L * 60 * 60 * 1000
+    }
 }
 
 /** Ajustes del usuario y estado de la app (si la bienvenida ya se hizo). */

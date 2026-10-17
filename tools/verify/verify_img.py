@@ -13,7 +13,7 @@ BASE = os.path.join(v.REPO, "app", "src", "main", "assets", "img")
 
 def vec(img):
     g = img.convert("L").resize((48, 48))
-    px = list(g.getdata())
+    px = list(getattr(g, "get_flattened_data", g.getdata)())  # `getdata` desaparece en Pillow 14
     m = sum(px) / len(px)
     d = [p - m for p in px]
     n = sum(p * p for p in d) ** 0.5 or 1

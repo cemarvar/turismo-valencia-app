@@ -67,7 +67,7 @@ import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 import com.cmarcillovargas.turismovalencia.ui.theme.eyebrow
-import com.cmarcillovargas.turismovalencia.util.formatEuro
+import com.cmarcillovargas.turismovalencia.util.formatPrice
 import com.cmarcillovargas.turismovalencia.util.formatShortDate
 import java.time.LocalDate
 import java.time.LocalTime
@@ -175,7 +175,7 @@ private fun Ticket(reservation: Reservation, offer: Offer?) {
                 }
                 Row(Modifier.fillMaxWidth()) {
                     Detail(stringResource(R.string.booking_locator), reservation.locator, Modifier.weight(1.6f))
-                    Detail(stringResource(R.string.booking_total), formatEuro(reservation.total), Modifier.weight(1f))
+                    Detail(stringResource(R.string.booking_total), formatPrice(reservation.totalCents), Modifier.weight(1f))
                 }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -249,7 +249,7 @@ private fun ReservaConfirmadaPreview() {
     TurismoValenciaTheme {
         ReservaConfirmadaScreen(
             ReservaConfirmadaUiState(
-                reservation = Reservation("r", "albufera-barca", "Paseo en barca por la Albufera", "El Palmar", LocalDate.now().plusDays(3), "18:30", 2, 0, "laura.garcia@email.com", 36, ReservationStatus.Confirmed, "TV-2026-0412"),
+                reservation = Reservation("r", "albufera-barca", "Paseo en barca por la Albufera", "El Palmar", LocalDate.now().plusDays(3), "18:30", 2, 0, "laura.garcia@email.com", 3600, ReservationStatus.Confirmed, "TV-2026-0412"),
                 offer = FakeOfertas.first { it.id == "albufera-barca" },
             ),
             {}, {}, {}, {},

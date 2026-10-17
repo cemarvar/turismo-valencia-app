@@ -29,6 +29,10 @@ data class DownloadEntity(
     val itemId: String,
 )
 
+/**
+ * Reserva del usuario. Las hechas con la app son las del servidor (el `id` y el `locator` los pone él); las tres de demostración
+ * del primer arranque solo existen en el móvil.
+ */
 @Entity(tableName = "reservations")
 data class ReservationEntity(
     @PrimaryKey val id: String,
@@ -42,11 +46,32 @@ data class ReservationEntity(
     val adults: Int,
     val children: Int,
     val email: String,
-    val total: Int,
+    /** Total en céntimos, el que calculó el servidor. */
+    val totalCents: Int,
     val status: ReservationStatus,
-    /** Número correlativo; el localizador es `TV-<año>-<número>`. */
-    val number: Int,
+    /** `TV-<año de la actividad>-<número>`. */
+    val locator: String,
     /** Cuándo se hizo la reserva (milisegundos); las más recientes salen primero. */
+    val createdAt: Long,
+)
+
+/**
+ * Intento de reservar que aún no ha tenido una respuesta definitiva del servidor (se cortó la red, error 5xx…). Guarda la clave de
+ * idempotencia (`Idempotency-Key`): al reintentar con los mismos datos se manda la misma clave y el servidor no duplica la reserva,
+ * aunque la app se haya cerrado entre medias. Se borra al recibir una respuesta definitiva o pasado un día.
+ */
+@Entity(
+    tableName = "reservation_attempts",
+    indices = [Index(value = ["offerId", "epochDay", "time", "adults", "children", "email"], unique = true)],
+)
+data class ReservationAttemptEntity(
+    @PrimaryKey val idempotencyKey: String,
+    val offerId: String,
+    val epochDay: Long,
+    val time: String,
+    val adults: Int,
+    val children: Int,
+    val email: String,
     val createdAt: Long,
 )
 
@@ -63,6 +88,8 @@ data class SettingsEntity(
     val wifiOnly: Boolean = true,
     val autoUpdate: Boolean = true,
     val mapDownloaded: Boolean = true,
+    /** Identificador anónimo de este móvil para la API (`X-Device-Id`): un UUID que se crea la primera vez que hace falta. */
+    val deviceId: String? = null,
 )
 
 /** Búsqueda reciente; no distingue mayúsculas (volver a buscar «mercado central» actualiza la misma fila). */

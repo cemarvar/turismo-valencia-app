@@ -13,6 +13,7 @@ plugins {
 // (con `adb reverse` la app llega al ordenador por 127.0.0.1; la dirección 10.0.2.2 del emulador se queda sin respuesta por la red Wi-Fi
 // virtual). Solo la versión de depuración admite HTTP sin cifrar, y únicamente hacia el ordenador (`src/debug/res/xml`).
 val apiBaseUrl = "https://rttqdgrrprzgdxdlhaeq.supabase.co/functions/v1/api-v1/"
+val localApiBaseUrl = "http://127.0.0.1:54321/functions/v1/api-v1/"
 
 android {
     namespace = "com.cmarcillovargas.turismovalencia"
@@ -46,6 +47,21 @@ android {
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**", "okhttp3.**", "okio.**", "retrofit2.**")
             }
         }
+        // Lo mismo que `release` (R8 incluido) pero firmada con la clave de depuración y apuntando siempre al backend local, al que
+        // llega por HTTP como la de depuración (`src/debug`, ver `sourceSets`). Sirve para probar el código minificado —reservas
+        // incluidas— sin escribir nada en la nube (`tools/verify/verify_release.py`). No se publica; `-PapiBaseUrl=…` le da otra dirección.
+        create("releaseCheck") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+            buildConfigField("String", "API_BASE_URL", "\"${providers.gradleProperty("apiBaseUrl").orNull ?: localApiBaseUrl}\"")
+        }
+    }
+    sourceSets {
+        getByName("releaseCheck") {
+            manifest.srcFile("src/debug/AndroidManifest.xml")
+            res.srcDir("src/debug/res")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -77,6 +93,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.okhttp)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
@@ -97,6 +114,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.work.testing)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

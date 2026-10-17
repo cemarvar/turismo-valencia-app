@@ -62,6 +62,13 @@ Con `adb reverse` la app llega al ordenador por `127.0.0.1`; la dirección `10.0
 virtual. Solo la versión de depuración admite HTTP sin cifrar, y únicamente hacia el ordenador (`app/src/debug/res/xml`). Para volver a la
 nube, `./gradlew installDebug` sin `-PapiBaseUrl`.
 
+Contra el backend local se pueden hacer reservas de prueba sin tocar la nube: `prueba-aforo` tiene 3 plazas a las 10:00 y a las 11:00
+(lo que la app muestra como «Ya no quedan plazas» a la segunda reserva de 2 personas). Las pruebas de interfaz de la app
+(`tools/verify/verify_ui.py reservas` y `verify_release.py`, con el APK de `./gradlew assembleReleaseCheck`, que apunta siempre a este
+backend) borran antes de empezar los contadores de límites y sus reservas de pruebas anteriores (las del correo `laura.garcia@example.com`,
+las del correo `precarga@example.com` y las de `prueba-aforo`): `docker exec supabase_db_turismo-valencia psql -U postgres -c "…"` es lo
+que usan, y tarda décimas de segundo (`npx supabase db query --local` tarda unos 8 s).
+
 ## Cambiar el esquema
 
 1. `npx supabase migration new nombre` y escribir el SQL en el archivo nuevo.
@@ -89,7 +96,8 @@ Las ofertas se cambian con una migración (`insert` o `update`) o con una consul
 6. Plan gratuito: crea la variable de repositorio `API_BASE` en GitHub (Settings → Secrets and variables → Actions → Variables) para
    que `.github/workflows/keepalive.yml` evite la pausa por inactividad.
 
-La dirección base de la API no es un secreto: irá en la app (paso «App: reservas reales»).
+La dirección base de la API no es un secreto: va en la app (`BuildConfig.API_BASE_URL`, en `app/build.gradle.kts`), que ya lee de ahí el
+catálogo de ofertas y hace las reservas reales (`docs/api.md`, «Cómo debe usarla la app»).
 
 **Despliegue actual:** proyecto `turismo-valencia` (región `eu-north-1`, UE), dirección base
 `https://rttqdgrrprzgdxdlhaeq.supabase.co/functions/v1/api-v1`. La cuenta tiene además un proyecto antiguo y pausado
@@ -107,8 +115,8 @@ llega débil (`W/"…"`); funciona igual y las pruebas aceptan las dos formas.
 
 ## Límites conocidos
 
-- Sin cuentas, el UUID del dispositivo es el «secreto» de sus reservas; si se pierde (reinstalar la app), se recuperan con el
-  localizador y el correo.
+- Sin cuentas, el UUID del dispositivo es el «secreto» de sus reservas; si se pierde (reinstalar la app, borrar sus datos), se recuperan
+  con el localizador y el correo (la API lo permite; la app todavía no tiene la pantalla para hacerlo).
 - Los límites de peticiones son una defensa básica, suficiente para este proyecto; no sustituyen a un captcha ni a un cortafuegos.
 - La API todavía no cancela ni modifica reservas (el estado `cancelled` existe en la base de datos).
 - El pago está simulado.

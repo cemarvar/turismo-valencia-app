@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cmarcillovargas.turismovalencia.data.AppContainer
 import com.cmarcillovargas.turismovalencia.data.model.Offer
+import com.cmarcillovargas.turismovalencia.data.repo.ReservationFailure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,10 +28,17 @@ data class ReservarUiState(
     val adults: Int = 2,
     val children: Int = 0,
     val email: String = "",
+    /** La reserva se está enviando al servidor. */
+    val submitting: Boolean = false,
+    /** Por qué falló el último intento; se borra al cambiar cualquier dato o al reintentar. */
+    val failure: ReservationFailure? = null,
+    /** Hay conexión: reservar la exige (ver las reservas ya guardadas, no). */
+    val online: Boolean = true,
 ) {
-    val total: Int get() = (offer?.priceFrom ?: 0) * adults
+    /** El total que se enseña; el que vale es el que calcula el servidor (precio por adulto × adultos). */
+    val totalCents: Int get() = (offer?.priceFromCents ?: 0) * adults
     val emailValid: Boolean get() = email.contains("@") && email.substringAfter("@").contains(".")
-    val canConfirm: Boolean get() = offer != null && time != null && adults >= 1 && emailValid
+    val canConfirm: Boolean get() = offer != null && time != null && adults >= 1 && emailValid && online && !submitting
     val canGoBackWeek: Boolean get() = weekDays.firstOrNull()?.let { it.isAfter(today) } == true
 }
 
@@ -42,12 +50,16 @@ class ReservarViewModel(private val container: AppContainer, private val offerId
     private val time = MutableStateFlow<String?>(offer?.times?.getOrNull(2) ?: offer?.times?.firstOrNull())
     private val adults = MutableStateFlow(2)
     private val children = MutableStateFlow(0)
-    private val email = MutableStateFlow(DefaultEmail)
-    private var confirming = false
+
+    // El correo de la última reserva (la primera vez, el de las de demostración): quien reserva de nuevo no lo vuelve a escribir.
+    private val email = MutableStateFlow(container.reservations.items.value.firstOrNull()?.email.orEmpty())
+    private val submitting = MutableStateFlow(false)
+    private val failure = MutableStateFlow<ReservationFailure?>(null)
 
     private val party = combine(adults, children, email) { a, c, e -> Triple(a, c, e) }
+    private val sending = combine(submitting, failure, container.network.isOnline) { s, f, o -> Triple(s, f, o) }
 
-    val uiState: StateFlow<ReservarUiState> = combine(date, weekStart, time, party) { selectedDate, start, selectedTime, (a, c, e) ->
+    val uiState: StateFlow<ReservarUiState> = combine(date, weekStart, time, party, sending) { selectedDate, start, selectedTime, (a, c, e), (s, f, o) ->
         ReservarUiState(
             offer = offer,
             weekDays = (0..6).map { start.plusDays(it.toLong()) },
@@ -58,12 +70,16 @@ class ReservarViewModel(private val container: AppContainer, private val offerId
             adults = a,
             children = c,
             email = e,
+            submitting = s,
+            failure = f,
+            online = o,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReservarUiState(offer = offer, email = DefaultEmail))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReservarUiState(offer = offer, email = email.value, online = container.network.isOnline.value))
 
     fun onSelectDate(value: LocalDate) {
         if (value.isBefore(today)) return
         date.value = value
+        failure.value = null
     }
 
     fun onChangeWeek(delta: Int) {
@@ -76,29 +92,44 @@ class ReservarViewModel(private val container: AppContainer, private val offerId
 
     fun onSelectTime(value: String) {
         time.value = value
+        failure.value = null
     }
 
-    fun onAdults(delta: Int) = adults.update { (it + delta).coerceIn(1, MaxPeople) }
+    fun onAdults(delta: Int) {
+        adults.update { (it + delta).coerceIn(1, MaxPeople) }
+        failure.value = null
+    }
 
-    fun onChildren(delta: Int) = children.update { (it + delta).coerceIn(0, MaxPeople) }
+    fun onChildren(delta: Int) {
+        children.update { (it + delta).coerceIn(0, MaxPeople) }
+        failure.value = null
+    }
 
     fun onEmailChange(value: String) {
         email.value = value
+        failure.value = null
     }
 
-    /** Guarda la reserva y, cuando ya está guardada, llama a `onConfirmed` con su id para abrir la confirmación. */
+    /**
+     * Reserva en el servidor y, cuando él la confirma y queda guardada, llama a `onConfirmed` con su id para abrir la confirmación.
+     * Si falla, deja el motivo en el estado ([ReservarUiState.failure]); reintentar con los mismos datos manda la misma clave de
+     * idempotencia, así que un corte de red a mitad no duplica la reserva.
+     */
     fun confirm(onConfirmed: (String) -> Unit) {
         val state = uiState.value
         val chosenTime = state.time ?: return
-        // Un segundo toque mientras se guarda no crea otra reserva.
-        if (!state.canConfirm || confirming) return
-        confirming = true
+        // Un segundo toque mientras se envía no crea otra reserva.
+        if (!state.canConfirm || submitting.value) return
+        submitting.value = true
+        failure.value = null
         viewModelScope.launch {
             try {
                 val saved = container.reservations.create(offerId, state.date, chosenTime, state.adults, state.children, state.email.trim())
                 onConfirmed(saved.id)
+            } catch (e: ReservationFailure) {
+                failure.value = e
             } finally {
-                confirming = false
+                submitting.value = false
             }
         }
     }
@@ -109,6 +140,5 @@ class ReservarViewModel(private val container: AppContainer, private val offerId
 
     private companion object {
         const val MaxPeople = 12
-        const val DefaultEmail = "laura.garcia@email.com"
     }
 }

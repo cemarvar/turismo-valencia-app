@@ -18,7 +18,9 @@ import com.cmarcillovargas.turismovalencia.data.notify.ReminderScheduler
 import com.cmarcillovargas.turismovalencia.data.remote.ChatApi
 import com.cmarcillovargas.turismovalencia.data.remote.OffersService
 import com.cmarcillovargas.turismovalencia.data.remote.OsrmApi
+import com.cmarcillovargas.turismovalencia.data.remote.ReservationsService
 import com.cmarcillovargas.turismovalencia.data.remote.RetrofitOffersService
+import com.cmarcillovargas.turismovalencia.data.remote.RetrofitReservationsService
 import com.cmarcillovargas.turismovalencia.data.remote.RouteService
 import com.cmarcillovargas.turismovalencia.data.remote.TurismoApiClient
 import com.cmarcillovargas.turismovalencia.data.repo.ContentRepository
@@ -30,31 +32,41 @@ import com.cmarcillovargas.turismovalencia.data.repo.NotificationsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.OffersRefresh
 import com.cmarcillovargas.turismovalencia.data.repo.OffersRepository
 import com.cmarcillovargas.turismovalencia.data.repo.RemindersRepository
+import com.cmarcillovargas.turismovalencia.data.repo.ReservationsRefresh
 import com.cmarcillovargas.turismovalencia.data.repo.ReservationsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SearchHistoryRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SettingsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.ValBotEngine
 import com.cmarcillovargas.turismovalencia.data.repo.ValBotRepository
 import com.cmarcillovargas.turismovalencia.data.repo.WebContentRepository
+import com.cmarcillovargas.turismovalencia.data.work.BackgroundRefresher
+import com.cmarcillovargas.turismovalencia.data.work.RefreshPlan
+import com.cmarcillovargas.turismovalencia.data.work.RefreshScheduler
+import com.cmarcillovargas.turismovalencia.data.work.WorkRefreshScheduler
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 
 /**
- * Dependencias de la app, creadas una vez en `TurismoApp`: el contenido (assets), el catálogo de ofertas del servidor, la
- * base de datos local con lo del usuario (Room) y los repositorios que las unen. `database` y `offersService` se pueden
- * cambiar para probar con una base en memoria y sin tocar la red.
+ * Dependencias de la app, creadas una vez en `TurismoApp`: el contenido (assets), el catálogo de ofertas y las reservas, que
+ * pasan por la API propia, la base de datos local con lo del usuario (Room) y los repositorios que las unen. `database`, los
+ * servicios de la API y quien programa el refresco nocturno se pueden cambiar para probar con una base en memoria y sin tocar la
+ * red ni WorkManager.
  */
 class AppContainer(
     application: Application,
     private val database: AppDatabase = AppDatabase.create(application),
     offersService: OffersService? = null,
+    reservationsService: ReservationsService? = null,
+    refreshScheduler: RefreshScheduler = WorkRefreshScheduler(application),
 ) {
     /**
      * Ámbito de las escrituras y de los estados que siguen a Room: vive tanto como la app. La paralelización limitada a 1
@@ -68,14 +80,11 @@ class AppContainer(
     private val http = OkHttpClient()
     val web = WebContentRepository(application)
 
+    /** La API propia (ofertas y reservas); solo se crea si alguno de los dos servicios no viene dado. */
+    private val api by lazy { TurismoApiClient.create(BuildConfig.API_BASE_URL, TurismoApiClient.defaultClient(http)) }
+
     /** Catálogo de ofertas: el del servidor, guardado en Room (el incluido en la app mientras no haya llegado ninguno). */
-    val offers = OffersRepository(
-        database.offers(),
-        offersService ?: RetrofitOffersService(TurismoApiClient.create(BuildConfig.API_BASE_URL, TurismoApiClient.defaultClient(http))),
-        FakeOfertas,
-        web::offerImage,
-        scope,
-    )
+    val offers = OffersRepository(database.offers(), offersService ?: RetrofitOffersService(api), FakeOfertas, web::offerImage, scope)
     val content = ContentRepository(web, offers.offers)
     private val demo = DemoData(content)
 
@@ -88,7 +97,13 @@ class AppContainer(
 
     val favorites = FavoritesRepository(database.favorites(), scope)
     val downloads = DownloadsRepository(content, database.downloads(), settingsStore, scope)
-    val reservations = ReservationsRepository(content, database.reservations(), scope)
+    val reservations = ReservationsRepository(
+        database.reservations(),
+        database.reservationAttempts(),
+        settingsStore,
+        reservationsService ?: RetrofitReservationsService(api),
+        scope,
+    )
     val settings = SettingsRepository(settingsStore)
     val location = LocationRepository(application, settings, scope)
 
@@ -105,26 +120,72 @@ class AppContainer(
     val network = NetworkMonitor(application)
 
     init {
-        // El catálogo de ofertas se pide al abrir la app y cada vez que vuelve la conexión. Si no ha cambiado, el servidor responde
-        // 304 sin cuerpo; si falla, la app sigue con lo guardado (o con el catálogo incluido en la app) y no se entera nadie.
-        scope.launch { network.isOnline.filter { it }.collect { refreshOffers() } }
+        // El catálogo de ofertas y las reservas se ponen al día al abrir la app y cada vez que vuelve la conexión, sin depender de los
+        // ajustes de Descargas (es una petición pequeña: si el catálogo no ha cambiado, el servidor responde 304 sin cuerpo; y sin ella,
+        // con «Actualizar automáticamente» apagado no se pondría al día nunca). Si algo falla, la app sigue con lo guardado (o con el
+        // catálogo incluido en la app) y no se entera nadie.
+        scope.launch {
+            network.isOnline.filter { it }.collect { refreshAll() }
+        }
+        // Lo mismo, cada noche y con la app cerrada (WorkManager), si «Actualizar automáticamente» está activado; «Descargar solo con
+        // Wi-Fi» decide si basta con datos móviles. Se vuelve a programar cada vez que cambia uno de los dos ajustes.
+        scope.launch {
+            combine(downloads.autoUpdate, downloads.wifiOnly) { auto, wifiOnly -> RefreshPlan(enabled = auto, unmeteredOnly = wifiOnly) }
+                .distinctUntilChanged()
+                .collect { plan ->
+                    try {
+                        refreshScheduler.apply(plan)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e(Tag, "No se pudo programar el refresco nocturno", e)
+                    }
+                }
+        }
     }
 
     val valbot = ValBotRepository(ChatApi(ChatApi.defaultClient(http)), ValBotEngine(content, web))
     val routes: RouteService = OsrmApi(OsrmApi.defaultClient(http))
 
+    /** Lo que ejecuta el trabajo nocturno de WorkManager (`TurismoApp` lo pasa a su `WorkerFactory`). */
+    val refresher = BackgroundRefresher { refreshAll() }
+
+    /** Pone al día el catálogo y las reservas; devuelve si las dos quedaron al día (nunca lanza). */
+    private suspend fun refreshAll(): Boolean {
+        val offersOk = refreshOffers()
+        val reservationsOk = refreshReservations()
+        return offersOk && reservationsOk
+    }
+
     /** Pide el catálogo de ofertas y anota el resultado en el registro; nunca lanza (la app sigue con lo que ya tiene). */
-    private suspend fun refreshOffers() {
+    private suspend fun refreshOffers(): Boolean {
         try {
-            when (val result = offers.refresh()) {
-                is OffersRefresh.Updated -> Log.i(Tag, "Catálogo de ofertas actualizado: ${result.count} ofertas")
-                OffersRefresh.NotModified -> Log.i(Tag, "Catálogo de ofertas sin cambios (304)")
-                is OffersRefresh.Failed -> Log.w(Tag, "No se pudo actualizar el catálogo de ofertas", result.reason)
+            return when (val result = offers.refresh()) {
+                is OffersRefresh.Updated -> true.also { Log.i(Tag, "Catálogo de ofertas actualizado: ${result.count} ofertas") }
+                OffersRefresh.NotModified -> true.also { Log.i(Tag, "Catálogo de ofertas sin cambios (304)") }
+                is OffersRefresh.Failed -> false.also { Log.w(Tag, "No se pudo actualizar el catálogo de ofertas", result.reason) }
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Log.e(Tag, "Error al guardar el catálogo de ofertas", e)
+            return false
+        }
+    }
+
+    /** Pone las reservas al día con el servidor y anota el resultado en el registro; nunca lanza. */
+    private suspend fun refreshReservations(): Boolean {
+        try {
+            return when (val result = reservations.refresh()) {
+                is ReservationsRefresh.Updated -> true.also { Log.i(Tag, "Reservas al día con el servidor: ${result.count}") }
+                ReservationsRefresh.NothingToAsk -> true.also { Log.i(Tag, "Reservas: este móvil nunca ha reservado, no se pide nada") }
+                is ReservationsRefresh.Failed -> false.also { Log.w(Tag, "No se pudieron actualizar las reservas", result.reason) }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(Tag, "Error al guardar las reservas", e)
+            return false
         }
     }
 

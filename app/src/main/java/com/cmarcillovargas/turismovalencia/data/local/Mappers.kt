@@ -21,9 +21,9 @@ fun ReservationEntity.toModel(today: LocalDate = LocalDate.now()): Reservation {
         adults = adults,
         children = children,
         email = email,
-        total = total,
+        totalCents = totalCents,
         status = if (status == ReservationStatus.Confirmed && date.isBefore(today)) ReservationStatus.Completed else status,
-        locator = "TV-${date.year}-${number.toString().padStart(4, '0')}",
+        locator = locator,
     )
 }
 

@@ -63,29 +63,51 @@ abstract class DownloadDao {
 
 @Dao
 abstract class ReservationDao {
-    @Query("SELECT * FROM reservations ORDER BY createdAt DESC, number DESC")
+    @Query("SELECT * FROM reservations ORDER BY createdAt DESC, locator DESC")
     abstract fun observeAll(): Flow<List<ReservationEntity>>
 
-    @Insert
-    abstract suspend fun insert(entity: ReservationEntity)
+    /** Guarda la reserva o, si ya estaba (misma `id`), la pone al día con lo que dice el servidor. */
+    @Upsert
+    abstract suspend fun upsert(entity: ReservationEntity)
+
+    @Upsert
+    abstract suspend fun upsertAll(entities: List<ReservationEntity>)
 
     @Insert
     abstract suspend fun insertAll(entities: List<ReservationEntity>)
 
-    /** Último número de reserva; los localizadores empiezan en el 413 si no hay ninguna. */
-    @Query("SELECT COALESCE(MAX(number), 412) FROM reservations")
-    abstract suspend fun lastNumber(): Int
-
     @Query("DELETE FROM reservations")
     abstract suspend fun clear()
+}
 
-    /** Guarda una reserva con el siguiente número correlativo y la devuelve. */
+@Dao
+abstract class ReservationAttemptDao {
+    @Query(
+        "SELECT * FROM reservation_attempts WHERE offerId = :offerId AND epochDay = :epochDay AND time = :time " +
+            "AND adults = :adults AND children = :children AND email = :email",
+    )
+    abstract suspend fun find(offerId: String, epochDay: Long, time: String, adults: Int, children: Int, email: String): ReservationAttemptEntity?
+
+    @Insert
+    abstract suspend fun insert(entity: ReservationAttemptEntity)
+
+    @Query("DELETE FROM reservation_attempts WHERE idempotencyKey = :idempotencyKey")
+    abstract suspend fun delete(idempotencyKey: String)
+
+    @Query("DELETE FROM reservation_attempts WHERE createdAt < :before")
+    abstract suspend fun deleteOlderThan(before: Long)
+
+    @Query("DELETE FROM reservation_attempts")
+    abstract suspend fun clear()
+
+    /**
+     * El intento pendiente con estos mismos datos o, si no hay, [attempt] guardado como nuevo. Los mismos datos reutilizan la
+     * clave: es lo que evita duplicar la reserva al reintentar tras un corte de red.
+     */
     @Transaction
-    open suspend fun insertNext(build: (number: Int) -> ReservationEntity): ReservationEntity {
-        val entity = build(lastNumber() + 1)
-        insert(entity)
-        return entity
-    }
+    open suspend fun findOrStart(attempt: ReservationAttemptEntity): ReservationAttemptEntity =
+        find(attempt.offerId, attempt.epochDay, attempt.time, attempt.adults, attempt.children, attempt.email)
+            ?: attempt.also { insert(it) }
 }
 
 @Dao
@@ -103,6 +125,16 @@ abstract class SettingsDao {
     @Transaction
     open suspend fun update(change: (SettingsEntity) -> SettingsEntity) {
         save(change(current() ?: SettingsEntity()))
+    }
+
+    /** El identificador de este móvil; si todavía no hay, lo crea con [generate] y lo guarda (de una vez: nunca salen dos distintos). */
+    @Transaction
+    open suspend fun deviceId(generate: () -> String): String {
+        val settings = current() ?: SettingsEntity()
+        settings.deviceId?.let { return it }
+        val id = generate()
+        save(settings.copy(deviceId = id))
+        return id
     }
 }
 

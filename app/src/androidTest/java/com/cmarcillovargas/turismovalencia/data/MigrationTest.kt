@@ -1,6 +1,7 @@
 package com.cmarcillovargas.turismovalencia.data
 
 import android.content.Context
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
 import androidx.test.core.app.ApplicationProvider
@@ -15,9 +16,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.LocalDate
 
 /**
  * Las migraciones de Room conservan lo que el usuario ya tenía guardado. Cada prueba crea una base de datos con el esquema
@@ -98,18 +101,72 @@ class MigrationTest {
     }
 
     @Test
-    fun deLaV1ALaV3PasaPorLasDosMigraciones() {
-        helper.createDatabase(name, 1).apply {
-            execSQL("INSERT INTO favorites (position, itemId) VALUES (1, 'paella')")
+    fun deLaV3ALaV4LasReservasPasanACentimosConSuLocalizadorYLlegaElIdentificadorDelMovil() {
+        val feb = LocalDate.of(2027, 2, 11).toEpochDay()
+        val dec = LocalDate.of(2026, 12, 31).toEpochDay()
+        helper.createDatabase(name, 3).apply {
+            execSQL(
+                "INSERT INTO settings (id, language, notificationsEnabled, location, textScale, onboardingDone, wifiOnly, autoUpdate, mapDownloaded) " +
+                    "VALUES (1, 'VA', 0, 'OnlyOnce', 'Large', 1, 0, 1, 0)",
+            )
+            execSQL(
+                "INSERT INTO reservations (id, offerId, title, place, epochDay, time, adults, children, email, total, status, number, createdAt) VALUES " +
+                    "('res-413', 'albufera-barca', 'Paseo en barca por la Albufera', 'El Palmar', $feb, '18:30', 2, 1, 'a@b.c', 36, 'Confirmed', 413, 100), " +
+                    "('seed-2', 'taller-paella', 'Taller de paella valenciana', 'Mercado', $dec, '13:00', 4, 0, 'd@e.f', 180, 'Pending', 7, 90), " +
+                    "('res-12345', 'albufera-barca', 'Paseo en barca por la Albufera', 'El Palmar', $feb, '16:30', 1, 0, 'g@h.i', 18, 'Completed', 12345, 80)",
+            )
             close()
         }
 
-        val migrated = helper.runMigrationsAndValidate(name, 3, true, *AppDatabase.Migrations)
+        val migrated = helper.runMigrationsAndValidate(name, 4, true, AppDatabase.Migration3To4)
+
+        fun rows(sql: String) = migrated.query(sql).use { c ->
+            generateSequence { if (c.moveToNext()) (0 until c.columnCount).map { c.getString(it) } else null }.toList()
+        }
+        // El total pasa a céntimos, el localizador se guarda (año de la actividad y número de cuatro cifras como mínimo) y no se pierde nada más.
+        assertEquals(
+            listOf(
+                listOf("res-12345", "1800", "TV-2027-12345", "Completed"),
+                listOf("res-413", "3600", "TV-2027-0413", "Confirmed"),
+                listOf("seed-2", "18000", "TV-2026-0007", "Pending"),
+            ),
+            rows("SELECT id, totalCents, locator, status FROM reservations ORDER BY id"),
+        )
+        assertEquals(listOf(listOf("Paseo en barca por la Albufera", "El Palmar", "18:30", "2", "1", "a@b.c", "100")), rows("SELECT title, place, time, adults, children, email, createdAt FROM reservations WHERE id = 'res-413'"))
+        // Los ajustes siguen intactos y el identificador del móvil empieza vacío (se crea cuando hace falta).
+        assertEquals(listOf(listOf("VA", "Large", "OnlyOnce", "1", null)), rows("SELECT language, textScale, location, onboardingDone, deviceId FROM settings"))
+        // La tabla de intentos existe, está vacía y no admite dos intentos con los mismos datos.
+        assertEquals(emptyList<List<String?>>(), rows("SELECT * FROM reservation_attempts"))
+        val attempt = "INSERT INTO reservation_attempts (idempotencyKey, offerId, epochDay, time, adults, children, email, createdAt) VALUES (%s, 'albufera-barca', $feb, '18:30', 2, 0, 'a@b.c', 1)"
+        migrated.execSQL(attempt.format("'k1'"))
+        try {
+            migrated.execSQL(attempt.format("'k2'"))
+            fail("los mismos datos no pueden tener dos claves a la vez")
+        } catch (_: SQLiteConstraintException) {
+            // esperado
+        }
+        migrated.close()
+    }
+
+    @Test
+    fun deLaV1ALaV4PasaPorLasTresMigraciones() {
+        helper.createDatabase(name, 1).apply {
+            execSQL("INSERT INTO favorites (position, itemId) VALUES (1, 'paella')")
+            execSQL(
+                "INSERT INTO reservations (id, offerId, title, place, epochDay, time, adults, children, email, total, status, number, createdAt) " +
+                    "VALUES ('res-413', 'albufera-barca', 'Paseo', 'El Palmar', ${LocalDate.of(2026, 10, 18).toEpochDay()}, '18:30', 2, 0, 'a@b.c', 36, 'Confirmed', 413, 1)",
+            )
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(name, 4, true, *AppDatabase.Migrations)
 
         fun strings(sql: String) = migrated.query(sql).use { cursor -> generateSequence { if (cursor.moveToNext()) cursor.getString(0) else null }.toList() }
         assertEquals(listOf("paella"), strings("SELECT itemId FROM favorites"))
         assertEquals(listOf("fallas"), strings("SELECT itemId FROM reminders"))
         assertEquals(emptyList<String>(), strings("SELECT id FROM offers"))
+        assertEquals(listOf("TV-2026-0413"), strings("SELECT locator FROM reservations"))
+        assertEquals(listOf("3600"), strings("SELECT totalCents FROM reservations"))
         migrated.close()
     }
 

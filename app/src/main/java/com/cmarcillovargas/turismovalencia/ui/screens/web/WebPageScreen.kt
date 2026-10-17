@@ -107,6 +107,7 @@ private fun PageContent(
     onShare: () -> Unit,
     onOpenWeb: () -> Unit,
 ) {
+    val extraBlocks = if (page.id == PrivacyPageId) appPrivacyBlocks() else emptyList()
     LazyColumn(Modifier.fillMaxSize(), state = rememberLazyListState(), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
         if (hero) {
             item(key = "hero") {
@@ -137,7 +138,8 @@ private fun PageContent(
                 }
             }
         }
-        webBlocks(page.blocks, filters, onOpenUrl, legal = page.family == WebFamily.Legal)
+        // La política de privacidad de la web se completa con lo que hace la app (ver `AppPrivacy.kt`).
+        webBlocks(page.blocks + extraBlocks, filters, onOpenUrl, legal = page.family == WebFamily.Legal)
         item(key = "web") {
             AppButton(
                 text = stringResource(R.string.web_view_on_web),

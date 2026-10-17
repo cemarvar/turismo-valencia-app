@@ -65,14 +65,14 @@ class OffersTest {
     }
 
     private inner class Session(val db: AppDatabase = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()) {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
+        val scope = testScope()
         val service = FakeService()
         var clock = 1_000L
         val dao: OfferDao = db.offers()
         val repo = OffersRepository(dao, service, FakeOfertas, { "img/$it.jpg" }, scope, now = { clock })
 
         init {
-            toClose += { scope.cancel(); db.close() }
+            toClose += { scope.closeAndJoin(); db.close() }
         }
 
         fun serve(vararg offers: OfferDto, etag: String? = "W/\"v1\"") {
@@ -110,14 +110,14 @@ class OffersTest {
         val barca = offers[0]
         // Los datos son los del servidor…
         assertEquals("Paseo en barca", barca.title)
-        assertEquals(21, barca.priceFrom)
+        assertEquals(2050, barca.priceFromCents)
         assertEquals(listOf("09:00", "10:00"), barca.times)
         // …y las fotos del diseño de las ofertas que la app ya conocía se conservan. La nueva sale sin ellas.
         assertNotNull(barca.thumb)
         assertNotNull(barca.ticket)
         assertEquals("img/albufera-barca.jpg", barca.assetImage)
         assertNull(offers[1].thumb)
-        assertEquals(10, offers[1].priceFrom)
+        assertEquals(990, offers[1].priceFromCents)
         val meta = runBlocking { s.dao.meta(OfferDao.OffersCache) }!!
         assertEquals("W/\"v1\"", meta.etag)
         assertEquals(1_000L, meta.fetchedAt)
@@ -266,16 +266,16 @@ class OffersTest {
             first.serve(dto("a", cents = 2500, slots = listOf("Cualquier hora")), dto("b"), etag = "W/\"v7\"")
             runBlocking { first.repo.refresh() }
             first.repo.offers.awaitIds(listOf("a", "b"))
-            first.scope.cancel()
+            first.scope.closeAndJoin()
             first.db.close()
 
             // Una apertura nueva, sin pedir nada al servidor: sigue el catálogo del servidor, no el de la app.
             val db = open()
-            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
-            toClose += { scope.cancel(); db.close() }
+            val scope = testScope()
+            toClose += { scope.closeAndJoin(); db.close() }
             val repo = OffersRepository(db.offers(), NoOffersService, FakeOfertas, { null }, scope)
             assertEquals(listOf("a", "b"), repo.offers.value.map { it.id })
-            assertEquals(25, repo.offers.value[0].priceFrom)
+            assertEquals(2500, repo.offers.value[0].priceFromCents)
             assertEquals(listOf("Cualquier hora"), repo.offers.value[0].times)
             assertEquals("W/\"v7\"", runBlocking { db.offers().meta(OfferDao.OffersCache) }!!.etag)
         } finally {

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material3.Icon
@@ -53,7 +54,7 @@ import com.cmarcillovargas.turismovalencia.ui.screens.favoritos.TabHeader
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
-import com.cmarcillovargas.turismovalencia.util.formatEuro
+import com.cmarcillovargas.turismovalencia.util.formatPrice
 import com.cmarcillovargas.turismovalencia.util.formatShortDate
 import java.time.LocalDate
 
@@ -96,7 +97,8 @@ fun ReservasScreen(
             section(R.string.res_this_week, uiState.thisWeek, onOpenReservation)
             section(R.string.res_later, uiState.later, onOpenReservation)
             section(R.string.res_completed, uiState.completed, onOpenReservation)
-            if (uiState.thisWeek.isEmpty() && uiState.later.isEmpty() && uiState.completed.isEmpty()) {
+            section(R.string.res_cancelled, uiState.cancelled, onOpenReservation)
+            if (uiState.thisWeek.isEmpty() && uiState.later.isEmpty() && uiState.completed.isEmpty() && uiState.cancelled.isEmpty()) {
                 item {
                     Text(
                         stringResource(R.string.res_empty),
@@ -131,7 +133,7 @@ private fun ReservationCard(row: ReservationRow, onOpen: (String) -> Unit) {
             Column(Modifier.weight(1f)) {
                 Text(reservation.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 2)
                 IconLine(Icons.Outlined.CalendarMonth, "${formatShortDate(reservation.date)} · ${reservation.time}")
-                IconLine(Icons.Outlined.Groups, stringResource(R.string.res_people_price, reservation.people, formatEuro(reservation.total)))
+                IconLine(Icons.Outlined.Groups, stringResource(R.string.res_people_price, reservation.people, formatPrice(reservation.totalCents)))
                 StatusChip(
                     text = stringResource(reservation.status.label()),
                     tone = reservation.status.tone(),
@@ -156,24 +158,27 @@ fun ReservationStatus.label(): Int = when (this) {
     ReservationStatus.Confirmed -> R.string.res_status_confirmed
     ReservationStatus.Pending -> R.string.res_status_pending
     ReservationStatus.Completed -> R.string.res_status_completed
+    ReservationStatus.Cancelled -> R.string.res_status_cancelled
 }
 
 fun ReservationStatus.tone(): StatusTone = when (this) {
     ReservationStatus.Confirmed -> StatusTone.Success
     ReservationStatus.Pending -> StatusTone.Warning
     ReservationStatus.Completed -> StatusTone.Neutral
+    ReservationStatus.Cancelled -> StatusTone.Danger
 }
 
 fun ReservationStatus.icon() = when (this) {
     ReservationStatus.Confirmed -> Icons.Outlined.Check
     ReservationStatus.Pending -> Icons.Outlined.HourglassEmpty
     ReservationStatus.Completed -> Icons.Outlined.CheckCircle
+    ReservationStatus.Cancelled -> Icons.Outlined.Close
 }
 
 private val PreviewRows = listOf(
-    ReservationRow(Reservation("1", "albufera-barca", "Paseo en barca por la Albufera", "El Palmar", LocalDate.now().plusDays(3), "18:30", 2, 0, "x", 36, ReservationStatus.Confirmed, "TV-1"), FakeOfertas.first { it.id == "albufera-barca" }),
-    ReservationRow(Reservation("2", "taller-paella", "Taller de paella valenciana", "Mercado", LocalDate.now().plusDays(10), "13:00", 4, 0, "x", 180, ReservationStatus.Pending, "TV-2"), FakeOfertas.first { it.id == "taller-paella" }),
-    ReservationRow(Reservation("3", "ruta-ciutat-vella", "Ruta guiada Ciutat Vella", "Centro", LocalDate.now().minusDays(5), "10:00", 1, 0, "x", 15, ReservationStatus.Completed, "TV-3"), FakeOfertas.first { it.id == "ruta-ciutat-vella" }),
+    ReservationRow(Reservation("1", "albufera-barca", "Paseo en barca por la Albufera", "El Palmar", LocalDate.now().plusDays(3), "18:30", 2, 0, "x", 3600, ReservationStatus.Confirmed, "TV-1"), FakeOfertas.first { it.id == "albufera-barca" }),
+    ReservationRow(Reservation("2", "taller-paella", "Taller de paella valenciana", "Mercado", LocalDate.now().plusDays(10), "13:00", 4, 0, "x", 18000, ReservationStatus.Pending, "TV-2"), FakeOfertas.first { it.id == "taller-paella" }),
+    ReservationRow(Reservation("3", "ruta-ciutat-vella", "Ruta guiada Ciutat Vella", "Centro", LocalDate.now().minusDays(5), "10:00", 1, 0, "x", 1500, ReservationStatus.Completed, "TV-3"), FakeOfertas.first { it.id == "ruta-ciutat-vella" }),
 )
 
 @Preview(name = "F1 · Mis reservas", showBackground = true, widthDp = 390, heightDp = 844)

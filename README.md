@@ -9,8 +9,9 @@ siguiendo el diseño de Figma pantalla a pantalla.
 
 > **Estado:** frontend completo y funcional; ValBot conectado a la web, lo del usuario guardado en local con Room, mapa real de
 > OpenStreetMap con ubicación y rutas, avisos de eventos con notificaciones reales, icono propio y pantalla de arranque del sistema.
-> El backend propio (Supabase) está publicado y probado, pero la app todavía no lo usa: aún no hay reservas en servidor, idiomas
-> ni mapa descargable por zonas (ver [Hoja de ruta](#hoja-de-ruta)).
+> El backend propio (Supabase) está publicado y probado, y la app ya lo usa: lee de él el catálogo de ofertas y hace las reservas
+> reales (reservar exige conexión) y las pone al día cada noche en segundo plano. Aún no hay idiomas ni mapa descargable por zonas (ver
+> [Hoja de ruta](#hoja-de-ruta)).
 
 ## Qué incluye
 
@@ -21,8 +22,8 @@ siguiendo el diseño de Figma pantalla a pantalla.
 | **Contenido de la web** | Las 65 páginas de la web: Lo esencial, Planes, Qué ver, Eventos, Gastronomía, Alojamientos, Sostenible, guías de entradas, tours y experiencias, y los textos legales; más Contacto. Los índices de sección siguen el orden de la web (15 lugares, 6 eventos, 9 platos, 6 alojamientos) |
 | **Mapa** | Mapa de OpenStreetMap con filtros por categoría, tu ubicación (con permiso), y ruta real a pie o en bici con los pasos por las calles (autobús y metro, estimados) |
 | **ValBot** | Asistente con IA (Gemini, a través de la web) con tarjetas de lugares y guías, dictado por voz, respuestas básicas si el servidor no responde y modo sin conexión |
-| **Favoritos y descargas** | Favoritos, fichas y mapa guardados, cuota de espacio, solo Wi-Fi |
-| **Reservas** | Reservar en dos pasos, reserva confirmada con código QR, historial |
+| **Favoritos y descargas** | Favoritos, fichas y mapa guardados, cuota de espacio, solo Wi-Fi y actualización automática cada noche |
+| **Reservas** | Reservar en dos pasos (la confirma el servidor, con aforo por día y horario), reserva confirmada con código QR, historial y reservas canceladas |
 | **Perfil** | Idioma, notificaciones (con el permiso del sistema), ubicación, tamaño del texto, cerrar sesión |
 | **Estados** | Sin conexión, cargando, favoritos vacío, búsqueda sin resultados |
 
@@ -34,11 +35,12 @@ Las 27 pantallas del [diseño de Figma](docs/Figma) están implementadas y compa
 - **Arquitectura MVVM**: una pantalla = `Screen` + `UiState` + `ViewModel`, con `Route` que los conecta
 - **Navigation Compose** (barra inferior solo en las rutas que la llevan en el diseño)
 - Tipografía **Source Sans 3** empaquetada, para que la app funcione sin conexión
-- **osmdroid** (mapa de OpenStreetMap), **Room** (base de datos local con lo del usuario), **OkHttp** (ValBot y rutas), **Retrofit** y **kotlinx.serialization** (la API propia del backend), **ZXing** (código QR real), **AlarmManager** y notificaciones locales (avisos de eventos), **SplashScreen API** y `desugar_jdk_libs` (`java.time` desde Android 7)
+- **osmdroid** (mapa de OpenStreetMap), **Room** (base de datos local con lo del usuario), **OkHttp** (ValBot y rutas), **Retrofit** y **kotlinx.serialization** (la API propia del backend), **WorkManager** (el refresco nocturno en segundo plano), **ZXing** (código QR real), **AlarmManager** y notificaciones locales (avisos de eventos), **SplashScreen API** y `desugar_jdk_libs` (`java.time` desde Android 7)
 - Android: `minSdk 24`, `targetSdk 37`, solo tema claro
 
 Datos: el contenido de la web como JSON en `assets/web/` (con 479 fotos en `assets/img/`) y lo del usuario (favoritos, descargas,
-reservas, ajustes…) en una base de datos Room que sigue ahí al cerrar la app. ValBot es lo único que usa Internet. Ninguna clave viaja en el APK.
+reservas, ajustes…) en una base de datos Room que sigue ahí al cerrar la app. Usa Internet para ValBot, el catálogo de ofertas y las reservas
+(la API propia), las rutas y las teselas del mapa; lo demás funciona sin conexión. Ninguna clave viaja en el APK.
 
 ## Cómo ejecutarla
 
@@ -56,8 +58,14 @@ O abre la carpeta en Android Studio, espera a que sincronice Gradle y pulsa **Ru
 |---|---|
 | `./gradlew assembleDebug` | Compilar el APK de depuración |
 | `./gradlew lint` | Análisis estático |
-| `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room) |
-| `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos), el catálogo de ofertas con su caché y avisos (alarmas y notificaciones reales) |
+| `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room, cliente de la API propia con sus ejemplos del contrato, calendario del refresco nocturno) |
+| `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos), el catálogo de ofertas con su caché, las reservas con un servidor falso (idempotencia, errores), el refresco nocturno con el WorkManager de pruebas y avisos (alarmas y notificaciones reales) |
+| `./gradlew assembleReleaseCheck` | APK de publicación (R8) firmado con la clave de depuración y apuntando al backend local, para `tools/verify/verify_release.py` |
+
+Por defecto la app habla con la API publicada. Para que use el backend local (`cd backend && npm start`, con Docker Desktop), desde el
+emulador o un móvil por USB: `adb reverse tcp:54321 tcp:54321` y
+`./gradlew installDebug -PapiBaseUrl=http://127.0.0.1:54321/functions/v1/api-v1/` (la versión de depuración admite HTTP sin cifrar
+solo hacia el ordenador; la oferta de pruebas con aforo, `prueba-aforo`, solo existe en local).
 
 ### Abrir una pantalla concreta (solo depuración)
 
@@ -126,7 +134,10 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - **Persistencia (emulador):** favoritos, descargas, reservas, ajustes, búsquedas, avisos y bienvenida siguen ahí tras cerrar y abrir la app.
 - **Avisos (emulador):** permiso real de notificaciones (diálogo, «No permitir» y «Abrir ajustes»), alarma de la mascletà en `dumpsys alarm`, disparo adelantando el reloj, tocar la notificación con la app cerrada y reinicio del móvil.
 - **Ofertas del servidor (emulador):** el catálogo llega y se guarda con su versión, el servidor confirma con 304 al reabrir, se ve sin conexión desde la caché y, sin nada guardado, el catálogo incluido en la app (`verify_ui.py ofertas`).
-- **Publicación (emulador):** la versión minificada con R8 arranca, guarda en Room y pide el catálogo con Retrofit (`verify_release.py`).
+- **Reservas (emulador + backend local):** el servidor confirma y la app guarda su localizador, aforo («Ya no quedan plazas»), sin conexión (aviso y botón desactivado), servidor inalcanzable con reintento con la misma clave (una sola reserva en el servidor) y reserva cancelada en el servidor (`verify_ui.py reservas`).
+- **Refresco nocturno (emulador):** el trabajo de WorkManager se programa con los ajustes de Descargas (red sin tarifa con «Solo Wi-Fi», a partir de las 3:00), se cancela al apagar «Actualizar automáticamente» y, con la app cerrada y el reloj pasadas las 3:00, el sistema lo ejecuta y deja programado el de la noche siguiente (`verify_ui.py refresco`).
+- **Privacidad (emulador):** la política de privacidad de la web lleva debajo lo que añade la app (`verify_ui.py privacidad`).
+- **Publicación (emulador + backend local):** la versión minificada con R8 arranca, guarda en Room, pide el catálogo, programa y ejecuta el refresco nocturno (WorkManager) y reserva con Retrofit y lee el error «Ya no quedan plazas» (`verify_release.py`).
 - **Fotos:** tras cambiar de sección, cada tarjeta muestra su propia foto.
 - **Backend (local):** `cd backend && npm test` prueba la API por HTTP (ofertas, reservas, idempotencia, aforo con peticiones simultáneas, límites y base de datos cerrada).
 
@@ -135,7 +146,8 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - [x] **ValBot en línea**: conectado a la función `/api/chat` de la web (Gemini); la clave se queda en el servidor y, si no responde, contesta con reglas
 - [x] **Backend propio en Supabase** (`backend/`): PostgreSQL y una API de ofertas y reservas con escritura ([`docs/api.md`](docs/api.md)); publicado en Supabase y probado en local y en la nube
 - [x] **Ofertas del servidor** en la app: Retrofit + kotlinx.serialization, caché en Room (esquema v3 con migración) y respaldo sin conexión
-- [ ] **Reservas reales** con el backend (reservar exige conexión), refresco en segundo plano y texto de privacidad
+- [x] **Reservas reales** con el backend: reservar exige conexión, UUID del móvil e idempotencia por intento en Room (esquema v4 con migración), errores por código y dinero en céntimos
+- [x] **Refresco nocturno en segundo plano** (WorkManager, respetando «Solo Wi-Fi» y «Actualizar automáticamente») y **privacidad de la app** en la página legal
 - [x] **Persistencia local** con Room: favoritos, descargas, reservas, ajustes, búsquedas, avisos y primer arranque
 - [x] **Mapa real** con osmdroid, ubicación del usuario y rutas a pie y en bici
 - [ ] **Mapa sin conexión por zonas** (hoy se ven sin conexión las teselas ya vistas)

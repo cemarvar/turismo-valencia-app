@@ -21,9 +21,6 @@ internal fun offerKindOf(raw: String): OfferKind? = when (raw.trim().lowercase()
     else -> null
 }
 
-/** El modelo de la app trabaja con euros enteros y la API con céntimos: al euro más cercano (hoy todos los precios son enteros). */
-internal fun eurosOf(cents: Int): Int = (cents + 50) / 100
-
 /** La oferta lista para guardar, o `null` si no es válida (sin id o título, precio negativo o un tipo que la app no conoce). */
 internal fun OfferDto.toEntity(position: Int): OfferEntity? {
     val offerKind = offerKindOf(kind) ?: return null
@@ -65,7 +62,7 @@ internal fun OfferEntity.toModel(bundled: Offer?, assetImage: String?): Offer = 
     duration = duration,
     place = place,
     extra = extra,
-    priceFrom = eurosOf(priceFromCents),
+    priceFromCents = priceFromCents,
     image = bundled?.image,
     description = description,
     times = decodeSlots(slots),

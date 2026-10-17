@@ -94,7 +94,8 @@ data class Offer(
     val place: String,
     /** Idiomas o lo que incluye: «español/inglés», «incluye comida». */
     val extra: String,
-    val priceFrom: Int,
+    /** Precio por adulto en céntimos, como lo manda la API; los niños no pagan. */
+    val priceFromCents: Int,
     @param:DrawableRes val image: Int?,
     val description: String,
     val times: List<String>,

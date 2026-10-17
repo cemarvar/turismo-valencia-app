@@ -25,6 +25,7 @@ data class ReservasUiState(
     val thisWeek: List<ReservationRow> = emptyList(),
     val later: List<ReservationRow> = emptyList(),
     val completed: List<ReservationRow> = emptyList(),
+    val cancelled: List<ReservationRow> = emptyList(),
 )
 
 class ReservasViewModel(private val container: AppContainer) : ViewModel() {
@@ -33,8 +34,9 @@ class ReservasViewModel(private val container: AppContainer) : ViewModel() {
     val uiState: StateFlow<ReservasUiState> = combine(tab, container.reservations.items) { current, all ->
         val today = LocalDate.now()
         val rows = all.map { ReservationRow(it, container.content.offer(it.offerId)) }
-        val upcoming = rows.filter { it.reservation.status != ReservationStatus.Completed }.sortedBy { it.reservation.date }
+        val upcoming = rows.filter { it.reservation.status != ReservationStatus.Completed && it.reservation.status != ReservationStatus.Cancelled }.sortedBy { it.reservation.date }
         val done = rows.filter { it.reservation.status == ReservationStatus.Completed }.sortedByDescending { it.reservation.date }
+        val cancelled = rows.filter { it.reservation.status == ReservationStatus.Cancelled }.sortedByDescending { it.reservation.date }
         ReservasUiState(
             tab = current,
             total = all.size,
@@ -42,6 +44,7 @@ class ReservasViewModel(private val container: AppContainer) : ViewModel() {
             thisWeek = if (current == ReservationsTab.Upcoming) upcoming.filter { it.reservation.date <= today.plusDays(7) } else emptyList(),
             later = if (current == ReservationsTab.Upcoming) upcoming.filter { it.reservation.date > today.plusDays(7) } else emptyList(),
             completed = done,
+            cancelled = cancelled,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReservasUiState())
 

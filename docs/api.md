@@ -120,12 +120,12 @@ Al pasarse, **429** con `Retry-After`. Los contadores no guardan IPs ni correos,
 
 ## Cómo debe usarla la app
 
-1. Generar el UUID del dispositivo la primera vez y guardarlo en Room (ajustes), nunca en el código.
+1. Generar el UUID del dispositivo la primera vez y guardarlo en Room (ajustes), nunca en el código (**hecho**, ver «Reservas»).
 2. Al confirmar una reserva, generar una `Idempotency-Key` y guardarla hasta recibir respuesta; reintentar **con la misma clave** solo
-   ante errores de red o 5xx. Si hay respuesta (200/201 o un 4xx), se acabó ese intento.
-3. Reservar exige conexión (el servidor confirma y asigna el localizador); ver las reservas ya guardadas, no.
+   ante errores de red o 5xx. Si hay respuesta (200/201 o un 4xx), se acabó ese intento (**hecho**).
+3. Reservar exige conexión (el servidor confirma y asigna el localizador); ver las reservas ya guardadas, no (**hecho**).
 4. Cachear el catálogo con el `ETag` y usar el catálogo incluido en la app como respaldo si no hay red (**hecho**, ver abajo).
-5. Enseñar los mensajes según `code`, no según `message`.
+5. Enseñar los mensajes según `code`, no según `message` (**hecho**).
 
 ### Catálogo de ofertas: lo que hace hoy la app
 
@@ -142,7 +142,40 @@ El cliente es Retrofit con kotlinx.serialization (`data/remote/TurismoApi.kt`; l
   mismas 16 ofertas; una prueba comprueba que coincide con los ejemplos del contrato.
 - Los datos son los del servidor; las fotos del diseño (`image`, `thumb`, `ticket`) siguen en la app y se asocian por `id`: una oferta
   nueva del servidor se pinta con el hueco de foto de su sección.
-- El modelo de la app usa euros enteros y la API céntimos: `priceFromCents` pasa a euros al euro más cercano (hoy todos son enteros).
+- El dinero va en céntimos también en el modelo de la app (`Offer.priceFromCents`, `Reservation.totalCents`); `formatPrice(cents)`
+  lo enseña («18 €», «12,50 €»).
+
+### Reservas: lo que hace hoy la app
+
+El cliente es el mismo (`TurismoApi`) y `ReservationsRepository` (`data/repo`) es el único que lo usa:
+
+- **Dispositivo.** El UUID se genera la primera vez que se reserva y se guarda en Room (`settings.deviceId`, de forma atómica: nunca
+  hay dos). Un móvil que nunca ha reservado no tiene identificador: poner las reservas al día no lo crea ni manda nada al servidor. Va en `X-Device-Id`. Si el usuario borra los datos de la app o la
+  desinstala, el móvil pierde el UUID y deja de poder listar sus reservas (siguen existiendo en el servidor, con su localizador).
+- **Reservar exige conexión.** Sin red, la pantalla muestra «Reservar necesita conexión a Internet» y el botón queda desactivado;
+  ver las reservas guardadas no necesita red. Pulsar «Confirmar reserva» manda `POST /reservations` y el botón dice «Reservando…»
+  (un segundo toque mientras tanto no hace nada). El total que se enseña es una vista previa: el que vale es el del servidor.
+- **Clave de idempotencia por intento.** Antes de enviar se guarda el intento (tabla `reservation_attempts`: clave y datos, con un
+  índice único por datos): pedir lo mismo otra vez reutiliza la clave y cambiar cualquier dato crea una nueva. Con una respuesta
+  definitiva (2xx o 4xx salvo 429) el intento se borra; sin red, con un 5xx o un 429 se conserva y el reintento manda **la misma
+  clave**, así que una reserva que el servidor sí guardó (cuya respuesta se perdió) no se duplica. Los intentos de más de 24 h se
+  olvidan al poner las reservas al día.
+- **Lo que se guarda.** La reserva que contesta el servidor (`id` = UUID del servidor, `locator` = su localizador, total en
+  céntimos) y, solo entonces, se abre la confirmación. Las tres reservas de demostración (`seed-*`) siguen en el móvil junto a las
+  del servidor. «Completada» se deduce de la fecha; un estado que la app no conoce se enseña como «Pendiente», nunca como
+  confirmado. El servidor no envía correos: la confirmación dice «Reserva registrada con el correo …» y el formulario avisa de que
+  el correo se guarda en el servidor para gestionar la reserva.
+- **Poner al día.** `GET /reservations` (solo si el móvil ya tiene identificador) al abrir la app, cada vez que vuelve la conexión y
+  cada noche en segundo plano (WorkManager, a partir de las 3:00; solo con Wi-Fi si «Descargar solo con Wi-Fi» está activado y si
+  «Actualizar automáticamente» lo está; el catálogo `GET /offers` va en la misma pasada): lo que el servidor diga manda (una reserva
+  cancelada sale en «Canceladas» con su estado). Un fallo se anota en el registro y la app sigue con lo guardado.
+- **Mensajes por `code`** (nunca el `message` del servidor): `sold_out` «Ya no quedan plazas para ese día y horario», `offer_not_found`
+  «Esta actividad ya no está disponible», `invalid_date`, `invalid_slot`, `invalid_party` y `invalid_email` (cada uno con su texto),
+  `rate_limited` (con `Retry-After`: «Vuelve a probar en N min»), cualquier 5xx «El servicio de reservas no está disponible ahora»,
+  sin red o respuesta ilegible «No hemos podido conectar con el servidor» y cualquier otro rechazo (`invalid_request`,
+  `idempotency_key_reused`, `payload_too_large`…) «No se ha podido completar la reserva». El aviso desaparece al cambiar un dato.
+- **Todavía no.** La app no usa `GET /reservations/{localizador}?email=` (recuperar una reserva en otro móvil) ni cancela reservas
+  (la API tampoco: `cancelled` solo lo pone quien administra la base de datos).
 
 ## Datos personales
 

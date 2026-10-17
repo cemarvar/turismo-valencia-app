@@ -2,7 +2,8 @@ package com.cmarcillovargas.turismovalencia.data.model
 
 import java.time.LocalDate
 
-enum class ReservationStatus { Confirmed, Pending, Completed }
+/** `Confirmed` y `Cancelled` los pone el servidor; `Completed` la deduce la app cuando la fecha ya pasó; `Pending` solo existe en los datos de demostración. */
+enum class ReservationStatus { Confirmed, Pending, Completed, Cancelled }
 
 data class Reservation(
     val id: String,
@@ -14,7 +15,8 @@ data class Reservation(
     val adults: Int,
     val children: Int,
     val email: String,
-    val total: Int,
+    /** Total en céntimos (el que calculó el servidor). */
+    val totalCents: Int,
     val status: ReservationStatus,
     val locator: String,
 ) {

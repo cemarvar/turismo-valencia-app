@@ -56,7 +56,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.WebPageCard
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
-import com.cmarcillovargas.turismovalencia.util.formatEuro
+import com.cmarcillovargas.turismovalencia.util.formatPrice
 
 private val BannerHeight = 132.dp
 private val OfferShape = RoundedCornerShape(20.dp)
@@ -180,7 +180,7 @@ private fun OfferCard(offer: Offer, onReserve: () -> Unit, modifier: Modifier = 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.tickets_from), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(Spacing.xxs))
-                    Text(formatEuro(offer.priceFrom), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(formatPrice(offer.priceFromCents), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
         }

@@ -1,5 +1,7 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas)
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas refresco privacidad)
+El grupo `reservas` necesita el backend local (cd backend && npm start, con Docker Desktop) y la app instalada con su dirección;
+si no lo encuentra, se salta con un aviso.
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
 guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado."""
 import io
@@ -53,6 +55,8 @@ def nodes():
             "b": tuple(map(int, m.groups())),
             "chk": n.get("checkable") == "true",
             "on": n.get("checked") == "true",
+            "en": n.get("enabled") == "true",
+            "clk": n.get("clickable") == "true",
         })
     return out
 
@@ -125,6 +129,18 @@ def find(text, exact=True, ns=None):
             if label and ((label == text) if exact else (text.lower() in label.lower())):
                 return n
     return None
+
+
+def control(text, ns=None):
+    """El control pulsable (botón, chip) que contiene el texto. Su estado (activado, marcado) vive en él y no en el texto."""
+    ns = ns if ns is not None else nodes()
+    label = find(text, ns=ns)
+    if not label:
+        return None
+    cx, cy = (label["b"][0] + label["b"][2]) // 2, (label["b"][1] + label["b"][3]) // 2
+    # Un chip ya elegido deja de ser pulsable para Android, pero sigue siendo «marcable».
+    around = [n for n in ns if (n["clk"] or n["chk"]) and n["b"][0] <= cx <= n["b"][2] and n["b"][1] <= cy <= n["b"][3]]
+    return min(around, key=lambda n: (n["b"][2] - n["b"][0]) * (n["b"][3] - n["b"][1])) if around else None
 
 
 def scroll_to(text, exact=True, tries=14):
@@ -399,18 +415,13 @@ def g_persist():
     check("tras reiniciar «Actualizar automáticamente» sigue activado", (switch_near("Actualizar automáticamente") or {}).get("on") is True)
     check("la descarga eliminada no vuelve", len([t for t in texts() if t == "DESCARGADO"]) <= left, "quedan %d" % len([t for t in texts() if t == "DESCARGADO"]))
 
-    # Reservas
+    # Reservas (las de demostración: crear una de verdad necesita el servidor y lo prueba el grupo `reservas`)
     start("reservas")
     check("demo: 3 reservas · 1 pendiente", find("3 reservas · 1 pendiente") is not None)
-    start("reservar/albufera-barca", reset=False)
-    tap_text("Confirmar reserva")
-    time.sleep(0.8)
-    locator = next((t for t in texts() if re.fullmatch(r"TV-\d{4}-\d{4}", t)), "")
-    check("la reserva nueva sale con su localizador (TV-…-0416)", locator.endswith("0416"), locator)
     start("reservas", reset=False)
-    check("tras reiniciar hay 4 reservas", find("4 reservas · 1 pendiente") is not None)
+    check("tras reiniciar siguen las 3 reservas · 1 pendiente", find("3 reservas · 1 pendiente") is not None)
     start("perfil", reset=False)
-    check("Perfil cuenta 4 reservas", find("4 reservas") is not None)
+    check("Perfil cuenta 3 reservas", find("3 reservas") is not None)
 
     # Ajustes
     tap_text("Tamaño del texto")
@@ -908,16 +919,31 @@ def g_avisos():
     check("el emulador ha vuelto a arrancar", booted)
     adb("shell", "wm", "size", "780x1688")
     adb("shell", "wm", "density", "320")
+    adb("reverse", "tcp:54321", "tcp:54321")  # el reinicio borra el puente al backend local (si la app apunta a él)
     alarms = wait_alarms(1, 90)
     check("tras reiniciar, sin abrir la app, la alarma se ha vuelto a programar (BootReceiver)", len(alarms) == 1 and is_mascleta_window(alarms[0]), str(alarms))
+    # Justo después de arrancar el sistema aún está ocupado (actualiza e indexa): pantalla encendida y sin bloqueo, el lanzador en
+    # primer plano y unos segundos de calma antes de volver a pedir permisos.
+    adb("shell", "input", "keyevent", "KEYCODE_WAKEUP")
+    adb("shell", "wm", "dismiss-keyguard")
+    wait_focus("nexuslauncher", 60)
+    time.sleep(20)
 
     # --- Ubicación: si el sistema ya no pregunta, la app lleva a Ajustes
-    set_location_permission(False)
-    start("perfil")
-    tap_text("Ubicación")
-    time.sleep(0.8)
-    tap_last("Mientras se usa la app")
-    check("Perfil → Ubicación abre el diálogo del sistema", wait_system_dialog("access this device"))
+    # El diálogo del sistema es lo único que depende de un servicio ajeno a la app: si no sale a la primera se repite (hasta 3 veces)
+    # y cada intento fallido cuenta qué había en pantalla.
+    opened = False
+    for attempt in range(1, 4):
+        set_location_permission(False)
+        start("perfil")
+        tap_text("Ubicación")
+        time.sleep(0.8)
+        tap_last("Mientras se usa la app")
+        opened = wait_system_dialog("access this device", 8)
+        if opened:
+            break
+        print("   intento %d sin diálogo: foco %s · textos %s" % (attempt, focused_window().strip(), texts()[:8]), flush=True)
+    check("Perfil → Ubicación abre el diálogo del sistema", opened)
     tap_system_button("Don't allow")
     time.sleep(1.2)
     check("tras el primer no no hay aviso de Ajustes", find("Ubicación desactivada") is None)
@@ -942,23 +968,24 @@ def g_avisos():
 
 
 def offers_log(want, seconds=12.0):
-    """Última línea del registro de la app sobre el catálogo de ofertas («actualizado», «sin cambios (304)» o «No se pudo…»).
-    Espera a que salga una que contenga `want` (al abrir con `resetData` hay dos peticiones seguidas: la del arranque y la que
-    sigue al borrado) y, si no sale, devuelve la última que haya."""
+    """Línea del registro de la app sobre el catálogo de ofertas («actualizado», «sin cambios (304)» o «No se pudo…») que contiene
+    `want`; espera a que salga (al abrir con `resetData` hay dos peticiones seguidas, la del arranque y la que sigue al borrado, y
+    según lo rápido que conteste el servidor la 304 puede salir antes o después de la descarga) y, si no sale, devuelve la última."""
     end = time.time() + seconds
     last = ""
     while time.time() < end:
-        lines = [l for l in adb("shell", "logcat", "-d", "-s", "TurismoDb:V").splitlines() if "ofertas" in l]
+        lines = [l.split("TurismoDb:")[-1].strip() for l in adb("shell", "logcat", "-d", "-s", "TurismoDb:V").splitlines() if "ofertas" in l]
         if lines:
-            last = lines[-1].split("TurismoDb:")[-1].strip()
-            if want in last:
-                return last
+            last = lines[-1]
+            hit = next((l for l in lines if want in l), None)
+            if hit:
+                return hit
         time.sleep(0.8)
     return last
 
 
-def app_offers_db():
-    """(ofertas, versión) de la caché de ofertas, leídas de la base de datos de la app (build de depuración, con run-as)."""
+def app_db(*queries):
+    """Resultado de cada consulta sobre la base de datos de la app (build de depuración, con run-as), como lista de filas."""
     import sqlite3
     import tempfile
 
@@ -970,15 +997,22 @@ def app_offers_db():
                 f.write(data)
     con = sqlite3.connect(os.path.join(folder, "turismo.db"))
     try:
-        offers = con.execute("SELECT id, priceFromCents FROM offers ORDER BY position").fetchall()
-        meta = con.execute("SELECT etag, fetchedAt FROM cache_meta WHERE name = 'offers'").fetchone()
+        return [con.execute(query).fetchall() for query in queries]
     finally:
         con.close()
-    return offers, meta
+
+
+def app_offers_db():
+    """(ofertas, versión) de la caché de ofertas guardada en la app; la versión es None si no hay nada guardado."""
+    offers, meta = app_db("SELECT id, priceFromCents FROM offers ORDER BY position", "SELECT etag, fetchedAt FROM cache_meta WHERE name = 'offers'")
+    return offers, (meta[0] if meta else None)
 
 
 def g_ofertas():
     print("\n## Ofertas del servidor: caché en Room y respaldo sin conexión")
+    # Si la app de depuración apunta al backend local, necesita el puente de `adb reverse` (un reinicio del emulador, como el de `avisos`,
+    # lo borra); con la nube no hace ninguna falta y no estorba.
+    adb("reverse", "tcp:54321", "tcp:54321")
     set_network(True)
     # Primer arranque con conexión: pide el catálogo al servidor y lo guarda con su versión.
     adb("shell", "logcat", "-c")
@@ -1023,7 +1057,305 @@ def g_ofertas():
     start(None)  # deja la app como un primer arranque
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas}
+LOCAL_API = "http://127.0.0.1:54321/functions/v1/api-v1"
+LOCAL_APP_HINT = "instala la app con ./gradlew installDebug -PapiBaseUrl=" + LOCAL_API + "/ y deja `adb reverse tcp:54321 tcp:54321`"
+
+
+def local_sql(sql):
+    """Ejecuta una consulta en la base de datos del backend local (contenedor de Docker `supabase_db_<project_id>`) y devuelve
+    las líneas que imprime, con las columnas separadas por «|». None si no se pudo (Docker parado o backend sin arrancar)."""
+    config = open(os.path.join(REPO, "backend", "supabase", "config.toml"), encoding="utf-8").read()
+    container = "supabase_db_" + re.search(r'^project_id\s*=\s*"([^"]+)"', config, re.M).group(1)
+    try:
+        r = subprocess.run(["docker", "exec", container, "psql", "-U", "postgres", "-t", "-A", "-F", "|", "-c", sql], capture_output=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if r.returncode != 0:
+        return None
+    return [line for line in r.stdout.decode("utf-8", "replace").splitlines() if line.strip()]
+
+
+def local_api_up():
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen(LOCAL_API + "/offers", timeout=5) as response:
+            return response.status == 200
+    except OSError:
+        return False
+
+
+def clean_local_backend():
+    """Deja el backend local como lo necesitan las pruebas: sin contadores de límites de peticiones y sin las reservas que dejaron
+    ellas mismas (las del correo de demostración de la app, las precargadas y todas las de la oferta de pruebas), que irían
+    llenando el aforo de cada horario (la barca de la Albufera tiene 12 plazas por horario y día)."""
+    local_sql("delete from app.rate_limits")
+    local_sql("delete from app.reservations where email in ('laura.garcia@example.com', 'precarga@example.com') or offer_id = 'prueba-aforo'")
+
+
+def app_reservations_db():
+    """(reservas, claves de intentos pendientes, deviceId) guardados en la base de datos de la app. Una reserva es
+    (localizador, oferta, hora, adultos, niños, correo, céntimos, estado), la más reciente primero."""
+    rows, attempts, device = app_db(
+        "SELECT locator, offerId, time, adults, children, email, totalCents, status FROM reservations ORDER BY createdAt DESC, locator DESC",
+        "SELECT idempotencyKey FROM reservation_attempts",
+        "SELECT deviceId FROM settings",
+    )
+    return rows, [a[0] for a in attempts], (device[0][0] if device else None)
+
+
+def locator_on_screen(seconds=8.0):
+    """Localizador (TV-año-número) de la pantalla de confirmación; espera a que el servidor conteste y la app navegue."""
+    end = time.time() + seconds
+    while time.time() < end:
+        found = next((t for t in texts() if re.fullmatch(r"TV-\d{4}-\d{4,}", t)), "")
+        if found:
+            return found
+        time.sleep(0.7)
+    return ""
+
+
+def g_reservas():
+    print("\n## Reservas reales: confirma el servidor, aforo, sin conexión y reintento con la misma clave")
+    if not local_api_up() or local_sql("select 1") is None:
+        print("SKIP - hace falta el backend local en marcha (cd backend && npm start, con Docker Desktop) y la app: " + LOCAL_APP_HINT)
+        return
+    set_network(True)
+    adb("reverse", "tcp:54321", "tcp:54321")
+    clean_local_backend()
+    start("reservar/albufera-barca")
+    # La app habla con el backend local si su catálogo trae la oferta de pruebas, que solo existe allí.
+    end = time.time() + 12
+    while time.time() < end and "prueba-aforo" not in [o[0] for o in app_offers_db()[0]]:
+        time.sleep(1.0)
+    if "prueba-aforo" not in [o[0] for o in app_offers_db()[0]]:
+        print("SKIP - la app no habla con el backend local (su catálogo no trae «prueba-aforo»): " + LOCAL_APP_HINT)
+        return
+    start("reservar/albufera-barca", reset=False)
+
+    # Reservar con conexión: confirma el servidor y la app guarda lo que él contesta.
+    ns = nodes()
+    confirm = control("Confirmar reserva", ns)
+    check("con conexión no sale el aviso de «necesita conexión» y se puede confirmar", find("Reservar necesita conexión a Internet", ns=ns) is None and bool(confirm and confirm["en"]))
+    check("el correo viene rellenado con el de la última reserva", find("laura.garcia@example.com", ns=ns) is not None)
+    tap_text("Confirmar reserva")
+    locator = locator_on_screen()
+    ts = texts()
+    check("el servidor confirma y la pantalla enseña su localizador", bool(locator), locator)
+    check("con el total (36 €) y el correo", any("36 €" in t for t in ts) and any("laura.garcia@example.com" in t for t in ts))
+    server = (local_sql("select total_cents, status, email, adults, children, slot from app.reservations where locator = '%s'" % locator) or [""])[0]
+    check("el servidor la tiene guardada: 36 €, confirmada, 2 adultos, 18:30", server == "3600|confirmed|laura.garcia@example.com|2|0|18:30", server)
+    rows, attempts, device = app_reservations_db()
+    check("la app la guarda con ese localizador y sin intento pendiente", bool(rows) and rows[0][0] == locator and rows[0][6] == 3600 and attempts == [], str(rows[:1]))
+    check("el móvil se identifica con un UUID propio", bool(re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", device or "")), str(device))
+    check("y el servidor la asocia a ese móvil", local_sql("select count(*) from app.reservations where device_id = '%s'" % device) == ["1"])
+    start("reservas", reset=False)
+    check("Mis reservas: las 3 de demostración y la nueva (4 · 1 pendiente), también tras reiniciar", find("4 reservas · 1 pendiente") is not None)
+    start("perfil", reset=False)
+    check("Perfil cuenta 4 reservas", find("4 reservas") is not None)
+
+    # Aforo: la oferta de pruebas tiene 3 plazas a las 10:00.
+    start("reservar/prueba-aforo", reset=False)
+    tap_text("10:00")
+    check("se elige el horario de las 10:00", bool((control("10:00") or {}).get("on")))
+    tap_text("Confirmar reserva")
+    check("aforo 3: la primera reserva de 2 personas entra", bool(locator_on_screen()))
+    start("reservar/prueba-aforo", reset=False)
+    tap_text("10:00")
+    tap_text("Confirmar reserva")
+    check("la segunda de 2 personas (solo queda 1 plaza) sale «Ya no quedan plazas»", wait_for("Ya no quedan plazas para ese día y horario. Prueba con otro.", 8))
+    rows, attempts, _ = app_reservations_db()
+    confirm = control("Confirmar reserva")
+    check("se queda en Reservar con el botón activo; no se guarda nada y no queda intento (el fallo es definitivo)", bool(confirm and confirm["en"]) and len(rows) == 5 and attempts == [], "%d reservas, %d intentos" % (len(rows), len(attempts)))
+    tap_text("12:00")
+    check("al cambiar de horario desaparece el aviso", find("Ya no quedan plazas para ese día y horario. Prueba con otro.") is None)
+    tap_text("Confirmar reserva")
+    check("a las 12:00 (sin aforo) sí entra", bool(locator_on_screen()))
+
+    # Sin conexión: se pueden ver las reservas guardadas pero no reservar.
+    set_network(False)
+    start("reservar/albufera-barca", reset=False)
+    ns = nodes()
+    confirm = control("Confirmar reserva", ns)
+    check("sin conexión sale «Reservar necesita conexión a Internet»", find("Reservar necesita conexión a Internet", ns=ns) is not None)
+    check("y «Confirmar reserva» está desactivado", bool(confirm) and confirm["en"] is False)
+    start("reservas", reset=False)
+    check("sin conexión se ven las 6 reservas guardadas", find("6 reservas · 1 pendiente") is not None)
+    start("reservar/albufera-barca", reset=False)
+    set_network(True)
+    time.sleep(2.0)
+    ns = nodes()
+    confirm = control("Confirmar reserva", ns)
+    check("al volver la conexión desaparece el aviso y se puede confirmar sin reabrir", find("Reservar necesita conexión a Internet", ns=ns) is None and bool(confirm and confirm["en"]))
+
+    # Servidor inalcanzable: el intento guarda su clave y el reintento la reutiliza (una sola reserva en el servidor). Se reabre la app
+    # con el puente cortado porque una conexión ya abierta (keep-alive) seguiría viva a través de `adb reverse`.
+    adb("reverse", "--remove", "tcp:54321")
+    start("reservar/albufera-barca", reset=False)
+    tap_text("Confirmar reserva")
+    check("sin llegar al servidor sale «No hemos podido conectar con el servidor»", wait_for("No hemos podido conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.", 10))
+    rows, attempts, _ = app_reservations_db()
+    check("la app guarda la clave del intento y no la reserva", len(attempts) == 1 and len(rows) == 6, "%d reservas, %d intentos" % (len(rows), len(attempts)))
+    adb("reverse", "tcp:54321", "tcp:54321")
+    tap_text("Confirmar reserva")
+    retried = locator_on_screen()
+    check("al reintentar con red, la reserva se confirma", bool(retried), retried)
+    key = attempts[0] if attempts else ""
+    check("con la misma clave: el servidor tiene una sola reserva con ella", local_sql("select count(*) from app.reservations where idempotency_key = '%s'" % key) == ["1"])
+    rows, attempts, _ = app_reservations_db()
+    check("hecha la reserva, el intento se borra", attempts == [] and len(rows) == 7, "%d reservas, %d intentos" % (len(rows), len(attempts)))
+
+    # El servidor manda: si cancela una reserva, la app la enseña como cancelada al abrir.
+    local_sql("update app.reservations set status = 'cancelled' where locator = '%s'" % retried)
+    start("reservas", reset=False)
+    time.sleep(2.5)
+    check("una reserva cancelada en el servidor sale en «Canceladas»", scroll_to("CANCELADAS") is not None)
+    check("con su estado «Cancelada»", scroll_to("Cancelada") is not None)
+    check("y la app la guarda como cancelada", [r[7] for r in app_reservations_db()[0] if r[0] == retried] == ["Cancelled"])
+    start(None)  # deja la app como un primer arranque
+
+
+def app_job():
+    """El trabajo nocturno de WorkManager según `dumpsys jobscheduler`, o None si no hay: su id, si exige una red sin tarifa
+    (`unmetered`) o cualquier conexión (`connected`), si pide batería no baja, los segundos que le faltan para empezar (`delay`) y
+    cuántos trabajos tiene la app (`count`; el id cambia cada vez que WorkManager lo reprograma)."""
+    lines = adb("shell", "dumpsys", "jobscheduler").splitlines()
+    pattern = r"\s*JOB \S+:u0a\d+/(\d+): .*" + re.escape(PKG)
+    found = [(i, re.match(pattern, line)) for i, line in enumerate(lines) if re.match(pattern, line)]
+    if not found:
+        return None
+    i, m = found[0]
+    block = []
+    for nxt in lines[i + 1:]:
+        if re.match(r"^\s{0,3}JOB |^\S|^  \S", nxt):  # el siguiente trabajo o una sección nueva
+            break
+        block.append(nxt)
+    network = next((b for b in block if b.strip().startswith("Network type:")), "")
+    latency = re.search(r"Minimum latency: \+(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", "\n".join(block))
+    seconds = None
+    if latency:
+        d, h, mi, s = (int(g or 0) for g in latency.groups())
+        seconds = d * 86400 + h * 3600 + mi * 60 + s
+    return {
+        "id": int(m.group(1)),
+        "count": len(found),
+        "unmetered": "NOT_METERED" in network,
+        "connected": "INTERNET" in network,
+        "battery_not_low": "batteryNotLow=true" in "\n".join(block),
+        "delay": seconds,
+    }
+
+
+def wait_job(present=True, seconds=12.0, until=None):
+    """Espera a que el trabajo nocturno exista (o no) y, si se da `until`, a que cumpla esa condición; devuelve lo último que vio."""
+    end = time.time() + seconds
+    job = app_job()
+    while time.time() < end and ((job is not None) != present or (present and until is not None and not until(job))):
+        time.sleep(0.8)
+        job = app_job()
+    return job
+
+
+def refresh_log_lines():
+    """Líneas del registro de la app que dejó el trabajo nocturno al ejecutarse («Refresco en segundo plano (intento N): …»)."""
+    return [l.split("TurismoDb:")[-1].strip() for l in adb("shell", "logcat", "-d", "-s", "TurismoDb:V").splitlines() if "Refresco en segundo plano" in l]
+
+
+def run_night_job(job, seconds=30.0):
+    """Ejecuta ya el trabajo nocturno: adelanta el reloj hasta pasadas las 3:00 (WorkManager no deja ejecutar un trabajo periódico antes
+    de su hora, ni forzándolo), pide a JobScheduler que lo lance y devuelve la línea que deja en el registro (o ''). Restaura el reloj."""
+    before = len(refresh_log_lines())
+    line = ""
+    try:
+        set_clock(datetime.now(timezone.utc) + timedelta(seconds=(job["delay"] if job and job["delay"] else 86400) + 120))
+        adb("shell", "cmd", "jobscheduler", "run", "-f", "-n", "androidx.work.systemjobscheduler", PKG, str(job["id"]) if job else "0")
+        end = time.time() + seconds
+        while time.time() < end and not line:
+            lines = refresh_log_lines()
+            line = lines[-1] if len(lines) > before else ""
+            time.sleep(1.0)
+    finally:
+        restore_clock()
+    return line
+
+
+def seconds_until_night(hour=3):
+    """Segundos que faltan, según el reloj del emulador (su zona horaria), para las 3:00 de la próxima noche."""
+    now = [int(x) for x in adb("shell", "date", "+%H:%M:%S").strip().split(":")]
+    seconds = now[0] * 3600 + now[1] * 60 + now[2]
+    target = hour * 3600
+    return target - seconds if target > seconds else target + 86400 - seconds
+
+
+def g_refresco():
+    print("\n## Refresco nocturno: WorkManager, «Solo Wi-Fi» y «Actualizar automáticamente»")
+    set_network(True)
+    # Desde cero, con la base de datos de WorkManager vacía: un trabajo que ya ha corrido conserva su calendario (cada 24 h desde la
+    # última vez) y no empezaría a las 3:00.
+    adb("shell", "pm", "clear", PKG)
+    start("descargas")  # con los ajustes de demostración: «Solo Wi-Fi» y «Actualizar automáticamente» activados
+    job = wait_job(True)
+    check("con los ajustes de siempre WorkManager programa el trabajo nocturno", job is not None)
+    check("…que pide una red sin tarifa (Solo Wi-Fi) y batería no baja", bool(job and job["unmetered"] and job["battery_not_low"]))
+    expected = seconds_until_night()
+    check("…y empieza a las 3:00 de la hora del móvil (faltan %d s)" % expected, bool(job and job["delay"] is not None and abs(job["delay"] - expected) < 180), str(job and job["delay"]))
+    first_delay = job["delay"] if job else None
+
+    # «Descargar solo con Wi-Fi» apagado: basta cualquier conexión; encendido otra vez, vuelve a exigir Wi-Fi
+    tap(switch_near("Descargar solo con Wi-Fi"))
+    job = wait_job(True, until=lambda j: not j["unmetered"])
+    check("sin «Solo Wi-Fi» el trabajo acepta cualquier conexión", bool(job and job["connected"] and not job["unmetered"]))
+    check("…sigue habiendo un solo trabajo y su calendario no se reinicia (a las 3:00, no 24 h después)", bool(job and job["count"] == 1 and job["delay"] is not None and abs(job["delay"] - (first_delay or 0)) < 180), str(job and (job["count"], job["delay"], first_delay)))
+    tap(switch_near("Descargar solo con Wi-Fi"))
+    job = wait_job(True, until=lambda j: j["unmetered"])
+    check("al volver a encender «Solo Wi-Fi» vuelve a pedir una red sin tarifa", bool(job and job["unmetered"] and job["count"] == 1))
+
+    # «Actualizar automáticamente» apagado: sin trabajo, también tras cerrar y abrir la app; encendido, vuelve
+    tap(switch_near("Actualizar automáticamente"))
+    check("al apagar «Actualizar automáticamente» desaparece el trabajo", wait_job(False) is None)
+    start("descargas", reset=False)
+    time.sleep(2.0)
+    check("tras cerrar y abrir la app sigue sin trabajo (el ajuste se guardó)", app_job() is None)
+    tap(switch_near("Actualizar automáticamente"))
+    job = wait_job(True)
+    check("al encenderlo de nuevo se programa otra vez", job is not None)
+    start("descargas", reset=False)
+    check("tras cerrar y abrir la app el trabajo sigue programado", wait_job(True) is not None)
+
+    # El trabajo se ejecuta con la app cerrada. Se mata el proceso con `kill -9` (no con «forzar detención», que borra los trabajos de
+    # la app), se adelanta el reloj hasta pasadas las 3:00 (WorkManager no deja ejecutar un trabajo periódico antes de su hora, ni
+    # forzándolo) y se pide a JobScheduler que lo lance: el sistema arranca la app, WorkManager se crea con la configuración de
+    # `TurismoApp` y el trabajo pone todo al día.
+    job = wait_job(True)
+    adb("shell", "input", "keyevent", "KEYCODE_HOME")
+    pid = adb("shell", "pidof", PKG).strip()
+    if pid:
+        adb("shell", "run-as", PKG, "kill", "-9", pid.split()[0])
+    time.sleep(1.5)
+    check("con la app cerrada no hay proceso de la app y el trabajo sigue programado", adb("shell", "pidof", PKG).strip() == "" and app_job() is not None)
+    line = run_night_job(app_job())
+    check("al ejecutarse arranca la app en segundo plano y pone todo al día", "al día" in line, line)
+    again = wait_job(True)
+    check("y deja programado el de la noche siguiente (24 h después)", bool(again and again["delay"] is not None and 23 * 3600 < again["delay"] <= 24 * 3600 + 60), str(again and again["delay"]))
+    start(None)  # deja la app como un primer arranque
+
+
+def g_privacidad():
+    print("\n## Política de privacidad: la de la web y lo que añade la app")
+    start("pagina/PoliticaPrivacidad")
+    check("la política de la web sigue arriba", find("Política de Privacidad") is not None and find("1. Responsable del tratamiento") is not None)
+    sections = ("La app en tu móvil", "Reservas", "Identificador del móvil", "Asistente ValBot", "Mapa, rutas y ubicación", "Actualización automática", "Lo que la app no incluye", "Tus derechos")
+    for title in sections:
+        check("debajo, lo que añade la app: «%s»" % title, scroll_to(title, tries=40) is not None)
+        if title == "Reservas":
+            swipe_up(1, 500)  # y un poco más, para ver los puntos de debajo del título
+            check("…con lo que se envía («Un identificador aleatorio de tu móvil…»)", find("Un identificador aleatorio de tu móvil", exact=False) is not None)
+    start("pagina/AvisoLegal")
+    swipe_up(14, 900)
+    check("el aviso legal no lleva ese añadido", find("La app en tu móvil") is None and find("Lo que la app no incluye") is None)
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "refresco": g_refresco, "privacidad": g_privacidad}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     chosen = sys.argv[1:] or list(GROUPS)

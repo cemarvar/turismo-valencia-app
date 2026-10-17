@@ -18,7 +18,7 @@ import com.cmarcillovargas.turismovalencia.data.model.SortMode
 import com.cmarcillovargas.turismovalencia.data.model.WebFamily
 import com.cmarcillovargas.turismovalencia.util.ValenciaCenter
 import com.cmarcillovargas.turismovalencia.util.distanceMeters as metersBetween
-import com.cmarcillovargas.turismovalencia.util.formatEuro
+import com.cmarcillovargas.turismovalencia.util.formatPrice
 import com.cmarcillovargas.turismovalencia.util.normalizeText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -146,7 +146,7 @@ class ContentRepository(
             suggestions += SearchSuggestion(item.title, item.area.takeIf { item.distanceMeters <= 0 } ?: "${item.eyebrow} · ${item.area}", kind, item.id)
         }
         offers.take(1).forEach { offer ->
-            suggestions += SearchSuggestion(offer.title, "Experiencia · desde ${formatEuro(offer.priceFrom)}", SearchSuggestion.Kind.Offer, offer.id)
+            suggestions += SearchSuggestion(offer.title, "Experiencia · desde ${formatPrice(offer.priceFromCents)}", SearchSuggestion.Kind.Offer, offer.id)
         }
         web.search(q).take(2).forEach { page ->
             suggestions += SearchSuggestion(page.title, page.family.label(), SearchSuggestion.Kind.Guide, page.id)

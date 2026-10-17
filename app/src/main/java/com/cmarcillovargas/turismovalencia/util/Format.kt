@@ -20,7 +20,12 @@ fun walkMinutes(meters: Int): Int = meters / 75
 
 fun formatRating(rating: Double): String = String.format(Spanish, "%.1f", rating)
 
-fun formatEuro(amount: Int): String = "$amount €"
+/** Un importe en céntimos (como lo manda la API) a la española: «18 €», «18,50 €». */
+fun formatPrice(cents: Int): String {
+    val euros = cents / 100
+    val rest = cents % 100
+    return if (rest == 0) "$euros €" else "$euros,${rest.toString().padStart(2, '0')} €"
+}
 
 /** «Sáb 12 oct». */
 fun formatShortDate(date: LocalDate): String =

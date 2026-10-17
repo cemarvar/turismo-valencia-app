@@ -242,6 +242,8 @@
     <string name="res_status_confirmed">Confirmada</string>
     <string name="res_status_pending">Pendiente</string>
     <string name="res_status_completed">Completada</string>
+    <string name="res_status_cancelled">Cancelada</string>
+    <string name="res_cancelled">Canceladas</string>
     <string name="book_title">Reservar</string>
     <string name="book_step">Paso 1 de 2 · Fecha y personas</string>
     <string name="book_per_person">%1$s · %2$s por persona</string>
@@ -253,6 +255,20 @@
     <string name="book_email_label">Correo para la confirmación</string>
     <string name="book_total_note">Total · pago en el embarcadero</string>
     <string name="book_confirm">Confirmar reserva</string>
+    <string name="book_submitting">Reservando…</string>
+    <string name="book_needs_connection">Reservar necesita conexión a Internet</string>
+    <string name="book_email_privacy">Tu correo se guarda en nuestro servidor solo para gestionar esta reserva.</string>
+    <string name="book_error_unreachable">No hemos podido conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="book_error_server">El servicio de reservas no está disponible ahora. Inténtalo en unos minutos.</string>
+    <string name="book_error_rate_limited">Demasiados intentos seguidos. Espera un poco y vuelve a probar.</string>
+    <string name="book_error_rate_limited_wait">Demasiados intentos seguidos. Vuelve a probar en %1$d min.</string>
+    <string name="book_error_sold_out">Ya no quedan plazas para ese día y horario. Prueba con otro.</string>
+    <string name="book_error_offer_gone">Esta actividad ya no está disponible.</string>
+    <string name="book_error_invalid_date">Esa fecha ya no se puede reservar. Elige otra.</string>
+    <string name="book_error_invalid_slot">Ese horario ya no existe. Elige otro.</string>
+    <string name="book_error_invalid_party">El número de personas no es válido (máximo 20 entre adultos y niños).</string>
+    <string name="book_error_invalid_email">El servidor no acepta ese correo. Revísalo.</string>
+    <string name="book_error_other">No se ha podido completar la reserva. Revisa los datos e inténtalo de nuevo.</string>
     <string name="book_prev_week">Semana anterior</string>
     <string name="book_next_week">Semana siguiente</string>
     <string name="book_less">Quitar uno</string>
@@ -260,7 +276,7 @@
     <string name="booking_title">Reserva</string>
     <string name="booking_confirmed">¡Reserva confirmada!</string>
     <string name="booking_pending">Reserva pendiente</string>
-    <string name="booking_sent_to">Te hemos enviado la confirmación a %1$s</string>
+    <string name="booking_sent_to">Reserva registrada con el correo %1$s</string>
     <string name="booking_date">Fecha</string>
     <string name="booking_time">Hora</string>
     <string name="booking_people">Personas</string>
@@ -353,4 +369,28 @@
     <string name="profile_contact_text">Oficina de turismo, redes y mapa</string>
 
     <string name="detail_guide">Guía completa</string>
+
+    <!-- Política de privacidad: lo que añade la app a la de la web (se pinta debajo del texto importado de la web) -->
+    <string name="privacy_app_title">La app en tu móvil</string>
+    <string name="privacy_app_intro">Lo anterior es la política del sitio web. Aquí se añade lo que hace la app de Android: qué datos salen de tu móvil, adónde van y para qué. Todo lo demás (favoritos, descargas, ajustes, búsquedas recientes y reservas guardadas) está solo en una base de datos de tu móvil.</string>
+    <string name="privacy_app_bookings_title">Reservas</string>
+    <string name="privacy_app_bookings_body">Al confirmar una reserva, la app envía a nuestro servidor, alojado en la Unión Europea:</string>
+    <string-array name="privacy_app_bookings_bullets">
+        <item>Tu correo.</item>
+        <item>La actividad, el día, el horario y el número de personas.</item>
+        <item>Un identificador aleatorio de tu móvil (ver más abajo), para mostrarte tus reservas sin que tengas que crear una cuenta.</item>
+    </string-array>
+    <string name="privacy_app_bookings_use">Lo usamos solo para gestionar la reserva (ejecución del contrato, como se indica en el punto 4): confirmarla, controlar las plazas y devolverte su localizador. No pedimos datos de pago: el pago de esta versión está simulado. Conservamos los datos mientras sean necesarios para gestionar la reserva y puedes pedir que los borremos cuando quieras.</string>
+    <string name="privacy_app_device_title">Identificador del móvil</string>
+    <string name="privacy_app_device_body">La primera vez que reservas, la app crea un número aleatorio y lo guarda en tu móvil. No contiene datos tuyos ni del aparato. Se manda con cada reserva y cada vez que la app consulta tus reservas. Si borras los datos de la app, el móvil lo pierde y deja de ver sus reservas en la app (si usas la copia de seguridad de Android, al reinstalarla puede volver con el resto de tus datos); en nuestro servidor siguen hasta que pidas borrarlas.</string>
+    <string name="privacy_app_valbot_title">Asistente ValBot</string>
+    <string name="privacy_app_valbot_body">Lo que escribes a ValBot se envía al servidor de la web, que lo procesa con el servicio de inteligencia artificial Gemini de Google para contestarte (puntos 2 y 6). No escribas datos personales en el chat. Si no hay conexión, o el servidor no puede contestar, la app responde con respuestas básicas desde tu móvil (sin conexión no se envía nada).</string>
+    <string name="privacy_app_map_title">Mapa, rutas y ubicación</string>
+    <string name="privacy_app_map_body">El mapa se descarga por partes de los servidores de OpenStreetMap, que ven tu dirección IP y la zona que miras. Cuando pides «Cómo llegar», el punto de partida y el destino se envían al servicio de rutas de OpenStreetMap Alemania para calcular el camino; el punto de partida es tu ubicación si la compartes y estás en Valencia o, si no, la Plaza del Ayuntamiento. La ubicación solo se usa si das permiso, y la app la emplea en tu móvil para mostrar dónde estás y las distancias: no la envía a nuestro servidor. Estos servicios tienen su propia política de privacidad.</string>
+    <string name="privacy_app_background_title">Actualización automática</string>
+    <string name="privacy_app_background_body">Cada vez que abres la app con conexión, esta consulta a nuestro servidor el catálogo de ofertas y, si ya has reservado alguna vez, tus reservas (con el identificador del móvil). Si dejas activada «Actualizar automáticamente» en Descargas, lo hace también cada noche aunque no la tengas abierta, y solo con Wi-Fi si tienes activada «Descargar solo con Wi-Fi». Puedes desactivarlo en Descargas.</string>
+    <string name="privacy_app_none_title">Lo que la app no incluye</string>
+    <string name="privacy_app_none_body">La app no tiene cuentas, publicidad, analítica ni rastreadores, y no comparte tus datos con terceros más allá de los servicios que se nombran arriba.</string>
+    <string name="privacy_app_rights_title">Tus derechos</string>
+    <string name="privacy_app_rights_body">Para ejercer tus derechos sobre los datos de la app (por ejemplo, pedir que borremos tus reservas), escribe al correo de privacidad del punto 1 indicando el correo con el que reservaste y el localizador de la reserva. Más información en el punto 7.</string>
 </resources>

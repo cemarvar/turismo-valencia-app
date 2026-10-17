@@ -42,7 +42,7 @@ class OfferMappingTest {
             val bundled = bundledById[server.id] ?: error("El catálogo incluido en la app no tiene «${server.id}», que sí está en el contrato")
             assertEquals(server.id, bundled.kind, offerKindOf(server.kind))
             assertEquals(server.id, bundled.title, server.title)
-            assertEquals(server.id, bundled.priceFrom, eurosOf(server.priceFromCents))
+            assertEquals(server.id, bundled.priceFromCents.toLong(), server.priceFromCents.toLong())
             assertEquals(server.id, bundled.times, server.slots)
             assertEquals(server.id, bundled.placeId, server.placeId)
         }
@@ -53,7 +53,7 @@ class OfferMappingTest {
         assertEquals("ids repetidos", FakeOfertas.size, FakeOfertas.map { it.id }.toSet().size)
         FakeOfertas.forEach { offer ->
             assertTrue("«${offer.id}» no tiene horarios", offer.times.isNotEmpty())
-            assertTrue("«${offer.id}» no tiene precio", offer.priceFrom > 0)
+            assertTrue("«${offer.id}» no tiene precio", offer.priceFromCents > 0)
             assertTrue("«${offer.id}» no tiene título", offer.title.isNotBlank())
         }
     }
@@ -65,15 +65,6 @@ class OfferMappingTest {
         assertEquals(OfferKind.Experiencia, offerKindOf("EXPERIENCIA"))
         assertNull(offerKindOf("abono"))
         assertNull(dto(kind = "abono").toEntity(0))
-    }
-
-    @Test
-    fun `los centimos pasan a euros al euro mas cercano`() {
-        assertEquals(0, eurosOf(0))
-        assertEquals(18, eurosOf(1800))
-        assertEquals(18, eurosOf(1849))
-        assertEquals(19, eurosOf(1850))
-        assertEquals(45, eurosOf(4500))
     }
 
     @Test
@@ -111,7 +102,7 @@ class OfferMappingTest {
         val offer = entity.toModel(bundled, assetImage = "img/Albufera/hero.jpg")
 
         assertEquals("Paseo en barca", offer.title)
-        assertEquals(21, offer.priceFrom)
+        assertEquals(2050, offer.priceFromCents)
         assertEquals(listOf("09:00", "10:00"), offer.times)
         assertEquals(OfferKind.Experiencia, offer.kind)
         assertEquals(bundled.image, offer.image)

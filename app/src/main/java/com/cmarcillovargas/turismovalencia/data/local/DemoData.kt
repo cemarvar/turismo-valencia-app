@@ -39,6 +39,7 @@ class DemoData(private val content: ContentRepository) {
             clear()
             insertAll(reservations(today, now))
         }
+        db.reservationAttempts().clear()
         db.recentSearches().run {
             clear()
             insertAll(RecentSearches.mapIndexed { index, text -> RecentSearchEntity(text, now - index) })
@@ -58,7 +59,7 @@ class DemoData(private val content: ContentRepository) {
 
     private fun reservations(today: LocalDate, now: Long): List<ReservationEntity> = listOf(
         seedReservation(0, "albufera-barca", today.with(TemporalAdjusters.next(DayOfWeek.SATURDAY)), "18:30", 2, ReservationStatus.Confirmed, null, now),
-        seedReservation(1, "taller-paella", today.with(TemporalAdjusters.next(DayOfWeek.SUNDAY)).plusDays(7), "13:00", 4, ReservationStatus.Pending, 180, now),
+        seedReservation(1, "taller-paella", today.with(TemporalAdjusters.next(DayOfWeek.SUNDAY)).plusDays(7), "13:00", 4, ReservationStatus.Pending, 18_000, now),
         seedReservation(2, "ruta-ciutat-vella", today.minusDays(5), "10:00", 1, ReservationStatus.Completed, null, now),
     )
 
@@ -69,7 +70,7 @@ class DemoData(private val content: ContentRepository) {
         time: String,
         adults: Int,
         status: ReservationStatus,
-        total: Int?,
+        totalCents: Int?,
         now: Long,
     ): ReservationEntity {
         val offer = checkNotNull(content.offer(offerId))
@@ -83,9 +84,9 @@ class DemoData(private val content: ContentRepository) {
             adults = adults,
             children = 0,
             email = DemoEmail,
-            total = total ?: (offer.priceFrom * adults),
+            totalCents = totalCents ?: (offer.priceFromCents * adults),
             status = status,
-            number = FirstSeedNumber + index,
+            locator = "TV-${date.year}-${(FirstSeedNumber + index).toString().padStart(4, '0')}",
             createdAt = now - index * MinuteMillis,
         )
     }
@@ -105,7 +106,9 @@ class DemoData(private val content: ContentRepository) {
 
         /** Como en el diseño, el aviso de la mascletà sale activado. */
         val Reminders = listOf("fallas")
-        const val DemoEmail = "laura.garcia@email.com"
+
+        /** Dominio reservado `example.com`: el correo de demostración nunca es el buzón de nadie (la reserva de verdad lo guarda el servidor). */
+        const val DemoEmail = "laura.garcia@example.com"
         const val FirstSeedNumber = 413
         const val MinuteMillis = 60_000L
     }

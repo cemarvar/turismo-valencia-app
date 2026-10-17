@@ -54,17 +54,20 @@ import com.cmarcillovargas.turismovalencia.R
 import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.fake.FakeOfertas
 import com.cmarcillovargas.turismovalencia.data.model.Category
+import com.cmarcillovargas.turismovalencia.data.repo.ReservationFailure
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.BottomActionBar
+import com.cmarcillovargas.turismovalencia.ui.components.ErrorNotice
 import com.cmarcillovargas.turismovalencia.ui.components.Eyebrow
+import com.cmarcillovargas.turismovalencia.ui.components.OfflineBanner
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.theme.PillShape
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 import com.cmarcillovargas.turismovalencia.ui.theme.screenTitle
-import com.cmarcillovargas.turismovalencia.util.formatEuro
+import com.cmarcillovargas.turismovalencia.util.formatPrice
 import com.cmarcillovargas.turismovalencia.util.formatMonthYear
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -114,6 +117,8 @@ fun ReservarScreen(
     val offer = uiState.offer ?: return
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         AppTopBar(stringResource(R.string.book_title), subtitle = stringResource(R.string.book_step), onBack = onBack)
+        // Reservar exige conexión: el servidor confirma la plaza y pone el localizador.
+        if (!uiState.online) OfflineBanner(text = stringResource(R.string.book_needs_connection))
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(Spacing.m),
             verticalArrangement = Arrangement.spacedBy(Spacing.m),
@@ -126,7 +131,7 @@ fun ReservarScreen(
                         Eyebrow(listOf(offer.tag, offer.place).filter { it.isNotBlank() }.joinToString(" · "))
                         Text(offer.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 2)
                         Text(
-                            stringResource(R.string.book_per_person, offer.duration, formatEuro(offer.priceFrom)),
+                            stringResource(R.string.book_per_person, offer.duration, formatPrice(offer.priceFromCents)),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -141,18 +146,43 @@ fun ReservarScreen(
                     TimeChip(slot.time, slot.available, slot.time == uiState.time, { onSelectTime(slot.time) }, Modifier.weight(1f))
                 }
             }
-            CounterRow(stringResource(R.string.book_adults), stringResource(R.string.book_adults_price, formatEuro(offer.priceFrom)), uiState.adults, { onAdults(-1) }, { onAdults(1) }, minusEnabled = uiState.adults > 1)
+            CounterRow(stringResource(R.string.book_adults), stringResource(R.string.book_adults_price, formatPrice(offer.priceFromCents)), uiState.adults, { onAdults(-1) }, { onAdults(1) }, minusEnabled = uiState.adults > 1)
             CounterRow(stringResource(R.string.book_children), stringResource(R.string.book_children_free), uiState.children, { onChildren(-1) }, { onChildren(1) }, minusEnabled = uiState.children > 0)
             EmailField(uiState.email, onEmailChange)
+            Text(stringResource(R.string.book_email_privacy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        uiState.failure?.let { failure -> ErrorNotice(failure.message(), Modifier.padding(horizontal = Spacing.m, vertical = Spacing.xs)) }
         BottomActionBar {
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.book_total_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(formatEuro(uiState.total), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
+                Text(formatPrice(uiState.totalCents), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
             }
-            AppButton(stringResource(R.string.book_confirm), onConfirm, Modifier.weight(1.35f), trailingIcon = Icons.AutoMirrored.Outlined.ArrowForward, enabled = uiState.canConfirm)
+            AppButton(
+                stringResource(if (uiState.submitting) R.string.book_submitting else R.string.book_confirm),
+                onConfirm,
+                Modifier.weight(1.35f),
+                trailingIcon = if (uiState.submitting) null else Icons.AutoMirrored.Outlined.ArrowForward,
+                enabled = uiState.canConfirm,
+            )
         }
     }
+}
+
+/** Lo que se le dice al usuario según el motivo del fallo (nunca el texto del servidor). */
+@Composable
+private fun ReservationFailure.message(): String = when (reason) {
+    ReservationFailure.Reason.Unreachable -> stringResource(R.string.book_error_unreachable)
+    ReservationFailure.Reason.Server -> stringResource(R.string.book_error_server)
+    ReservationFailure.Reason.RateLimited ->
+        retryAfterSeconds?.let { stringResource(R.string.book_error_rate_limited_wait, ((it + 59) / 60).coerceAtLeast(1)) }
+            ?: stringResource(R.string.book_error_rate_limited)
+    ReservationFailure.Reason.SoldOut -> stringResource(R.string.book_error_sold_out)
+    ReservationFailure.Reason.OfferGone -> stringResource(R.string.book_error_offer_gone)
+    ReservationFailure.Reason.InvalidDate -> stringResource(R.string.book_error_invalid_date)
+    ReservationFailure.Reason.InvalidSlot -> stringResource(R.string.book_error_invalid_slot)
+    ReservationFailure.Reason.InvalidParty -> stringResource(R.string.book_error_invalid_party)
+    ReservationFailure.Reason.InvalidEmail -> stringResource(R.string.book_error_invalid_email)
+    ReservationFailure.Reason.Rejected -> stringResource(R.string.book_error_other)
 }
 
 @Composable

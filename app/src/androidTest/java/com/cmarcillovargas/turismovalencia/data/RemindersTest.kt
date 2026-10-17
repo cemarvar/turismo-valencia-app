@@ -157,14 +157,14 @@ class RemindersTest {
 
     private inner class Session {
         val db: AppDatabase = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
+        val scope = testScope()
         val allowed = booleanArrayOf(true)
         val access = NotificationAccess { allowed[0] }
         val settings = SettingsRepository(SettingsStore(db.settings(), scope))
         val reminders = RemindersRepository(db.reminders(), settings, access, scheduler, scope)
 
         init {
-            toClose += { scope.cancel(); db.close() }
+            toClose += { scope.closeAndJoin(); db.close() }
         }
     }
 

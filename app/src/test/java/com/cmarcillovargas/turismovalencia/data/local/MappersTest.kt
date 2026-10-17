@@ -11,8 +11,8 @@ import java.time.LocalDate
 class MappersTest {
     private val day = LocalDate.of(2026, 10, 17)
 
-    private fun row(status: ReservationStatus, number: Int = 413) = ReservationEntity(
-        id = "res-$number",
+    private fun row(status: ReservationStatus, locator: String = "TV-2026-1000") = ReservationEntity(
+        id = "12b229f7-e8d4-475b-9637-2a80c1739f2d",
         offerId = "albufera-barca",
         title = "Paseo en barca por la Albufera",
         place = "El Palmar",
@@ -21,27 +21,21 @@ class MappersTest {
         adults = 2,
         children = 1,
         email = "a@b.es",
-        total = 36,
+        totalCents = 3600,
         status = status,
-        number = number,
+        locator = locator,
         createdAt = 0,
     )
 
     @Test
-    fun `convierte la fila en la reserva con su localizador`() {
+    fun `convierte la fila en la reserva con el localizador del servidor`() {
         val reservation = row(ReservationStatus.Confirmed).toModel(today = day.minusDays(3))
-        assertEquals("res-413", reservation.id)
+        assertEquals("12b229f7-e8d4-475b-9637-2a80c1739f2d", reservation.id)
         assertEquals(day, reservation.date)
-        assertEquals("TV-2026-0413", reservation.locator)
+        assertEquals("TV-2026-1000", reservation.locator)
         assertEquals(3, reservation.people)
-        assertEquals(36, reservation.total)
+        assertEquals(3600, reservation.totalCents)
         assertEquals(ReservationStatus.Confirmed, reservation.status)
-    }
-
-    @Test
-    fun `el numero se rellena con ceros hasta cuatro cifras`() {
-        assertEquals("TV-2026-0007", row(ReservationStatus.Confirmed, number = 7).toModel(day).locator)
-        assertEquals("TV-2026-12345", row(ReservationStatus.Confirmed, number = 12345).toModel(day).locator)
     }
 
     @Test
@@ -51,9 +45,10 @@ class MappersTest {
     }
 
     @Test
-    fun `una pendiente o completada no cambia de estado`() {
+    fun `una pendiente, completada o cancelada no cambia de estado`() {
         assertEquals(ReservationStatus.Pending, row(ReservationStatus.Pending).toModel(today = day.plusDays(30)).status)
         assertEquals(ReservationStatus.Completed, row(ReservationStatus.Completed).toModel(today = day.minusDays(30)).status)
+        assertEquals(ReservationStatus.Cancelled, row(ReservationStatus.Cancelled).toModel(today = day.plusDays(30)).status)
     }
 
     @Test

@@ -173,9 +173,9 @@ fun BottomActionBar(modifier: Modifier = Modifier, content: @Composable RowScope
     }
 }
 
-/** Aviso fijo bajo la cabecera cuando no hay conexión. */
+/** Aviso fijo bajo la cabecera cuando no hay conexión (con [text] se cambia el mensaje: «Reservar necesita conexión…»). */
 @Composable
-fun OfflineBanner(modifier: Modifier = Modifier) {
+fun OfflineBanner(modifier: Modifier = Modifier, text: String = stringResource(R.string.offline_banner)) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -187,7 +187,7 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
         Icon(Icons.Outlined.WifiOff, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary, modifier = Modifier.size(Spacing.m))
         Spacer(Modifier.width(Spacing.s))
         Text(
-            text = stringResource(R.string.offline_banner),
+            text = text,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSecondary,
             maxLines = 1,
