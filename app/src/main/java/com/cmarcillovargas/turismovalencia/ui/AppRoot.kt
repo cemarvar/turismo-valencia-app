@@ -14,10 +14,11 @@ import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 
 /**
  * Raíz de la app: el recorrido de bienvenida y, al terminarlo, la app principal.
- * `startRoute` salta la bienvenida y abre esa pantalla (solo se usa al depurar).
+ * `startRoute` salta la bienvenida y abre esa pantalla (solo se usa al depurar). `openItem` es la ficha que abre un aviso
+ * tocado; se abre cuando la app principal está en pantalla y entonces se llama a `onOpenItemHandled`.
  */
 @Composable
-fun AppRoot(startRoute: String? = null) {
+fun AppRoot(startRoute: String? = null, openItem: String? = null, onOpenItemHandled: () -> Unit = {}) {
     val container = (LocalContext.current.applicationContext as TurismoApp).container
     val textScale by container.settings.textScale.collectAsStateWithLifecycle()
     // La bienvenida ya se hizo (guardado en la base de datos) o se salta al depurar. Se decide al abrir la app; después
@@ -32,6 +33,8 @@ fun AppRoot(startRoute: String? = null) {
                     container.settings.setOnboardingDone(false)
                 },
                 startRoute = startRoute,
+                openItem = openItem,
+                onOpenItemHandled = onOpenItemHandled,
             )
         } else {
             BienvenidaFlow(

@@ -1,5 +1,6 @@
 package com.cmarcillovargas.turismovalencia
 
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.graphics.Color
 import android.os.Bundle
@@ -7,12 +8,24 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.cmarcillovargas.turismovalencia.data.remote.CannedChatService
 import com.cmarcillovargas.turismovalencia.ui.AppRoot
 
 class MainActivity : ComponentActivity() {
+    /** Ficha que hay que abrir porque el usuario tocó un aviso; `MainApp` la abre y la da por atendida. */
+    private var openItem by mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Pantalla de arranque del sistema (logotipo sobre el color de marca): sustituye a la ventana en blanco de antes y se
+        // queda hasta que el contenedor de datos esté listo.
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+        val app = application as TurismoApp
+        splash.setKeepOnScreenCondition { !app.containerReady }
         // Tema solo claro: iconos oscuros en las barras del sistema aunque el móvil esté en modo oscuro.
         // Las pantallas con fondo oscuro los cambian con SystemBarIcons.
         enableEdgeToEdge(
@@ -27,23 +40,51 @@ class MainActivity : ComponentActivity() {
         val debuggable = applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
         val startRoute = if (debuggable) intent.getStringExtra("route") else null
         if (debuggable && intent.getBooleanExtra("resetData", false)) {
-            (application as TurismoApp).container.resetToDemo()
+            app.container.resetToDemo()
         }
         if (debuggable && intent.hasExtra("offline")) {
-            (application as TurismoApp).container.network.force(!intent.getBooleanExtra("offline", false))
+            app.container.network.force(!intent.getBooleanExtra("offline", false))
         }
         if (debuggable && intent.getBooleanExtra("emptyFavorites", false)) {
-            (application as TurismoApp).container.favorites.clear()
+            app.container.favorites.clear()
         }
         if (debuggable && intent.getBooleanExtra("chatFake", false)) {
-            (application as TurismoApp).container.valbot.useChat(CannedChatService())
+            app.container.valbot.useChat(CannedChatService())
         }
-        setContent { AppRoot(startRoute = startRoute) }
+        // Al recrear la actividad (girar el móvil, proceso cerrado) el grafo de navegación se restaura solo: la ficha del aviso
+        // solo se abre en un arranque nuevo.
+        if (savedInstanceState == null) openItem = intent.getStringExtra(ExtraOpenItem)
+        setContent {
+            AppRoot(
+                startRoute = startRoute,
+                openItem = openItem,
+                onOpenItemHandled = {
+                    openItem = null
+                    intent.removeExtra(ExtraOpenItem)
+                },
+            )
+        }
+    }
+
+    /** La app ya estaba abierta y el usuario tocó un aviso. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.getStringExtra(ExtraOpenItem)?.let { openItem = it }
     }
 
     override fun onResume() {
         super.onResume()
-        // El usuario pudo conceder o quitar el permiso de ubicación desde los Ajustes del sistema.
-        (application as TurismoApp).container.location.refreshPermission()
+        // El usuario pudo conceder o quitar el permiso de ubicación y las notificaciones desde los Ajustes del sistema.
+        val app = application as TurismoApp
+        if (app.containerReady) {
+            app.container.location.refreshPermission()
+            app.container.notificationAccess.refresh()
+        }
+    }
+
+    companion object {
+        /** Extra con el id de la ficha que abre un aviso (lo pone `ReminderNotifier`). */
+        const val ExtraOpenItem = "open_item"
     }
 }

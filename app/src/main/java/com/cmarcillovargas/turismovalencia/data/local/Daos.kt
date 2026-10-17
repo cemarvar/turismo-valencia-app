@@ -135,6 +135,24 @@ abstract class RecentSearchDao {
 }
 
 @Dao
+abstract class ReminderDao {
+    @Query("SELECT itemId FROM reminders")
+    abstract fun observeIds(): Flow<List<String>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun insert(entity: ReminderEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun insertAll(entities: List<ReminderEntity>)
+
+    @Query("DELETE FROM reminders WHERE itemId = :itemId")
+    abstract suspend fun delete(itemId: String)
+
+    @Query("DELETE FROM reminders")
+    abstract suspend fun clear()
+}
+
+@Dao
 abstract class NotificationDao {
     @Query("SELECT * FROM notifications ORDER BY position")
     abstract fun observeAll(): Flow<List<NotificationEntity>>

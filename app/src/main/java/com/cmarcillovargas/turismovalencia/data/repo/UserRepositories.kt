@@ -4,6 +4,8 @@ import com.cmarcillovargas.turismovalencia.data.local.DownloadDao
 import com.cmarcillovargas.turismovalencia.data.local.FavoriteDao
 import com.cmarcillovargas.turismovalencia.data.local.NotificationDao
 import com.cmarcillovargas.turismovalencia.data.local.RecentSearchDao
+import com.cmarcillovargas.turismovalencia.data.local.ReminderDao
+import com.cmarcillovargas.turismovalencia.data.local.ReminderEntity
 import com.cmarcillovargas.turismovalencia.data.local.ReservationDao
 import com.cmarcillovargas.turismovalencia.data.local.ReservationEntity
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
@@ -15,11 +17,17 @@ import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.Reservation
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
+import com.cmarcillovargas.turismovalencia.data.notify.NotificationAccess
+import com.cmarcillovargas.turismovalencia.data.notify.ReminderScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -141,12 +149,48 @@ class SettingsRepository(private val store: SettingsStore) {
 
     fun setNotificationsEnabled(value: Boolean) = store.update { it.copy(notificationsEnabled = value) }
 
-    // TODO(permisos): cambiar el permiso real del sistema.
+    // El permiso real del sistema no se puede quitar desde la app: las pantallas lo piden al elegir «Mientras se usa» y, si el
+    // sistema ya no pregunta, llevan a Ajustes.
     fun setLocation(value: LocationMode) = store.update { it.copy(location = value) }
 
     fun setTextScale(value: TextScale) = store.update { it.copy(textScale = value) }
 
     fun setOnboardingDone(value: Boolean) = store.update { it.copy(onboardingDone = value) }
+}
+
+/**
+ * Avisos de eventos que el usuario ha pedido (la mascletà de las Fallas) y su programación. Un aviso llega solo si el usuario
+ * lo ha pedido, el ajuste general de Notificaciones está activo y el sistema deja notificar ([active]); cuando cualquiera de
+ * las tres cosas cambia se programan o cancelan las alarmas.
+ */
+class RemindersRepository(
+    private val dao: ReminderDao,
+    settings: SettingsRepository,
+    access: NotificationAccess,
+    private val scheduler: ReminderScheduler,
+    private val scope: CoroutineScope,
+) {
+    /** Eventos de los que el usuario quiere el aviso. */
+    val ids: StateFlow<Set<String>> = dao.observeIds().map { it.toSet() }.asState(scope)
+
+    /** Las notificaciones pueden llegar: el ajuste general está activo y el sistema las permite. */
+    val active: StateFlow<Boolean> = combine(settings.notificationsEnabled, access.enabled) { enabled, allowed -> enabled && allowed }
+        .stateIn(scope, SharingStarted.Eagerly, settings.notificationsEnabled.value && access.enabled.value)
+
+    init {
+        scope.launch {
+            combine(ids, active) { wanted, active -> if (active) wanted else emptySet() }
+                .distinctUntilChanged()
+                .collect { scheduler.sync(it) }
+        }
+    }
+
+    fun set(itemId: String, on: Boolean) {
+        scope.launch { if (on) dao.insert(ReminderEntity(itemId)) else dao.delete(itemId) }
+    }
+
+    /** Programa ya, en el hilo que llama, los avisos que corresponden (al reiniciar el móvil no hay ninguna pantalla que lo haga). */
+    fun syncNow() = scheduler.sync(if (active.value) ids.value else emptySet())
 }
 
 class NotificationsRepository(private val dao: NotificationDao, private val scope: CoroutineScope) {

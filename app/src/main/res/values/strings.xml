@@ -304,6 +304,16 @@
     <string name="profile_logout_text">Volverás a la pantalla de bienvenida.</string>
     <string name="notifications_today">Hoy</string>
     <string name="notifications_settings">Ajustes de notificaciones</string>
+    <string name="notifications_blocked_title">Notificaciones desactivadas</string>
+    <string name="notifications_blocked_text">Para poder avisarte, activa las notificaciones de Turismo Valencia en los ajustes del móvil.</string>
+    <string name="location_blocked_title">Ubicación desactivada</string>
+    <string name="location_blocked_text">Para usar tu ubicación, permítela a Turismo Valencia en los ajustes del móvil.</string>
+    <string name="common_open_settings">Abrir ajustes</string>
+    <string name="common_not_now">Ahora no</string>
+    <string name="reminder_channel_name">Avisos de eventos</string>
+    <string name="reminder_channel_description">Recordatorios de actos como la mascletà, unos minutos antes de que empiecen.</string>
+    <string name="reminder_mascleta_title">Mascletà a las 14:00</string>
+    <string name="reminder_mascleta_text">Plaza del Ayuntamiento · llega 30 min antes para coger sitio.</string>
 
     <string name="web_more_info">Más información</string>
     <string name="web_view_on_web">Ver en la web</string>

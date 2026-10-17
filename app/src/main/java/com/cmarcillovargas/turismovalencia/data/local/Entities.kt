@@ -71,6 +71,12 @@ data class RecentSearchEntity(
     val searchedAt: Long,
 )
 
+/** Evento del que el usuario quiere recibir el aviso (la mascletà de las Fallas). El calendario del aviso está en `data/notify`. */
+@Entity(tableName = "reminders")
+data class ReminderEntity(
+    @PrimaryKey val itemId: String,
+)
+
 @Entity(tableName = "notifications")
 data class NotificationEntity(
     @PrimaryKey val id: String,

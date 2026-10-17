@@ -5,7 +5,11 @@ import com.cmarcillovargas.turismovalencia.data.AppContainer
 import kotlin.concurrent.thread
 
 class TurismoApp : Application() {
-    val container: AppContainer by lazy { AppContainer(this) }
+    private val containerLazy = lazy { AppContainer(this) }
+    val container: AppContainer get() = containerLazy.value
+
+    /** El contenedor ya está creado (la pantalla de arranque del sistema espera a esto, ver `MainActivity`). */
+    val containerReady: Boolean get() = containerLazy.isInitialized()
 
     override fun onCreate() {
         super.onCreate()

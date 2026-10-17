@@ -2,4 +2,12 @@
 <resources>
 
     <style name="Theme.TurismoValencia" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Tema de arranque de MainActivity: la pantalla de arranque del sistema (Android 12 o más) y su versión para móviles
+         anteriores. Pinta el logotipo sobre el color de marca, como el A1 del diseño, y al terminar pasa a Theme.TurismoValencia. -->
+    <style name="Theme.TurismoValencia.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.TurismoValencia</item>
+    </style>
 </resources>

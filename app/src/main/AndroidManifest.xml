@@ -7,6 +7,10 @@
     <!-- Ubicación del usuario en el mapa y como punto de partida de las rutas; se pide al usuario en tiempo de ejecución. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Avisos de eventos (la mascletà); en Android 13 o más se pide al usuario cuando enciende un aviso. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Las alarmas de los avisos se pierden al reiniciar el móvil: al arrancar se vuelven a programar. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
@@ -21,11 +25,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TurismoValencia">
+        <!-- singleTop: tocar un aviso con la app abierta llega a `onNewIntent` en vez de abrir otra ventana. El tema de
+             arranque pinta la pantalla de arranque del sistema y después pasa a Theme.TurismoValencia. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.TurismoValencia"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.TurismoValencia.Starting"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +39,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Los dos receptores son internos: el sistema (arranque y actualización) y las alarmas de la propia app pueden llamarlos
+             aunque no estén exportados, y así ninguna otra app puede hacerlo. -->
+        <receiver
+            android:name=".data.notify.ReminderReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".data.notify.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

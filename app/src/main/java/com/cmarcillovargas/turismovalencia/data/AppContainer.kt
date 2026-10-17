@@ -11,6 +11,8 @@ import com.cmarcillovargas.turismovalencia.TurismoApp
 import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.DemoData
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
+import com.cmarcillovargas.turismovalencia.data.notify.NotificationAccess
+import com.cmarcillovargas.turismovalencia.data.notify.ReminderScheduler
 import com.cmarcillovargas.turismovalencia.data.remote.ChatApi
 import com.cmarcillovargas.turismovalencia.data.remote.OsrmApi
 import com.cmarcillovargas.turismovalencia.data.remote.RouteService
@@ -20,6 +22,7 @@ import com.cmarcillovargas.turismovalencia.data.repo.FavoritesRepository
 import com.cmarcillovargas.turismovalencia.data.repo.LocationRepository
 import com.cmarcillovargas.turismovalencia.data.repo.NetworkMonitor
 import com.cmarcillovargas.turismovalencia.data.repo.NotificationsRepository
+import com.cmarcillovargas.turismovalencia.data.repo.RemindersRepository
 import com.cmarcillovargas.turismovalencia.data.repo.ReservationsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SearchHistoryRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SettingsRepository
@@ -64,6 +67,10 @@ class AppContainer(application: Application, private val database: AppDatabase =
     val reservations = ReservationsRepository(content, database.reservations(), scope)
     val settings = SettingsRepository(settingsStore)
     val location = LocationRepository(application, settings, scope)
+
+    /** Si el sistema deja mostrar notificaciones; `MainActivity` lo vuelve a mirar al volver a la app. */
+    val notificationAccess = NotificationAccess.of(application)
+    val reminders = RemindersRepository(database.reminders(), settings, notificationAccess, ReminderScheduler(application), scope)
 
     init {
         // Las distancias de las fichas se miden desde donde esté el usuario (o el centro de Valencia).

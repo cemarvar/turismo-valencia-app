@@ -259,6 +259,7 @@ class PersistenceTest {
         assertEquals(listOf("seed-1", "seed-2", "seed-3"), first.reservations.items.value.map { it.id })
         assertEquals(listOf("Mercado Central", "Fallas 2027"), first.searches.recent.value)
         assertEquals(5, first.notifications.items.value.size)
+        assertEquals(listOf("fallas"), runBlocking { first.db.reminders().observeIds().first() })
         assertFalse(first.settings.onboardingDone.value)
 
         // El usuario lo quita todo y reinicia: la demo no vuelve a aparecer.
@@ -282,10 +283,14 @@ class PersistenceTest {
         try {
             val container = AppContainer(app, memory)
             assertEquals(6, container.favorites.ids.value.size)
+            assertEquals(setOf("fallas"), container.reminders.ids.value)
             container.favorites.clear()
             container.favorites.ids.await(emptyList())
+            container.reminders.set("fallas", false)
+            container.reminders.ids.await(emptySet())
             container.resetToDemo()
             container.favorites.ids.awaitThat { it.size == 6 }
+            container.reminders.ids.await(setOf("fallas"))
             assertFalse(container.settings.onboardingDone.value)
         } finally {
             memory.close()

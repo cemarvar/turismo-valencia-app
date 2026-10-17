@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -67,19 +68,27 @@ import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
 import com.cmarcillovargas.turismovalencia.ui.components.AppSwitch
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
+import com.cmarcillovargas.turismovalencia.ui.components.NotificationAccessResult
+import com.cmarcillovargas.turismovalencia.ui.components.OpenSettingsDialog
 import com.cmarcillovargas.turismovalencia.ui.components.SectionLabel
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
 import com.cmarcillovargas.turismovalencia.ui.components.rememberLocationPermissionRequest
+import com.cmarcillovargas.turismovalencia.ui.components.rememberNotificationAccessRequest
 import com.cmarcillovargas.turismovalencia.ui.screens.bienvenida.IdiomaSheetHost
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
+import com.cmarcillovargas.turismovalencia.util.openAppSettings
+import com.cmarcillovargas.turismovalencia.util.openNotificationSettings
 
 private val AvatarSize = 80.dp
 private val GroupShape = RoundedCornerShape(24.dp)
 
 private enum class Dialog { Location, TextSize, Privacy, Logout }
+
+/** Permiso que el sistema ya no deja pedir: solo se puede activar desde los ajustes del móvil. */
+private enum class SettingsDialog { Location, Notifications }
 
 @Composable
 fun PerfilRoute(
@@ -91,10 +100,35 @@ fun PerfilRoute(
     viewModel: PerfilViewModel = viewModel(factory = containerFactory { PerfilViewModel(it) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var showLanguage by remember { mutableStateOf(false) }
+    // Los permisos del sistema solo se pueden pedir un par de veces: si el usuario ya dijo que no, lo único que se puede hacer es
+    // llevarle a los ajustes del móvil.
+    var settingsDialog by remember { mutableStateOf<SettingsDialog?>(null) }
     // Elegir «Mientras se usa» o «Solo esta vez» sin tener el permiso del sistema abre su diálogo; lo que responda decide el ajuste.
     var pendingMode by remember { mutableStateOf(LocationMode.WhileUsing) }
-    val askLocation = rememberLocationPermissionRequest { granted -> viewModel.onLocation(if (granted) pendingMode else LocationMode.Denied) }
+    val askLocation = rememberLocationPermissionRequest(onBlocked = { settingsDialog = SettingsDialog.Location }) { granted ->
+        viewModel.onLocation(if (granted) pendingMode else LocationMode.Denied)
+    }
+    // Encender Notificaciones pide el permiso del sistema (Android 13+).
+    val askNotifications = rememberNotificationAccessRequest { result -> if (result == NotificationAccessResult.NeedsSettings) settingsDialog = SettingsDialog.Notifications }
+    when (settingsDialog) {
+        SettingsDialog.Location -> OpenSettingsDialog(
+            title = stringResource(R.string.location_blocked_title),
+            text = stringResource(R.string.location_blocked_text),
+            onOpenSettings = context::openAppSettings,
+            onDismiss = { settingsDialog = null },
+        )
+
+        SettingsDialog.Notifications -> OpenSettingsDialog(
+            title = stringResource(R.string.notifications_blocked_title),
+            text = stringResource(R.string.notifications_blocked_text),
+            onOpenSettings = context::openNotificationSettings,
+            onDismiss = { settingsDialog = null },
+        )
+
+        null -> Unit
+    }
     PerfilScreen(
         uiState = uiState,
         onBack = onBack,
@@ -102,7 +136,10 @@ fun PerfilRoute(
         onOpenDownloads = onOpenDownloads,
         onOpenContact = onOpenContact,
         onOpenPage = onOpenPage,
-        onNotifications = viewModel::onNotifications,
+        onNotifications = { on ->
+            viewModel.onNotifications(on)
+            if (on) askNotifications()
+        },
         onLocation = { mode ->
             if (mode != LocationMode.Denied && !viewModel.locationPermissionGranted()) {
                 pendingMode = mode

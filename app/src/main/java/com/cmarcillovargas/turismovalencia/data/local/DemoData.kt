@@ -47,6 +47,10 @@ class DemoData(private val content: ContentRepository) {
             clear()
             insertAll(notifications())
         }
+        db.reminders().run {
+            clear()
+            insertAll(Reminders.map { ReminderEntity(it) })
+        }
         db.settings().save(SettingsEntity())
     }
 
@@ -96,6 +100,9 @@ class DemoData(private val content: ContentRepository) {
         val Favorites = listOf("mercado-central", "albufera-barca", "fallas", "paella", "lonja-seda", "catedral-caliz")
         val Downloads = listOf("mercado-central", "fallas", "paella", "lonja-seda")
         val RecentSearches = listOf("Mercado Central", "Fallas 2027")
+
+        /** Como en el diseño, el aviso de la mascletà sale activado. */
+        val Reminders = listOf("fallas")
         const val DemoEmail = "laura.garcia@email.com"
         const val FirstSeedNumber = 413
         const val MinuteMillis = 60_000L

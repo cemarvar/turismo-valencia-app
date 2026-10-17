@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores de recursos XML (icono, pantalla de arranque del sistema y notificaciones). Los de las pantallas viven en
+         `ui/theme/Color.kt`; estos son los mismos valores: `PrimaryStrong` = fondo de la pantalla de arranque y del icono
+         (A1 del diseño) y `Brand` = naranja de marca para gráficos. -->
+    <color name="splash_background">#C44D00</color>
+    <color name="notification_accent">#EB5A00</color>
+</resources>

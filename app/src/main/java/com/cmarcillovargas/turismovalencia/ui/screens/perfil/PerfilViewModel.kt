@@ -17,6 +17,7 @@ data class PerfilUiState(
     val cardsMb: Int = 0,
     val reservations: Int = 0,
     val language: LanguageCode = LanguageCode.ES,
+    /** Las notificaciones llegarán: el ajuste está activo y el sistema las permite. */
     val notifications: Boolean = true,
     val location: LocationMode = LocationMode.WhileUsing,
     val textScale: TextScale = TextScale.System,
@@ -25,7 +26,7 @@ data class PerfilUiState(
 class PerfilViewModel(private val container: AppContainer) : ViewModel() {
     private val settings = combine(
         container.settings.language,
-        container.settings.notificationsEnabled,
+        container.reminders.active,
         container.settings.location,
         container.settings.textScale,
     ) { language, notifications, location, scale -> listOf(language, notifications, location, scale) }
@@ -44,6 +45,7 @@ class PerfilViewModel(private val container: AppContainer) : ViewModel() {
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PerfilUiState())
 
+    /** Enciende o apaga el ajuste general de Notificaciones; al encenderlo la pantalla pide además el permiso del sistema. */
     fun onNotifications(value: Boolean) = container.settings.setNotificationsEnabled(value)
 
     fun onLocation(value: LocationMode) = container.settings.setLocation(value)

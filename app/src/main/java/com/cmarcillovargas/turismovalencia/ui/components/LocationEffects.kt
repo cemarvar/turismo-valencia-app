@@ -8,20 +8,34 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
 /**
  * Devuelve una función que abre el diálogo del sistema para pedir la ubicación (`precise = false` pide solo la aproximada).
- * [onResult] recibe si ha quedado concedida. Si el usuario ya la rechazó dos veces, el sistema no vuelve a preguntar y
- * el resultado llega enseguida como denegado.
+ * [onResult] recibe si ha quedado concedida. Si el usuario ya la rechazó dos veces, el sistema no vuelve a preguntar y el
+ * resultado llega enseguida como denegado; en ese caso (y tras un «no» que ya no se puede repetir) se llama además a
+ * [onBlocked]: el permiso solo se puede dar desde los ajustes del móvil (ver [OpenSettingsDialog]).
  */
 @Composable
-fun rememberLocationPermissionRequest(onResult: (granted: Boolean) -> Unit): (precise: Boolean) -> Unit {
+fun rememberLocationPermissionRequest(
+    onBlocked: () -> Unit = {},
+    onResult: (granted: Boolean) -> Unit,
+): (precise: Boolean) -> Unit {
+    val context = LocalContext.current
     val currentOnResult by rememberUpdatedState(onResult)
+    val currentOnBlocked by rememberUpdatedState(onBlocked)
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
-        currentOnResult(grants.values.any { it })
+        val granted = grants.values.any { it }
+        currentOnResult(granted)
+        // Tras un «no», `shouldShow…` es verdadero mientras el sistema siga dispuesto a preguntar otra vez.
+        val activity = context.findActivity()
+        if (!granted && activity != null && grants.keys.none { ActivityCompat.shouldShowRequestPermissionRationale(activity, it) }) {
+            currentOnBlocked()
+        }
     }
     return remember(launcher) {
         { precise ->

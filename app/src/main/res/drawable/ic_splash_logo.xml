@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logotipo de la pantalla de arranque del sistema: el mismo círculo blanco con el logotipo que el A1 del diseño (disco de
+     112 dp y logotipo de 80 dp). Android 12 o más lo recorta a un círculo de 192 dp dentro de un lienzo de 288 dp, y el disco
+     cabe de sobra. Las medidas van en porcentaje del lienzo. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <size
+                android:width="288dp"
+                android:height="288dp" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+    <item>
+        <inset
+            android:insetBottom="30.56%"
+            android:insetLeft="30.56%"
+            android:insetRight="30.56%"
+            android:insetTop="30.56%">
+            <shape android:shape="oval">
+                <solid android:color="@android:color/white" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:drawable="@drawable/logo_turismo_valencia"
+            android:insetBottom="36.11%"
+            android:insetLeft="36.11%"
+            android:insetRight="36.11%"
+            android:insetTop="36.11%" />
+    </item>
+</layer-list>

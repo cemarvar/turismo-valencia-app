@@ -1,5 +1,5 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa)
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos)
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
 guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado."""
 import io
@@ -10,6 +10,7 @@ import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
 
 from PIL import Image, ImageStat
 
@@ -478,6 +479,8 @@ GEO_VALENCIA = ("-0.3755", "39.4745")
 def set_location_permission(granted):
     for permission in PERMISSIONS:
         adb("shell", "pm", "grant" if granted else "revoke", PKG, permission)
+    if not granted:
+        reset_permission_flags(*PERMISSIONS)
 
 
 def has_location_permission():
@@ -652,7 +655,293 @@ def g_mapa():
     start(None)  # deja la app como un primer arranque
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa}
+NOTIFICATION_PERMISSION = "android.permission.POST_NOTIFICATIONS"
+REMINDER_ROW = "Avisarme de la mascletà"
+
+
+def reset_permission_flags(*permissions):
+    """`pm revoke` cuenta como una decisión del usuario: con esa marca el primer «No permitir» ya es el segundo para Android y
+    el sistema deja de preguntar. Se borran las marcas para volver al estado de un permiso que nunca se ha pedido."""
+    for permission in permissions:
+        adb("shell", "pm", "clear-permission-flags", PKG, permission, "user-set", "user-fixed")
+
+
+def set_notification_permission(granted):
+    adb("shell", "pm", "grant" if granted else "revoke", PKG, NOTIFICATION_PERMISSION)
+    if not granted:
+        reset_permission_flags(NOTIFICATION_PERMISSION)
+
+
+def has_notification_permission():
+    return "POST_NOTIFICATIONS: granted=true" in adb("shell", "dumpsys", "package", PKG)
+
+
+def app_alarms():
+    """Alarmas pendientes de la app (hora de inicio de la ventana en UTC), de `dumpsys alarm`."""
+    out = adb("shell", "dumpsys", "alarm")
+    pattern = r"Alarm\{\w+ type \d+ origWhen (\d+) whenElapsed -?\d+ " + re.escape(PKG)
+    return sorted(datetime.fromtimestamp(int(m.group(1)) / 1000, timezone.utc) for m in re.finditer(pattern, out))
+
+
+def wait_alarms(count, seconds=8.0):
+    """Espera a que haya `count` alarmas de la app (se programan en segundo plano al cambiar un ajuste o arrancar la app)."""
+    end = time.time() + seconds
+    alarms = app_alarms()
+    while len(alarms) != count and time.time() < end:
+        time.sleep(0.6)
+        alarms = app_alarms()
+    return alarms
+
+
+def is_mascleta_window(alarm, now=None):
+    """Ventana de la mascletà: del 1 al 19 de marzo a las 13:20 de Valencia (12:20 UTC, es invierno), dentro del próximo año."""
+    now = now or datetime.now(timezone.utc)
+    return alarm.month == 3 and 1 <= alarm.day <= 19 and (alarm.hour, alarm.minute, alarm.second) == (12, 20, 0) and now < alarm < now + timedelta(days=400)
+
+
+def reminder_notification_posted():
+    return "tag=event-reminder" in adb("shell", "dumpsys", "notification", "--noredact")
+
+
+def set_clock(moment):
+    """Cambia la hora del emulador (UTC). Siempre hay que llamar después a restore_clock()."""
+    adb("shell", "settings", "put", "global", "auto_time", "0")
+    adb("shell", "settings", "put", "global", "auto_time_zone", "0")
+    adb("shell", "cmd", "alarm", "set-time", str(int(moment.timestamp() * 1000)))
+
+
+def restore_clock():
+    adb("shell", "cmd", "alarm", "set-time", str(int(time.time() * 1000)))
+    adb("shell", "settings", "put", "global", "auto_time", "1")
+    adb("shell", "settings", "put", "global", "auto_time_zone", "1")
+
+
+def focused_window():
+    out = adb("shell", "dumpsys", "window")
+    return next((l.strip() for l in out.split("\n") if "mCurrentFocus" in l), "")
+
+
+def wait_focus(package, seconds=8.0):
+    end = time.time() + seconds
+    while time.time() < end:
+        if package in focused_window():
+            return True
+        time.sleep(0.6)
+    return False
+
+
+def tap_system_button(*labels, seconds=6.0):
+    """Pulsa un botón de un diálogo del sistema (en inglés en el emulador); el apóstrofo de «Don’t allow» no es el del teclado."""
+    wanted = [l.replace("’", "'") for l in labels]
+    end = time.time() + seconds
+    while time.time() < end:
+        for n in nodes():
+            if n["t"].replace("’", "'") in wanted:
+                tap(n)
+                return True
+        time.sleep(0.6)
+    return False
+
+
+def wait_system_dialog(text, seconds=6.0):
+    end = time.time() + seconds
+    while time.time() < end:
+        if any(text in t for t in texts()):
+            return True
+        time.sleep(0.6)
+    return False
+
+
+def reminder_switch():
+    """Interruptor del aviso de la ficha de Fallas (baja por la pantalla hasta verlo)."""
+    scroll_to(REMINDER_ROW)
+    return switch_near(REMINDER_ROW)
+
+
+def reminder_on():
+    return (reminder_switch() or {}).get("on")
+
+
+def welcome_to_home():
+    """Recorre la bienvenida (con el permiso de ubicación del sistema) hasta Inicio; deja `onboardingDone` guardado."""
+    start(None)
+    time.sleep(2.2)
+    tap_text("Saltar")
+    time.sleep(1.2)
+    tap_text("Mientras se usa la app")
+    accept_location_dialog()
+    return wait_for("Buscar en Valencia…", 8)
+
+
+def g_avisos():
+    print("\n## Avisos: permiso de notificaciones, aviso de la mascletà, alarmas, notificación y ajustes del sistema")
+    set_location_permission(True)
+
+    # --- Sin permiso: el aviso sale apagado y pide el permiso al encenderlo
+    set_notification_permission(False)
+    start("detalle/fallas")
+    check("sin permiso de notificaciones el aviso sale apagado", reminder_on() is False)
+    check("…y no hay ninguna alarma programada", app_alarms() == [])
+    tap(reminder_switch())
+    check("al encenderlo se abre el diálogo del sistema", wait_system_dialog("send you notifications"))
+    check("«No permitir»", tap_system_button("Don't allow"))
+    time.sleep(1.2)
+    check("tras decir que no sigue apagado y sin alarma", reminder_on() is False and app_alarms() == [])
+    tap(reminder_switch())
+    check("el sistema deja preguntar una segunda vez", wait_system_dialog("send you notifications"))
+    tap_system_button("Don't allow")
+    check("tras el segundo no, la app explica cómo activarlas en Ajustes", wait_for("Notificaciones desactivadas", 5))
+    check("…con el botón «Abrir ajustes»", find("Abrir ajustes") is not None)
+    tap_text("Abrir ajustes")
+    check("«Abrir ajustes» abre los ajustes de notificaciones de la app", wait_focus("com.android.settings") and wait_for("Turismo Valencia", 5, exact=False))
+    # El usuario las activa allí (se simula con `pm grant`) y vuelve a la app: el aviso que pidió se enciende solo.
+    set_notification_permission(True)
+    back()
+    time.sleep(1.5)
+    check("al volver con el permiso dado el aviso pedido está encendido", reminder_on() is True)
+    alarms = wait_alarms(1)
+    check("…y la alarma de la mascletà queda programada (13:20 de Valencia)", len(alarms) == 1 and is_mascleta_window(alarms[0]), str(alarms))
+    check("la alarma es una ventana de 10 minutos", "window=+10m0s0ms" in adb("shell", "dumpsys", "alarm"))
+
+    # --- Con el diálogo del sistema: permitir
+    set_notification_permission(False)
+    start("detalle/fallas")
+    check("sin permiso (de nuevo) el aviso sale apagado", reminder_on() is False)
+    tap(reminder_switch())
+    wait_system_dialog("send you notifications")
+    tap_system_button("Allow")
+    time.sleep(1.5)
+    check("al permitir se concede el permiso del sistema", has_notification_permission())
+    check("…y el aviso queda encendido", reminder_on() is True)
+    alarms = wait_alarms(1)
+    check("…con la alarma de la próxima mascletà", len(alarms) == 1 and is_mascleta_window(alarms[0]), str(alarms))
+
+    # --- Persistencia
+    start("detalle/fallas", reset=False)
+    check("al cerrar y abrir la app el aviso sigue encendido", reminder_on() is True)
+    check("…y la alarma se vuelve a programar al arrancar (el cierre forzoso las borra)", len(wait_alarms(1)) == 1)
+    tap(reminder_switch())
+    time.sleep(1.2)
+    check("apagar el aviso lo apaga", reminder_on() is False)
+    check("…y cancela la alarma", len(wait_alarms(0)) == 0)
+    start("detalle/fallas", reset=False)
+    check("apagado, tras reiniciar sigue apagado y sin alarma", reminder_on() is False and app_alarms() == [])
+    tap(reminder_switch())
+    time.sleep(1.2)
+    check("con el permiso ya dado, encenderlo no pregunta más", reminder_on() is True and not any("send you notifications" in t for t in texts()))
+    check("…y programa la alarma", len(wait_alarms(1)) == 1)
+
+    # --- Perfil: el ajuste general de Notificaciones manda sobre todos los avisos
+    start("perfil", reset=False)
+    check("Perfil: Notificaciones está activado", (switch_near("Notificaciones") or {}).get("on") is True)
+    tap(switch_near("Notificaciones"))
+    time.sleep(1.2)
+    check("Perfil: al apagarlo se cancela la alarma", (switch_near("Notificaciones") or {}).get("on") is False and len(wait_alarms(0)) == 0)
+    start("detalle/fallas", reset=False)
+    check("…y en la ficha de Fallas el aviso sale apagado", reminder_on() is False)
+    start("perfil", reset=False)
+    tap(switch_near("Notificaciones"))
+    time.sleep(1.2)
+    check("Perfil: al volver a encenderlo se programa otra vez", (switch_near("Notificaciones") or {}).get("on") is True and len(wait_alarms(1)) == 1)
+    set_notification_permission(False)
+    start("perfil", reset=False)
+    check("Perfil: sin el permiso del sistema Notificaciones sale apagado", (switch_near("Notificaciones") or {}).get("on") is False)
+    tap(switch_near("Notificaciones"))
+    check("…y al encenderlo pide el permiso", wait_system_dialog("send you notifications"))
+    tap_system_button("Allow")
+    time.sleep(1.5)
+    check("…y al permitir queda encendido con su alarma", (switch_near("Notificaciones") or {}).get("on") is True and len(wait_alarms(1)) == 1)
+
+    # --- El aviso salta de verdad: se adelanta el reloj al final de la ventana de la alarma
+    check("bienvenida completa hasta Inicio", welcome_to_home())
+    alarms = wait_alarms(1, 10)
+    first = alarms[0] if alarms else None
+    check("tras la bienvenida la mascletà vuelve a tener su alarma (la demo trae el aviso activado)", first is not None and is_mascleta_window(first), str(alarms))
+    posted = False
+    if first:
+        try:
+            set_clock(first + timedelta(minutes=9, seconds=40))
+            end = time.time() + 70
+            while time.time() < end and not posted:
+                posted = reminder_notification_posted()
+                time.sleep(2)
+            check("la alarma salta con la ventana y publica la notificación", posted)
+            nxt = wait_alarms(1, 10)
+            check("…y programa el aviso del día siguiente", len(nxt) == 1 and nxt[0] == first + timedelta(days=1), str(nxt))
+            adb("shell", "cmd", "statusbar", "expand-notifications")
+            time.sleep(2)
+            ts = texts()
+            check("la notificación dice «Mascletà a las 14:00»", "Mascletà a las 14:00" in ts)
+            check("…con la plaza y la antelación", any("Plaza del Ayuntamiento" in t and "30 min" in t for t in ts))
+            adb("shell", "cmd", "statusbar", "collapse")
+            time.sleep(1)
+            # Arranque en frío tocando la notificación: la app abre Inicio y encima la ficha de Fallas.
+            adb("shell", "input", "keyevent", "KEYCODE_HOME")
+            time.sleep(1)
+            adb("shell", "am", "kill", PKG)
+            time.sleep(1)
+            adb("shell", "cmd", "statusbar", "expand-notifications")
+            time.sleep(2)
+            note = next((n for n in nodes() if n["t"] == "Mascletà a las 14:00"), None)
+            check("la notificación sigue en la bandeja con la app cerrada", note is not None)
+            if note:
+                tap(note)
+                time.sleep(3)
+                check("tocarla abre la ficha de Fallas", wait_for("Les Falles de València", 6))
+                check("…y la notificación se quita al tocarla", not reminder_notification_posted())
+                back()
+                check("«Atrás» lleva a Inicio (no sale de la app)", wait_for("Buscar en Valencia…", 5))
+        finally:
+            restore_clock()
+
+    # --- Al reiniciar el móvil las alarmas se vuelven a programar sin abrir la app
+    start("detalle/fallas", reset=False)  # la app queda abierta (no «detenida»), como la deja el usuario
+    check("antes de reiniciar hay una alarma", len(wait_alarms(1)) == 1)
+    adb("shell", "input", "keyevent", "KEYCODE_HOME")
+    adb("reboot")
+    time.sleep(15)
+    end = time.time() + 240
+    booted = False
+    while time.time() < end and not booted:
+        booted = adb("shell", "getprop", "sys.boot_completed").strip() == "1"
+        time.sleep(3)
+    check("el emulador ha vuelto a arrancar", booted)
+    adb("shell", "wm", "size", "780x1688")
+    adb("shell", "wm", "density", "320")
+    alarms = wait_alarms(1, 90)
+    check("tras reiniciar, sin abrir la app, la alarma se ha vuelto a programar (BootReceiver)", len(alarms) == 1 and is_mascleta_window(alarms[0]), str(alarms))
+
+    # --- Ubicación: si el sistema ya no pregunta, la app lleva a Ajustes
+    set_location_permission(False)
+    start("perfil")
+    tap_text("Ubicación")
+    time.sleep(0.8)
+    tap_last("Mientras se usa la app")
+    check("Perfil → Ubicación abre el diálogo del sistema", wait_system_dialog("access this device"))
+    tap_system_button("Don't allow")
+    time.sleep(1.2)
+    check("tras el primer no no hay aviso de Ajustes", find("Ubicación desactivada") is None)
+    tap_text("Ubicación")
+    time.sleep(0.8)
+    tap_last("Mientras se usa la app")
+    wait_system_dialog("access this device")
+    tap_system_button("Don't allow")
+    check("tras el segundo no la app explica cómo permitir la ubicación", wait_for("Ubicación desactivada", 5))
+    tap_text("Abrir ajustes")
+    check("«Abrir ajustes» abre los ajustes de la app", wait_focus("com.android.settings") and wait_for("Turismo Valencia", 5, exact=False))
+    back()
+    time.sleep(1)
+    start("mapa", reset=False)
+    wait_for("© Colaboradores de OpenStreetMap", 8)
+    tap_text("Centrar en mi ubicación")
+    check("Mapa: «Centrar en mi ubicación» sin poder preguntar lleva también a Ajustes", wait_for("Ubicación desactivada", 5))
+    tap_text("Ahora no")
+    check("«Ahora no» cierra el aviso", wait_for("Ubicación desactivada", 1.5) is False)
+    set_location_permission(True)
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     chosen = sys.argv[1:] or list(GROUPS)

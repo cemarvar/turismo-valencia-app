@@ -1,4 +1,5 @@
-"""Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, ValBot (OkHttp), mapa, ruta y reserva.
+"""Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, ValBot (OkHttp), mapa, ruta, reserva
+y aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones).
 Una versión minificada puede romperse sin que la de depuración lo note (p. ej. al añadir una librería de Kotlin fuera de
 `packageScope`), así que conviene pasarla tras tocar dependencias o `app/build.gradle.kts`.
 
@@ -106,6 +107,24 @@ def main():
     restart()
     tab("reservas")
     v.check("tras reiniciar hay 4 reservas", wait_for("4 reservas · 1 pendiente", 5))
+
+    # Avisos de eventos: receptores, AlarmManager y notificaciones (androidx.core) bajo R8
+    v.set_notification_permission(True)
+    restart()
+    alarms = v.wait_alarms(1, 10)
+    v.check("Avisos: con el permiso dado, la alarma de la mascletà se programa al arrancar", len(alarms) == 1 and v.is_mascleta_window(alarms[0]), str(alarms))
+    tab("inicio")
+    v.check("chip Eventos", v.tap_chip("Eventos"))
+    time.sleep(1.2)
+    v.check("Fallas 2027 está en los eventos de la portada", v.tap_text("Fallas 2027"))
+    time.sleep(2)
+    switch = v.reminder_switch()
+    v.check("Fallas: el aviso de la mascletà sale encendido", bool(switch and switch["on"]))
+    if switch:
+        v.tap(switch)
+    time.sleep(1.2)
+    v.check("apagar el aviso cancela la alarma", len(v.wait_alarms(0)) == 0)
+    v.back()
 
     log = v.adb("shell", "logcat", "-d", "-t", "3000")
     bad = [l for l in log.split("\n") if ("FATAL EXCEPTION" in l or "IllegalAccessError" in l or "NoSuchMethodError" in l or "ClassNotFoundException" in l) and v.PKG in log]

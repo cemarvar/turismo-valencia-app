@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -25,11 +26,20 @@ import com.cmarcillovargas.turismovalencia.R
 import com.cmarcillovargas.turismovalencia.ui.components.BottomNavBar
 import com.cmarcillovargas.turismovalencia.ui.components.NavBarItem
 
-/** App principal: grafo de navegación y barra inferior (solo en las pantallas que la llevan en el diseño). */
+/**
+ * App principal: grafo de navegación y barra inferior (solo en las pantallas que la llevan en el diseño). `openItem` es la
+ * ficha que hay que abrir porque el usuario tocó un aviso: se abre encima de la pantalla en la que esté.
+ */
 @Composable
-fun MainApp(onLogout: () -> Unit, startRoute: String? = null) {
+fun MainApp(onLogout: () -> Unit, startRoute: String? = null, openItem: String? = null, onOpenItemHandled: () -> Unit = {}) {
     val navController = rememberNavController()
     val entry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(openItem) {
+        if (openItem != null) {
+            navController.navigate(Routes.detalle(openItem)) { launchSingleTop = true }
+            onOpenItemHandled()
+        }
+    }
     val tab = Routes.tabOf(entry?.destination?.route)
     // Con el teclado abierto se oculta la barra inferior y el contenido sube sobre él.
     val keyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0

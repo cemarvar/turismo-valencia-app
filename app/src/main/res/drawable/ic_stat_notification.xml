@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono pequeño de las notificaciones: un anillo con la «V» de Valencia. Solo cuenta la forma (Android la pinta de un color). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M12,2a10,10 0,1 0,0 20a10,10 0,1 0,0 -20zM12,4a8,8 0,1 0,0 16a8,8 0,1 0,0 -16z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M7.2,8h2.4L12,14.2L14.4,8h2.4L13.1,17h-2.2z" />
+</vector>

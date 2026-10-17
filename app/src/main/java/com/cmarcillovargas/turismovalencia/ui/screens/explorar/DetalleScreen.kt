@@ -39,7 +39,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,11 +67,15 @@ import com.cmarcillovargas.turismovalencia.ui.components.BottomActionBar
 import com.cmarcillovargas.turismovalencia.ui.components.ContactSummaryCard
 import com.cmarcillovargas.turismovalencia.ui.components.DetailHero
 import com.cmarcillovargas.turismovalencia.ui.components.InfoItemRow
+import com.cmarcillovargas.turismovalencia.ui.components.NotificationAccessResult
+import com.cmarcillovargas.turismovalencia.ui.components.OpenSettingsDialog
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.SectionTitle
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
+import com.cmarcillovargas.turismovalencia.ui.components.rememberNotificationAccessRequest
 import com.cmarcillovargas.turismovalencia.ui.components.webBlocks
+import com.cmarcillovargas.turismovalencia.util.openNotificationSettings
 import com.cmarcillovargas.turismovalencia.util.openUrl
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
@@ -92,12 +98,27 @@ fun DetalleRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    // El aviso necesita que el sistema deje notificar: al encenderlo se pide el permiso (Android 13+) y, si el sistema ya no
+    // pregunta, se explica cómo activarlo en los ajustes del móvil.
+    var showBlocked by remember { mutableStateOf(false) }
+    val askNotifications = rememberNotificationAccessRequest { result -> if (result == NotificationAccessResult.NeedsSettings) showBlocked = true }
+    if (showBlocked) {
+        OpenSettingsDialog(
+            title = stringResource(R.string.notifications_blocked_title),
+            text = stringResource(R.string.notifications_blocked_text),
+            onOpenSettings = context::openNotificationSettings,
+            onDismiss = { showBlocked = false },
+        )
+    }
     DetalleScreen(
         uiState = uiState,
         onBack = onBack,
         onToggleFavorite = viewModel::onToggleFavorite,
         onToggleDownload = viewModel::onToggleDownload,
-        onReminderChange = viewModel::onReminderChange,
+        onReminderChange = { on ->
+            viewModel.onReminderChange(on)
+            if (on) askNotifications()
+        },
         onShare = { uiState.item?.let { share(context, it) } },
         onCalendar = { uiState.item?.let { addToCalendar(context, it) } },
         onOpenRoute = { onOpenRoute(id) },
@@ -174,7 +195,7 @@ fun DetalleScreen(
                     }
                 }
                 if (item.acts.isNotEmpty()) {
-                    Acts(item, uiState.reminderOn, onReminderChange)
+                    Acts(item, uiState.reminderAvailable, uiState.reminderOn, onReminderChange)
                 }
                 if (item.info.isNotEmpty()) {
                     Text(stringResource(R.string.detail_info), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
@@ -211,7 +232,7 @@ fun DetalleScreen(
 }
 
 @Composable
-private fun Acts(item: ContentItem, reminderOn: Boolean, onReminderChange: (Boolean) -> Unit) {
+private fun Acts(item: ContentItem, reminderAvailable: Boolean, reminderOn: Boolean, onReminderChange: (Boolean) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
         SectionTitle(stringResource(R.string.detail_acts))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.m)) {
@@ -224,7 +245,7 @@ private fun Acts(item: ContentItem, reminderOn: Boolean, onReminderChange: (Bool
                 }
             }
         }
-        Row(
+        if (reminderAvailable) Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(MediaShape)
@@ -306,6 +327,9 @@ private fun DetallePlacePreview() {
 @Composable
 private fun DetalleEventPreview() {
     TurismoValenciaTheme {
-        DetalleScreen(DetalleUiState(item = FakeEventos.first { it.id == "fallas" }, favorite = true), {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+        DetalleScreen(
+            DetalleUiState(item = FakeEventos.first { it.id == "fallas" }, favorite = true, reminderAvailable = true, reminderOn = true),
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+        )
     }
 }

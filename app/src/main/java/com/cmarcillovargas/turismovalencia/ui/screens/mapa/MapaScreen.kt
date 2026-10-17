@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -72,6 +73,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.MapCamera
 import com.cmarcillovargas.turismovalencia.ui.components.MapAttribution
 import com.cmarcillovargas.turismovalencia.ui.components.MapMarker
 import com.cmarcillovargas.turismovalencia.ui.components.OnScreenVisible
+import com.cmarcillovargas.turismovalencia.ui.components.OpenSettingsDialog
 import com.cmarcillovargas.turismovalencia.ui.components.OsmMap
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.RatingRow
@@ -86,6 +88,7 @@ import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 import com.cmarcillovargas.turismovalencia.util.formatDistance
+import com.cmarcillovargas.turismovalencia.util.openAppSettings
 import com.cmarcillovargas.turismovalencia.util.walkMinutes
 
 private val SearchHeight = 48.dp
@@ -114,12 +117,23 @@ fun MapaRoute(
             centerOnFix = false
         }
     }
-    val askLocation = rememberLocationPermissionRequest { granted ->
+    // Si el usuario ya dijo que no y el sistema no vuelve a preguntar, solo se puede dar desde los ajustes del móvil.
+    var showLocationSettings by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val askLocation = rememberLocationPermissionRequest(onBlocked = { showLocationSettings = true }) { granted ->
         viewModel.onLocationResult(granted)
         if (granted) {
             camera.centerOn(uiState.user, FocusZoom)
             centerOnFix = true
         }
+    }
+    if (showLocationSettings) {
+        OpenSettingsDialog(
+            title = stringResource(R.string.location_blocked_title),
+            text = stringResource(R.string.location_blocked_text),
+            onOpenSettings = context::openAppSettings,
+            onDismiss = { showLocationSettings = false },
+        )
     }
     LaunchedEffect(initialQuery) { if (!initialQuery.isNullOrBlank()) viewModel.setQuery(initialQuery) }
     // Si llegamos desde una ficha, el mapa se abre centrado en ella.
