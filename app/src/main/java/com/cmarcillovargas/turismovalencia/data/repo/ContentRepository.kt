@@ -29,8 +29,12 @@ import kotlin.math.roundToInt
  * Contenido de solo lectura. Las distancias de las fichas se miden desde [origin] (la ubicación del usuario o el centro de
  * Valencia) con las coordenadas reales de cada lugar; quien las muestre debe volver a leer cuando [origin] cambie.
  */
-// TODO(api): sustituir el contenido de ejemplo por la API (Retrofit) con caché en Room (TODO(room)).
-class ContentRepository(private val web: WebContentRepository) {
+// TODO(api): el resto del contenido (fichas y guías) sigue siendo el de la app; el catálogo de ofertas ya viene del servidor.
+class ContentRepository(
+    private val web: WebContentRepository,
+    /** Catálogo de ofertas vigente (`OffersRepository.offers`); sin él, el incluido en la app. */
+    offersSource: StateFlow<List<Offer>> = MutableStateFlow(FakeOfertas.map { it.copy(assetImage = web.offerImage(it.id)) }),
+) {
     /** Fichas con el orden, los títulos y las fotos de los índices de la web; las del diseño del Figma conservan su título y su foto. */
     private val base: List<ContentItem> = (FakeQueVer + FakeQueVerWeb + FakeGastronomia + FakeAlojamientos + FakeEventos + FakeEventosWeb + FakeSostenible).map { item ->
         val pageId = web.pageIdFor(item.id)
@@ -45,7 +49,10 @@ class ContentRepository(private val web: WebContentRepository) {
             heroAsset = meta?.hero,
         )
     }
-    val offers: List<Offer> = FakeOfertas.map { it.copy(assetImage = web.offerImage(it.id)) }
+
+    /** Entradas, tours y experiencias: las del servidor o, si no ha llegado ninguna versión, las de la app. Cambia cuando llega una nueva. */
+    val offersFlow: StateFlow<List<Offer>> = offersSource
+    val offers: List<Offer> get() = offersFlow.value
 
     private class Snapshot(val items: List<ContentItem>) {
         val byId = items.associateBy { it.id }

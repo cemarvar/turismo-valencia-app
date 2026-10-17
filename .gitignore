@@ -24,3 +24,6 @@ __pycache__/
 
 # Copias de seguridad de la base de datos del backend (contienen correos de reservas)
 backend/backups/
+
+# Grafo de conocimiento local de Graphify (se regenera con `graphify update .`)
+graphify-out/

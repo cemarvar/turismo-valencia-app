@@ -123,7 +123,7 @@ fun ReservarScreen(
                     PlaceImage(offer.thumb ?: offer.image, Category.Sostenible, Modifier.size(Spacing.xxl + Spacing.l).clip(ThumbShape), offer.title, assetPath = offer.assetImage)
                     Spacer(Modifier.width(Spacing.s))
                     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
-                        Eyebrow("${offer.tag} · ${offer.place}")
+                        Eyebrow(listOf(offer.tag, offer.place).filter { it.isNotBlank() }.joinToString(" · "))
                         Text(offer.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 2)
                         Text(
                             stringResource(R.string.book_per_person, offer.duration, formatEuro(offer.priceFrom)),

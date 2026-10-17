@@ -152,6 +152,55 @@ abstract class ReminderDao {
     abstract suspend fun clear()
 }
 
+/** Caché del catálogo de ofertas del servidor y la versión (`ETag`) con la que se guardó. */
+@Dao
+abstract class OfferDao {
+    @Query("SELECT * FROM offers ORDER BY position")
+    abstract fun observeAll(): Flow<List<OfferEntity>>
+
+    @Query("SELECT COUNT(*) FROM offers")
+    abstract suspend fun count(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertAll(entities: List<OfferEntity>)
+
+    @Query("DELETE FROM offers")
+    abstract suspend fun clear()
+
+    @Query("SELECT * FROM cache_meta WHERE name = :name")
+    abstract suspend fun meta(name: String): CacheMetaEntity?
+
+    @Upsert
+    abstract suspend fun saveMeta(entity: CacheMetaEntity)
+
+    @Query("DELETE FROM cache_meta WHERE name = :name")
+    abstract suspend fun deleteMeta(name: String)
+
+    /** Sustituye el catálogo guardado por el recibido y apunta su versión. En una transacción: nunca se ve a medias. */
+    @Transaction
+    open suspend fun replace(entities: List<OfferEntity>, etag: String?, now: Long) {
+        clear()
+        insertAll(entities)
+        saveMeta(CacheMetaEntity(OffersCache, etag, now))
+    }
+
+    /** El servidor confirmó (304) que la versión guardada sigue vigente. */
+    @Query("UPDATE cache_meta SET fetchedAt = :now WHERE name = :name")
+    abstract suspend fun touch(name: String, now: Long)
+
+    /** Vacía la caché (y su versión), como si la app no hubiera recibido nunca el catálogo. */
+    @Transaction
+    open suspend fun clearCache() {
+        clear()
+        deleteMeta(OffersCache)
+    }
+
+    companion object {
+        /** Nombre de esta caché en `cache_meta`. */
+        const val OffersCache = "offers"
+    }
+}
+
 @Dao
 abstract class NotificationDao {
     @Query("SELECT * FROM notifications ORDER BY position")

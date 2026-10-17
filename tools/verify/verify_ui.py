@@ -1,5 +1,5 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos)
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas)
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
 guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado."""
 import io
@@ -941,7 +941,89 @@ def g_avisos():
     start(None)  # deja la app como un primer arranque
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos}
+def offers_log(want, seconds=12.0):
+    """Última línea del registro de la app sobre el catálogo de ofertas («actualizado», «sin cambios (304)» o «No se pudo…»).
+    Espera a que salga una que contenga `want` (al abrir con `resetData` hay dos peticiones seguidas: la del arranque y la que
+    sigue al borrado) y, si no sale, devuelve la última que haya."""
+    end = time.time() + seconds
+    last = ""
+    while time.time() < end:
+        lines = [l for l in adb("shell", "logcat", "-d", "-s", "TurismoDb:V").splitlines() if "ofertas" in l]
+        if lines:
+            last = lines[-1].split("TurismoDb:")[-1].strip()
+            if want in last:
+                return last
+        time.sleep(0.8)
+    return last
+
+
+def app_offers_db():
+    """(ofertas, versión) de la caché de ofertas, leídas de la base de datos de la app (build de depuración, con run-as)."""
+    import sqlite3
+    import tempfile
+
+    folder = tempfile.mkdtemp(prefix="tv-db-")
+    for suffix in ("", "-wal", "-shm"):
+        data = adb("exec-out", "run-as", PKG, "cat", "databases/turismo.db" + suffix, binary=True)
+        if data:
+            with open(os.path.join(folder, "turismo.db" + suffix), "wb") as f:
+                f.write(data)
+    con = sqlite3.connect(os.path.join(folder, "turismo.db"))
+    try:
+        offers = con.execute("SELECT id, priceFromCents FROM offers ORDER BY position").fetchall()
+        meta = con.execute("SELECT etag, fetchedAt FROM cache_meta WHERE name = 'offers'").fetchone()
+    finally:
+        con.close()
+    return offers, meta
+
+
+def g_ofertas():
+    print("\n## Ofertas del servidor: caché en Room y respaldo sin conexión")
+    set_network(True)
+    # Primer arranque con conexión: pide el catálogo al servidor y lo guarda con su versión.
+    adb("shell", "logcat", "-c")
+    start("entradas?tab=experiencias")
+    line = offers_log("actualizado")
+    check("con conexión se pide el catálogo y se guarda", "actualizado" in line, line)
+    offers, meta = app_offers_db()
+    check("la caché tiene las ofertas del servidor, en su orden y con su versión", len(offers) >= 16 and offers[0][0] == "albufera-barca" and bool(meta and meta[0]), "%d ofertas · %s" % (len(offers), meta and meta[0]))
+    ts = texts()
+    check("la lista pinta las ofertas del servidor", "Paseo en barca por la Albufera" in ts and "18 €" in ts and "Taller de paella valenciana" in ts)
+    first_check = meta[1] if meta else 0
+
+    # Segundo arranque conservando lo guardado: el servidor responde 304 (el ETag débil de la pasarela vuelve tal cual).
+    adb("shell", "logcat", "-c")
+    start("entradas?tab=experiencias", reset=False)
+    line = offers_log("sin cambios")
+    check("al reabrir, el servidor confirma que sigue vigente (304)", "sin cambios" in line, line)
+    offers_again, meta_again = app_offers_db()
+    check("sigue el mismo catálogo y se anota la comprobación", offers_again == offers and bool(meta_again) and meta_again[0] == meta[0] and meta_again[1] > first_check)
+
+    # Sin conexión y con la caché guardada: la lista sale igual.
+    set_network(False)
+    start("entradas?tab=experiencias", reset=False)
+    ts = texts()
+    check("sin conexión se ve el catálogo guardado", "Paseo en barca por la Albufera" in ts and "Taller de paella valenciana" in ts)
+    check("sin conexión no se pierde la caché", app_offers_db()[0] == offers)
+
+    # Sin conexión y sin nada guardado (primer arranque): el catálogo incluido en la app.
+    start("entradas?tab=experiencias")
+    empty, no_meta = app_offers_db()
+    check("sin nada guardado no hay caché", empty == [] and no_meta is None)
+    ts = texts()
+    check("pero se ve el catálogo incluido en la app (Experiencias)", "Paseo en barca por la Albufera" in ts and "Taller de paella valenciana" in ts)
+    check("el catálogo incluido en la app tiene sus tres pestañas", tap_text("Tours") and "Ruta guiada Ciutat Vella" in texts() and tap_text("Entradas") and "Valencia Tourist Card 72 h" in texts())
+
+    # Vuelve la conexión: el catálogo del servidor llega solo, sin reiniciar la app.
+    adb("shell", "logcat", "-c")
+    set_network(True)
+    line = offers_log("actualizado", seconds=20)
+    check("al volver la conexión se pide el catálogo", "actualizado" in line, line)
+    check("y se guarda", len(app_offers_db()[0]) >= 16)
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     chosen = sys.argv[1:] or list(GROUPS)

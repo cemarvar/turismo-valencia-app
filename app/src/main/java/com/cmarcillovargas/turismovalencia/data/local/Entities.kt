@@ -8,6 +8,7 @@ import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.NotificationGroup
 import com.cmarcillovargas.turismovalencia.data.model.NotificationKind
+import com.cmarcillovargas.turismovalencia.data.model.OfferKind
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
 
@@ -75,6 +76,36 @@ data class RecentSearchEntity(
 @Entity(tableName = "reminders")
 data class ReminderEntity(
     @PrimaryKey val itemId: String,
+)
+
+/**
+ * Oferta del catálogo del servidor guardada para usarla sin conexión (caché: el servidor manda). `position` conserva el
+ * orden en que la API las sirve. El dinero va en céntimos, como en la API.
+ */
+@Entity(tableName = "offers")
+data class OfferEntity(
+    @PrimaryKey val id: String,
+    val position: Int,
+    val kind: OfferKind,
+    val tag: String,
+    val title: String,
+    val duration: String,
+    val place: String,
+    val extra: String,
+    val priceFromCents: Int,
+    val description: String,
+    val placeId: String?,
+    /** Horarios como un array JSON de textos (`["16:30","17:30"]`). */
+    val slots: String,
+)
+
+/** Datos de una caché del servidor (una fila por caché, `name`): la versión recibida (`ETag`) y cuándo se actualizó por última vez. */
+@Entity(tableName = "cache_meta")
+data class CacheMetaEntity(
+    @PrimaryKey val name: String,
+    val etag: String?,
+    /** Última vez que el servidor confirmó que esta es la versión vigente (milisegundos). */
+    val fetchedAt: Long,
 )
 
 @Entity(tableName = "notifications")

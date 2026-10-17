@@ -164,7 +164,8 @@ private fun OfferCard(offer: Offer, onReserve: () -> Unit, modifier: Modifier = 
                             Icon(Icons.Outlined.AccessTime, contentDescription = null, tint = MaterialTheme.appColors.brand, modifier = Modifier.size(Spacing.m + Spacing.xxs))
                             Spacer(Modifier.width(Spacing.xxs))
                             Text(
-                                text = "${offer.duration} · ${offer.place} · ${offer.extra}",
+                                // El servidor puede dejar algún dato vacío (p. ej. «extra»): no se pinta un separador de más.
+                                text = listOf(offer.duration, offer.place, offer.extra).filter { it.isNotBlank() }.joinToString(" · "),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,

@@ -30,8 +30,9 @@ class EntradasViewModel(private val container: AppContainer, initialTab: OfferTa
     private val searching = MutableStateFlow(false)
     private val query = MutableStateFlow("")
 
-    val uiState: StateFlow<EntradasUiState> = combine(tab, searching, query) { currentTab, isSearching, text ->
-        val offers = container.content.offersOf(currentTab.kind).filter { offer ->
+    // El catálogo es el del servidor: la lista se rehace cuando llega una versión nueva.
+    val uiState: StateFlow<EntradasUiState> = combine(tab, searching, query, container.content.offersFlow) { currentTab, isSearching, text, catalog ->
+        val offers = catalog.filter { it.kind == currentTab.kind }.filter { offer ->
             text.isBlank() || normalizeText(offer.title + " " + offer.place + " " + offer.tag).contains(normalizeText(text.trim()))
         }
         EntradasUiState(currentTab, offers, isSearching, text, if (text.isBlank()) guidesOf(currentTab) else emptyList())

@@ -51,6 +51,8 @@ class DemoData(private val content: ContentRepository) {
             clear()
             insertAll(Reminders.map { ReminderEntity(it) })
         }
+        // Como en el primer arranque: sin catálogo del servidor recibido (se vuelve a pedir cuando haya conexión).
+        db.offers().clearCache()
         db.settings().save(SettingsEntity())
     }
 

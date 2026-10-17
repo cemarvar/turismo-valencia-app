@@ -124,8 +124,25 @@ Al pasarse, **429** con `Retry-After`. Los contadores no guardan IPs ni correos,
 2. Al confirmar una reserva, generar una `Idempotency-Key` y guardarla hasta recibir respuesta; reintentar **con la misma clave** solo
    ante errores de red o 5xx. Si hay respuesta (200/201 o un 4xx), se acabó ese intento.
 3. Reservar exige conexión (el servidor confirma y asigna el localizador); ver las reservas ya guardadas, no.
-4. Cachear el catálogo con el `ETag` y usar el catálogo de `assets/` como respaldo si no hay red.
+4. Cachear el catálogo con el `ETag` y usar el catálogo incluido en la app como respaldo si no hay red (**hecho**, ver abajo).
 5. Enseñar los mensajes según `code`, no según `message`.
+
+### Catálogo de ofertas: lo que hace hoy la app
+
+El cliente es Retrofit con kotlinx.serialization (`data/remote/TurismoApi.kt`; la dirección sale de `BuildConfig.API_BASE_URL`) y
+`OffersRepository` (`data/repo`) es el único que lo usa:
+
+- Pide `GET /offers` al abrir la app y cada vez que vuelve la conexión, con `If-None-Match` igual al `ETag` guardado, tal como llegó
+  (la pasarela de Supabase lo manda débil). **304**: la caché sigue vigente. **200**: sustituye el catálogo guardado (tablas `offers` y
+  `cache_meta` de Room, en una transacción) y apunta el nuevo `ETag`. Cualquier fallo (sin red, 4xx/5xx, JSON que no es el del contrato)
+  deja lo que ya había.
+- Se ignoran las ofertas que la app no entiende (un `kind` desconocido, sin `id` o título, o con precio negativo) y las repetidas; un
+  catálogo vacío no sustituye al guardado (sería un error del servidor, no que no haya ofertas).
+- Mientras no haya recibido ningún catálogo (primer arranque sin conexión) se usa el incluido en la app (`FakeOfertas`), que tiene las
+  mismas 16 ofertas; una prueba comprueba que coincide con los ejemplos del contrato.
+- Los datos son los del servidor; las fotos del diseño (`image`, `thumb`, `ticket`) siguen en la app y se asocian por `id`: una oferta
+  nueva del servidor se pinta con el hueco de foto de su sección.
+- El modelo de la app usa euros enteros y la API céntimos: `priceFromCents` pasa a euros al euro más cercano (hoy todos son enteros).
 
 ## Datos personales
 

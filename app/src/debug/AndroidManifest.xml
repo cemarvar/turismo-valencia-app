@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Solo depuración: permite HTTP (sin cifrar) con el backend local del emulador (`npm start` en backend/). El release no lo lleva. -->
+    <application android:networkSecurityConfig="@xml/network_security_debug" />
+
+</manifest>

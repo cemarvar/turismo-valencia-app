@@ -48,6 +48,20 @@ npm stop
 En local la API está en `http://127.0.0.1:54321/functions/v1/api-v1`. Para mirar la base de datos:
 `docker exec -it supabase_db_turismo-valencia psql -U postgres`.
 
+### La app de depuración contra el backend local
+
+Por defecto la app usa la API publicada. Para que use la local (la oferta de pruebas `prueba-aforo` solo existe ahí, así que se ve que el
+catálogo es el del servidor) desde el emulador o un móvil por USB:
+
+```bash
+adb reverse tcp:54321 tcp:54321
+./gradlew installDebug -PapiBaseUrl=http://127.0.0.1:54321/functions/v1/api-v1/
+```
+
+Con `adb reverse` la app llega al ordenador por `127.0.0.1`; la dirección `10.0.2.2` del emulador se queda sin respuesta por la red Wi-Fi
+virtual. Solo la versión de depuración admite HTTP sin cifrar, y únicamente hacia el ordenador (`app/src/debug/res/xml`). Para volver a la
+nube, `./gradlew installDebug` sin `-PapiBaseUrl`.
+
 ## Cambiar el esquema
 
 1. `npx supabase migration new nombre` y escribir el SQL en el archivo nuevo.

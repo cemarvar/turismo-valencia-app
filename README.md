@@ -34,7 +34,7 @@ Las 27 pantallas del [diseño de Figma](docs/Figma) están implementadas y compa
 - **Arquitectura MVVM**: una pantalla = `Screen` + `UiState` + `ViewModel`, con `Route` que los conecta
 - **Navigation Compose** (barra inferior solo en las rutas que la llevan en el diseño)
 - Tipografía **Source Sans 3** empaquetada, para que la app funcione sin conexión
-- **osmdroid** (mapa de OpenStreetMap), **Room** (base de datos local con lo del usuario), **OkHttp** (ValBot y rutas), **ZXing** (código QR real), **AlarmManager** y notificaciones locales (avisos de eventos), **SplashScreen API** y `desugar_jdk_libs` (`java.time` desde Android 7)
+- **osmdroid** (mapa de OpenStreetMap), **Room** (base de datos local con lo del usuario), **OkHttp** (ValBot y rutas), **Retrofit** y **kotlinx.serialization** (la API propia del backend), **ZXing** (código QR real), **AlarmManager** y notificaciones locales (avisos de eventos), **SplashScreen API** y `desugar_jdk_libs` (`java.time` desde Android 7)
 - Android: `minSdk 24`, `targetSdk 37`, solo tema claro
 
 Datos: el contenido de la web como JSON en `assets/web/` (con 479 fotos en `assets/img/`) y lo del usuario (favoritos, descargas,
@@ -57,7 +57,7 @@ O abre la carpeta en Android Studio, espera a que sincronice Gradle y pulsa **Ru
 | `./gradlew assembleDebug` | Compilar el APK de depuración |
 | `./gradlew lint` | Análisis estático |
 | `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room) |
-| `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos) y avisos (alarmas y notificaciones reales) |
+| `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos), el catálogo de ofertas con su caché y avisos (alarmas y notificaciones reales) |
 
 ### Abrir una pantalla concreta (solo depuración)
 
@@ -79,7 +79,7 @@ Rutas: `inicio`, `mapa`, `valbot`, `favoritos`, `reservas`, `busqueda`, `categor
 ```text
 app/src/main/
 ├─ java/com/cmarcillovargas/turismovalencia/
-│  ├─ data/          modelos, contenido, repositorios (favoritos, descargas, reservas, ValBot…), Room (`local/`), avisos de eventos (`notify/`) y cliente de ValBot (`remote/`)
+│  ├─ data/          modelos, contenido, repositorios (favoritos, descargas, reservas, ValBot…), Room (`local/`), avisos de eventos (`notify/`) y clientes de red (`remote/`: la API propia con Retrofit, ValBot y rutas)
 │  ├─ navigation/    rutas y grafo de navegación
 │  ├─ ui/
 │  │  ├─ theme/      colores, tipografía, formas y espaciado
@@ -125,7 +125,8 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - **Mapa (emulador):** teselas, marcadores, selección, zoom, ubicación real simulada, ruta real, modo sin conexión y permisos.
 - **Persistencia (emulador):** favoritos, descargas, reservas, ajustes, búsquedas, avisos y bienvenida siguen ahí tras cerrar y abrir la app.
 - **Avisos (emulador):** permiso real de notificaciones (diálogo, «No permitir» y «Abrir ajustes»), alarma de la mascletà en `dumpsys alarm`, disparo adelantando el reloj, tocar la notificación con la app cerrada y reinicio del móvil.
-- **Publicación (emulador):** la versión minificada con R8 arranca y guarda en Room (`verify_release.py`).
+- **Ofertas del servidor (emulador):** el catálogo llega y se guarda con su versión, el servidor confirma con 304 al reabrir, se ve sin conexión desde la caché y, sin nada guardado, el catálogo incluido en la app (`verify_ui.py ofertas`).
+- **Publicación (emulador):** la versión minificada con R8 arranca, guarda en Room y pide el catálogo con Retrofit (`verify_release.py`).
 - **Fotos:** tras cambiar de sección, cada tarjeta muestra su propia foto.
 - **Backend (local):** `cd backend && npm test` prueba la API por HTTP (ofertas, reservas, idempotencia, aforo con peticiones simultáneas, límites y base de datos cerrada).
 
@@ -133,7 +134,8 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 
 - [x] **ValBot en línea**: conectado a la función `/api/chat` de la web (Gemini); la clave se queda en el servidor y, si no responde, contesta con reglas
 - [x] **Backend propio en Supabase** (`backend/`): PostgreSQL y una API de ofertas y reservas con escritura ([`docs/api.md`](docs/api.md)); publicado en Supabase y probado en local y en la nube
-- [ ] **La app con el backend**: reservas reales, ofertas del servidor con caché en Room y migración del esquema
+- [x] **Ofertas del servidor** en la app: Retrofit + kotlinx.serialization, caché en Room (esquema v3 con migración) y respaldo sin conexión
+- [ ] **Reservas reales** con el backend (reservar exige conexión), refresco en segundo plano y texto de privacidad
 - [x] **Persistencia local** con Room: favoritos, descargas, reservas, ajustes, búsquedas, avisos y primer arranque
 - [x] **Mapa real** con osmdroid, ubicación del usuario y rutas a pie y en bici
 - [ ] **Mapa sin conexión por zonas** (hoy se ven sin conexión las teselas ya vistas)

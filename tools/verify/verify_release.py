@@ -1,5 +1,6 @@
-"""Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, ValBot (OkHttp), mapa, ruta, reserva
-y aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones).
+"""Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, catálogo de ofertas del servidor
+(Retrofit + kotlinx.serialization), ValBot (OkHttp), mapa, ruta, reserva y aviso de la mascletà (alarma con `AlarmManager`,
+receptores y notificaciones).
 Una versión minificada puede romperse sin que la de depuración lo note (p. ej. al añadir una librería de Kotlin fuera de
 `packageScope`), así que conviene pasarla tras tocar dependencias o `app/build.gradle.kts`.
 
@@ -59,6 +60,8 @@ def main():
         v.tap_text("While using the app")
     v.check("terminada la bienvenida se entra en Inicio", wait_for("Buscar en Valencia…", 8))
     v.check("Inicio lee las descargas de Room (Mercado Central sin conexión)", v.find("Sin conexión") is not None)
+    line = v.offers_log("actualizado")
+    v.check("Ofertas: Retrofit y kotlinx.serialization piden el catálogo al servidor y lo guardan bajo R8", "actualizado" in line, line)
 
     # Favoritos: quitar uno y que siga quitado tras reiniciar
     tab("favoritos")
