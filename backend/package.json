@@ -1,0 +1,19 @@
+{
+  "name": "turismo-valencia-backend",
+  "private": true,
+  "description": "Backend de Turismo Valencia en Supabase: base de datos PostgreSQL (migraciones) y funciones de borde (API)",
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "status": "supabase status",
+    "reset": "supabase db reset",
+    "serve": "supabase functions serve",
+    "test": "python tests/test_api.py",
+    "login": "supabase login",
+    "link": "supabase link",
+    "deploy": "supabase db push && supabase functions deploy api-v1 --use-api"
+  },
+  "devDependencies": {
+    "supabase": "^2.121.0"
+  }
+}

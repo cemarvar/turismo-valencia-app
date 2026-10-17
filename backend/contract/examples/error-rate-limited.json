@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "Demasiadas peticiones. Inténtalo de nuevo más tarde."
+  }
+}

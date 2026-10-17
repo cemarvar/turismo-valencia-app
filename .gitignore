@@ -21,3 +21,6 @@ local.properties
 node_modules/
 /tools/web-import/work/
 __pycache__/
+
+# Copias de seguridad de la base de datos del backend (contienen correos de reservas)
+backend/backups/

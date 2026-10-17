@@ -1,0 +1,20 @@
+name: Mantener activo el proyecto de Supabase
+
+# El plan gratuito de Supabase pausa el proyecto tras una semana sin actividad (revisa las condiciones vigentes). Esta tarea pide el
+# catálogo cada 3 días para que no se pause. Solo hace algo si existe la variable de repositorio API_BASE
+# (Settings → Secrets and variables → Actions → Variables), con la dirección base de la API, por ejemplo
+# https://<proyecto>.supabase.co/functions/v1/api-v1 (es pública, no es un secreto).
+# GitHub desactiva las tareas programadas de un repositorio sin actividad durante 60 días: si pasa, se reactivan desde la pestaña Actions.
+
+on:
+  schedule:
+    - cron: "17 6 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    if: ${{ vars.API_BASE != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pedir el catálogo de ofertas
+        run: curl --fail --silent --show-error --max-time 30 "${{ vars.API_BASE }}/offers" > /dev/null

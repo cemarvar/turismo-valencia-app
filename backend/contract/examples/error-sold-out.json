@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "sold_out",
+    "message": "Ya no quedan plazas para ese día y horario."
+  }
+}

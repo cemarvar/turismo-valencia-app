@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "invalid_request",
+    "message": "Datos incorrectos: adults (entero entre 1 y 20)."
+  }
+}

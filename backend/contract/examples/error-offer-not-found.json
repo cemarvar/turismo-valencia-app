@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "offer_not_found",
+    "message": "La oferta no existe o ya no está disponible."
+  }
+}

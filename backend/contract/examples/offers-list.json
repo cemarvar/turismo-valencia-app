@@ -1,0 +1,54 @@
+{
+  "offers": [
+    {
+      "id": "albufera-barca",
+      "kind": "experiencia",
+      "tag": "Excursión",
+      "title": "Paseo en barca por la Albufera",
+      "duration": "1 h",
+      "place": "El Palmar",
+      "extra": "español/inglés",
+      "priceFromCents": 1800,
+      "description": "Recorre el lago en una barca eléctrica con guía bilingüe, entre arrozales y aves migratorias.",
+      "placeId": "albufera-barca",
+      "slots": [
+        "16:30",
+        "17:30",
+        "18:30",
+        "19:30"
+      ]
+    },
+    {
+      "id": "tourist-card-72",
+      "kind": "entrada",
+      "tag": "Entradas",
+      "title": "Valencia Tourist Card 72 h",
+      "duration": "72 h",
+      "place": "Toda la ciudad",
+      "extra": "transporte y museos",
+      "priceFromCents": 2500,
+      "description": "La tarjeta que te abre Valencia entera: transporte gratis, 14 museos incluidos, tapa de regalo y descuentos de hasta el 50 % en más de 130 servicios turísticos.",
+      "placeId": null,
+      "slots": [
+        "Cualquier hora"
+      ]
+    },
+    {
+      "id": "entrada-oceanografic",
+      "kind": "entrada",
+      "tag": "Entradas",
+      "title": "Entrada al Oceanogràfic",
+      "duration": "Día completo",
+      "place": "Ciudad de las Artes y las Ciencias",
+      "extra": "delfinario incluido",
+      "priceFromCents": 3300,
+      "description": "Entrada al mayor acuario de Europa con el espectáculo del delfinario incluido. Evita colas comprando online.",
+      "placeId": "oceanografic",
+      "slots": [
+        "10:00",
+        "12:00",
+        "15:00"
+      ]
+    }
+  ]
+}

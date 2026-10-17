@@ -1,0 +1,18 @@
+{
+  "id": "albufera-barca",
+  "kind": "experiencia",
+  "tag": "Excursión",
+  "title": "Paseo en barca por la Albufera",
+  "duration": "1 h",
+  "place": "El Palmar",
+  "extra": "español/inglés",
+  "priceFromCents": 1800,
+  "description": "Recorre el lago en una barca eléctrica con guía bilingüe, entre arrozales y aves migratorias.",
+  "placeId": "albufera-barca",
+  "slots": [
+    "16:30",
+    "17:30",
+    "18:30",
+    "19:30"
+  ]
+}
