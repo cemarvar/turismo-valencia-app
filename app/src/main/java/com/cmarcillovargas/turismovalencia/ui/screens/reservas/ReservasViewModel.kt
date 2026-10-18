@@ -33,7 +33,10 @@ class ReservasViewModel(private val container: AppContainer) : ViewModel() {
 
     val uiState: StateFlow<ReservasUiState> = combine(tab, container.reservations.items) { current, all ->
         val today = LocalDate.now()
-        val rows = all.map { ReservationRow(it, container.content.offer(it.offerId)) }
+        val rows = all.map { reservation ->
+            val offer = container.content.offer(reservation.offerId)
+            ReservationRow(reservation.shownAs(offer), offer)
+        }
         val upcoming = rows.filter { it.reservation.status != ReservationStatus.Completed && it.reservation.status != ReservationStatus.Cancelled }.sortedBy { it.reservation.date }
         val done = rows.filter { it.reservation.status == ReservationStatus.Completed }.sortedByDescending { it.reservation.date }
         val cancelled = rows.filter { it.reservation.status == ReservationStatus.Cancelled }.sortedByDescending { it.reservation.date }

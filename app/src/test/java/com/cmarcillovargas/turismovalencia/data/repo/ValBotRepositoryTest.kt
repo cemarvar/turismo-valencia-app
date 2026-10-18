@@ -1,5 +1,6 @@
 package com.cmarcillovargas.turismovalencia.data.repo
 
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.remote.ChatException
 import com.cmarcillovargas.turismovalencia.data.remote.ChatService
 import com.cmarcillovargas.turismovalencia.data.remote.ChatTurn
@@ -18,8 +19,10 @@ private class FakeRules : ValBotRules {
 
 private class FakeChat(private val answer: () -> String) : ChatService {
     var received: Pair<String, List<ChatTurn>>? = null
-    override suspend fun ask(message: String, history: List<ChatTurn>): String {
+    var language: LanguageCode? = null
+    override suspend fun ask(message: String, history: List<ChatTurn>, language: LanguageCode): String {
         received = message to history
+        this.language = language
         return answer()
     }
 }
@@ -53,6 +56,18 @@ class ValBotRepositoryTest {
         assertEquals(10, sent.size)
         assertEquals("m5", sent.first().text)
         assertEquals("m14", sent.last().text)
+    }
+
+    @Test
+    fun `le pide la respuesta en el idioma de la app`() = runBlocking {
+        val chat = FakeChat { "ok" }
+        var language = LanguageCode.EN
+        val repo = ValBotRepository(chat, FakeRules(), language = { language })
+        repo.reply("hello", emptyList())
+        assertEquals(LanguageCode.EN, chat.language)
+        language = LanguageCode.VA
+        repo.reply("hola", emptyList())
+        assertEquals(LanguageCode.VA, chat.language)
     }
 
     @Test

@@ -11,7 +11,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.ReminderEntity
+import com.cmarcillovargas.turismovalencia.R
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.notify.EventReminders
 import com.cmarcillovargas.turismovalencia.data.notify.NotificationAccess
 import com.cmarcillovargas.turismovalencia.data.notify.ReminderNotifier
@@ -66,6 +68,7 @@ class RemindersTest {
 
     @After
     fun tearDown() {
+        AppLanguagePrefs.write(context, LanguageCode.ES)
         toClose.forEach { it() }
         scheduler.cancel(reminder.itemId)
         notifier.dismiss(reminder)
@@ -90,6 +93,30 @@ class RemindersTest {
 
     private fun at(year: Int, month: Int, day: Int, hour: Int, minute: Int): Instant =
         ZonedDateTime.of(year, month, day, hour, minute, 0, 0, ZoneId.of("Europe/Madrid")).toInstant()
+
+    @Test
+    fun elAvisoSaleEnElIdiomaDeLaApp() {
+        grantNotifications()
+        val manager = context.getSystemService(NotificationManager::class.java)
+        val expected = mapOf(
+            LanguageCode.ES to ("Mascletà a las 14:00" to "Avisos de eventos"),
+            LanguageCode.VA to ("Mascletà a les 14:00" to "Avisos d’esdeveniments"),
+            LanguageCode.EN to ("Mascletà at 14:00" to "Event alerts"),
+            LanguageCode.FR to ("Mascletà à 14 h 00" to "Alertes d’événements"),
+        )
+        expected.forEach { (language, texts) ->
+            notifier.dismiss(reminder)
+            // El idioma se lee de las preferencias, no de Room: la alarma despierta el proceso sin abrir la base de datos.
+            AppLanguagePrefs.write(context, language)
+            assertTrue("$language: el aviso se muestra", ReminderNotifier(context).show(reminder))
+            awaitTrue("$language: la notificación") { activeReminderNotification() != null }
+            val shown = activeReminderNotification()!!.notification
+            assertEquals("$language: título", texts.first, shown.extras.getString("android.title"))
+            assertEquals("$language: texto", AppStrings(context, language).get(R.string.reminder_mascleta_text), shown.extras.getString("android.text"))
+            // El canal se actualiza con el idioma de cada aviso.
+            assertEquals("$language: nombre del canal", texts.second, manager.getNotificationChannel(ReminderNotifier.ChannelId).name.toString())
+        }
+    }
 
     @Test
     fun elProgramadorProgramaCancelaYSincroniza() {
@@ -125,8 +152,11 @@ class RemindersTest {
 
         awaitTrue("la notificación del aviso") { activeReminderNotification() != null }
         val shown = activeReminderNotification()!!.notification
-        assertEquals(context.getString(reminder.title), shown.extras.getString("android.title"))
-        assertEquals(context.getString(reminder.text), shown.extras.getString("android.text"))
+        // Sin idioma guardado, el de la app por defecto (español), tenga el móvil el idioma que tenga.
+        val spanish = AppStrings(context, LanguageCode.ES)
+        assertEquals(spanish.get(reminder.title), shown.extras.getString("android.title"))
+        assertEquals(spanish.get(reminder.text), shown.extras.getString("android.text"))
+        assertEquals("Mascletà a las 14:00", shown.extras.getString("android.title"))
         assertNotNull("al tocarla abre la app", shown.contentIntent)
         assertTrue("se cierra al tocarla", shown.flags and android.app.Notification.FLAG_AUTO_CANCEL != 0)
 

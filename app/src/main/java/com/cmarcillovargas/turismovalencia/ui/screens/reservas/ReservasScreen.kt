@@ -46,6 +46,7 @@ import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.Reservation
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
+import com.cmarcillovargas.turismovalencia.ui.components.slotLabel
 import com.cmarcillovargas.turismovalencia.ui.components.SectionLabel
 import com.cmarcillovargas.turismovalencia.ui.components.SegmentedTabs
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
@@ -132,8 +133,8 @@ private fun ReservationCard(row: ReservationRow, onOpen: (String) -> Unit) {
             Spacer(Modifier.width(Spacing.m))
             Column(Modifier.weight(1f)) {
                 Text(reservation.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 2)
-                IconLine(Icons.Outlined.CalendarMonth, "${formatShortDate(reservation.date)} · ${reservation.time}")
-                IconLine(Icons.Outlined.Groups, stringResource(R.string.res_people_price, reservation.people, formatPrice(reservation.totalCents)))
+                IconLine(Icons.Outlined.CalendarMonth, "${formatShortDate(reservation.date)} · ${slotLabel(reservation.time)}")
+                IconLine(Icons.Outlined.Groups, pluralStringResource(R.plurals.res_people_price, reservation.people, reservation.people, formatPrice(reservation.totalCents)))
                 StatusChip(
                     text = stringResource(reservation.status.label()),
                     tone = reservation.status.tone(),

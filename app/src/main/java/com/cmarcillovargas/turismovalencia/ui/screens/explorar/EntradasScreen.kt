@@ -189,7 +189,7 @@ private fun OfferCard(offer: Offer, onReserve: () -> Unit, modifier: Modifier = 
 
 /** Sección a la que pertenece la oferta, para elegir el icono del marcador de imagen. */
 private fun Offer.category(): Category = when {
-    tag == "Gastronómica" -> Category.Gastronomia
+    tagKey == "Gastronómica" -> Category.Gastronomia
     kind == OfferKind.Experiencia -> Category.Sostenible
     else -> Category.QueVer
 }

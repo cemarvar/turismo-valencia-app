@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Idiomas de la app (Android 13+: aparecen en Ajustes → Aplicaciones → Turismo Valencia → Idioma). El valenciano es catalán con la
+     variante «valencia»; sus textos están en values-ca. Deben coincidir con `LanguageCode`. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="es" />
+    <locale android:name="ca-ES-valencia" />
+    <locale android:name="en" />
+    <locale android:name="fr" />
+</locale-config>

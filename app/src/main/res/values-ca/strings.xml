@@ -1,0 +1,453 @@
+<resources>
+    <!-- Valencià. Els textos són en valencià (variant «valencia» del català, ca-ES-valencia): este, teua, hui, xiquets… -->
+    <string name="locale_code">VA</string>
+
+    <!-- A1 · Splash -->
+    <string name="splash_logo_descripcion">Logotip de Turismo Valencia</string>
+    <string name="splash_titulo">València</string>
+    <string name="splash_lema">Millor esta vida</string>
+
+    <!-- A2–A4 · Onboarding -->
+    <string name="onboarding_saltar">Ometre</string>
+    <string name="onboarding_paso">Pas %1$d de %2$d</string>
+    <string name="onboarding_siguiente">Següent</string>
+    <string name="onboarding_empezar">Començar</string>
+    <string name="onboarding_1_titulo">Descobrix València al teu ritme</string>
+    <string name="onboarding_1_texto">L’essencial de la ciutat —què veure, esdeveniments, gastronomia i allotjaments— organitzat com a la web i pensat per a caminar.</string>
+    <string name="onboarding_1_imagen">Ciutat de les Arts i les Ciències de València a la posta de sol</string>
+    <string name="onboarding_2_titulo">Sense cobertura, cap problema</string>
+    <string name="onboarding_2_texto">Descarrega fitxes, rutes i el mapa del centre per a consultar-los sense connexió. Els teus preferits es guarden al mòbil.</string>
+    <string name="onboarding_2_imagen">Palmeres i un pont de pedra en un parc de València</string>
+    <string name="onboarding_3_titulo">Pregunta a ValBot</string>
+    <string name="onboarding_3_texto">El teu assistent amb IA et recomana plans, rutes i restaurants prop de tu, en el teu idioma.</string>
+    <string name="onboarding_3_imagen">Un arc en un carrer del casc antic de València</string>
+
+    <!-- A5 · Permís d’ubicació -->
+    <string name="permiso_dialogo_titulo">Vols permetre que %1$s accedisca a la ubicació d’este dispositiu?</string>
+    <string name="permiso_precisa">Precisa</string>
+    <string name="permiso_aproximada">Aproximada</string>
+    <string name="permiso_mientras_se_usa">Mentre s’utilitza l’app</string>
+    <string name="permiso_solo_esta_vez">Només esta vegada</string>
+    <string name="permiso_no_permitir">No permetre</string>
+    <string name="permiso_panel_etiqueta">Permís d’ubicació</string>
+    <string name="permiso_panel_titulo">Llocs prop de tu</string>
+    <string name="permiso_panel_texto">Usem la teua ubicació només mentre uses l’app, per a ordenar llocs per proximitat i calcular rutes a peu. Pots canviar-ho en Configuració.</string>
+
+    <!-- A6 · Selecció d’idioma -->
+    <string name="idioma_titulo">Idioma de l’app</string>
+    <string name="idioma_subtitulo">ValBot també et respondrà en este idioma.</string>
+    <string name="idioma_aplicar">Aplicar</string>
+    <string name="idioma_es_detalle">Castellà</string>
+    <string name="idioma_va_detalle">Valencià</string>
+    <string name="idioma_en_detalle">Anglés</string>
+    <string name="idioma_fr_detalle">Francés</string>
+
+    <string name="common_back">Arrere</string>
+    <string name="common_share">Compartir</string>
+    <string name="common_favorite_add">Guardar en preferits</string>
+    <string name="common_favorite_remove">Llevar de preferits</string>
+    <string name="common_notifications">Notificacions</string>
+    <string name="common_language">Idioma</string>
+    <string name="common_filter">Filtres</string>
+    <string name="common_search">Cercar</string>
+    <string name="common_close">Tancar</string>
+    <string name="offline_banner">Sense connexió · mostrant contingut guardat</string>
+    <string name="offline_snackbar">Sense connexió a Internet</string>
+    <string name="offline_retry">Reintentar</string>
+    <string name="chip_offline_ready">Sense connexió</string>
+    <string name="chip_download">Descarregar</string>
+    <string name="eco_tag">Eco</string>
+    <string name="home_search_hint">Cerca a València…</string>
+    <string name="home_nearby">Prop de tu</string>
+    <string name="home_see_all">Veure-ho tot</string>
+    <string name="cat_que_ver">Què veure</string>
+    <string name="cat_gastronomia">Gastronomia</string>
+    <string name="cat_alojamientos">Allotjaments</string>
+    <string name="cat_eventos">Esdeveniments</string>
+    <string name="cat_tickets">Tickets &amp; Tours</string>
+    <string name="cat_sostenible">Sostenible</string>
+
+    <string name="common_map">Veure en el mapa</string>
+    <string name="search_suggestions">Suggeriments</string>
+    <string name="search_recent">Cerques recents</string>
+    <string name="search_trends">Tendències</string>
+    <string name="search_clear">Esborrar cerca</string>
+    <string name="search_empty_title">Sense resultats</string>
+    <string name="search_empty_text">No hem trobat «%1$s». Prova amb altres paraules o pregunta a ValBot.</string>
+    <string name="search_ask_valbot">Preguntar a ValBot</string>
+    <string name="search_quick_horchata">Orxata</string>
+    <string name="search_quick_open_now">Obert ara</string>
+    <string name="cat_subtitle">%1$s · %2$d %3$s</string>
+    <string name="cat_sort">Ordenar</string>
+    <string name="cat_all">Tots</string>
+    <string name="cat_view_list">Llista</string>
+    <string name="cat_view_grid">Quadrícula</string>
+    <string name="cat_que_ver_banner">Espais únics</string>
+    <string name="cat_que_ver_tagline">Estos són els llocs essencials per a visitar a València</string>
+    <string name="cat_unit_places">llocs</string>
+    <string name="cat_gastro_banner">Tradició culinària</string>
+    <string name="cat_gastro_tagline">Una experiència gastronòmica per a tots els sentits</string>
+    <string name="cat_unit_dishes">plats</string>
+    <string name="cat_aloj_banner">Opcions d’allotjament</string>
+    <string name="cat_aloj_tagline">Et proposem allotjaments recomanats per a tots els gustos</string>
+    <string name="cat_unit_zones">zones</string>
+    <string name="cat_eventos_banner">Esdeveniments destacats</string>
+    <string name="cat_eventos_tagline">Estos són els esdeveniments valencians que omplen el cor</string>
+    <string name="cat_unit_events">esdeveniments</string>
+    <string name="cat_sost_banner">Turisme sostenible</string>
+    <string name="cat_sost_tagline">Viatja amb la ciutat, no contra ella</string>
+    <string name="cat_unit_topics">temes</string>
+    <string name="cat_sorted_distance">Ordenat per proximitat</string>
+    <string name="cat_sorted_web">Orde de la web</string>
+    <string name="cat_sort_web">Orde de la web</string>
+    <string name="cat_sorted_rating">Ordenat per valoració</string>
+    <string name="cat_sorted_name">Ordenat per nom</string>
+    <string name="cat_sort_distance">Més prop primer</string>
+    <string name="cat_sort_rating">Millor valorats</string>
+    <string name="cat_sort_name">Nom (A–Z)</string>
+    <string name="detail_free">Entrada gratuïta</string>
+    <string name="detail_available_offline">Disponible sense connexió</string>
+    <string name="detail_info">Informació pràctica</string>
+    <string name="detail_acts">Actes imprescindibles</string>
+    <string name="detail_remind_title">Avisa’m de la %1$s</string>
+    <string name="detail_remind_text">Notificació 30 min abans</string>
+    <string name="detail_save">Guardar</string>
+    <string name="detail_saved">Guardat</string>
+    <string name="detail_how_to_get">Com arribar</string>
+    <string name="detail_calendar">Calendari</string>
+    <string name="detail_not_found">No hem trobat este contingut</string>
+    <string name="detail_no_calendar">No hi ha cap aplicació de calendari instal·lada</string>
+    <string name="detail_share_chooser">Compartir amb</string>
+
+    <string name="tickets_search_hint">Cercar tickets i tours</string>
+    <string name="tickets_tab_tickets">Entrades</string>
+    <string name="tickets_tab_tours">Tours</string>
+    <string name="tickets_tab_experiences">Experiències</string>
+    <string name="tickets_empty">No hi ha resultats per a la teua cerca</string>
+    <string name="tickets_from">des de</string>
+    <string name="tickets_reserve">Reservar</string>
+    <string name="eco_banner_bold">Capital Verda Europea 2024.</string>
+    <string name="eco_banner_text">Mou-te a peu, en bici o en transport públic i dóna suport al comerç local.</string>
+
+    <string name="map_search_hint">Cercar llocs en el mapa</string>
+    <string name="map_all">Tot</string>
+    <string name="map_saved_only">Només el guardat sense connexió</string>
+    <string name="map_locate">Centrar en la meua ubicació</string>
+    <string name="map_clear_filters">Llevar filtres</string>
+    <string name="map_attribution">© Col·laboradors d’OpenStreetMap</string>
+    <string name="map_zoom_in">Acostar</string>
+    <string name="map_zoom_out">Allunyar</string>
+    <string name="map_details">Veure detalls</string>
+    <string name="route_your_location">La teua ubicació</string>
+    <string name="route_mode_metro">Metro</string>
+    <string name="route_summary">%1$s · arribada %2$s</string>
+    <string name="route_saved">Ruta guardada</string>
+    <string name="route_save">Guardar ruta</string>
+    <string name="route_start">Iniciar navegació</string>
+    <string name="route_step_straight">Continua per %1$s</string>
+    <string name="route_step_left">Gira a l’esquerra cap a %1$s</string>
+    <string name="route_step_right">Gira a la dreta cap a %1$s</string>
+    <string name="route_step_straight_plain">Continua recte</string>
+    <string name="route_step_left_plain">Gira a l’esquerra</string>
+    <string name="route_step_right_plain">Gira a la dreta</string>
+    <string name="route_loading">Calculant la ruta…</string>
+    <string name="route_estimated">Ruta aproximada: el servei de rutes no respon</string>
+    <string name="route_arrived">Has arribat: %1$s</string>
+    <string name="route_entrance">Entrada principal</string>
+    <string name="route_no_maps">No hi ha cap aplicació de mapes per a navegar</string>
+
+    <string name="nav_inicio">Inici</string>
+    <string name="nav_mapa">Mapa</string>
+    <string name="nav_valbot">ValBot</string>
+    <string name="nav_favoritos">Preferits</string>
+    <string name="nav_reservas">Reserves</string>
+    <string name="valbot_today">Hui</string>
+    <string name="valbot_online">En línia · Assistent de turisme</string>
+    <string name="valbot_offline_status">Sense connexió</string>
+    <string name="valbot_menu">Més opcions</string>
+    <string name="valbot_new_chat">Nova conversa</string>
+    <string name="valbot_free">Gratis</string>
+    <string name="valbot_basic_reply">Resposta bàsica · ValBot en línia no disponible</string>
+    <string name="valbot_unavailable">Ara mateix ValBot no està operatiu. Sentim les molèsties.</string>
+    <string name="valbot_offline_meanwhile">Mentrestant pots consultar sense connexió:</string>
+    <string name="valbot_my_favorites">Els meus preferits</string>
+    <string name="valbot_saved_map">Mapa guardat</string>
+    <string name="valbot_hint">Escriu la teua pregunta…</string>
+    <string name="valbot_hint_offline">ValBot no està disponible</string>
+    <string name="valbot_mic">Dictar pregunta</string>
+    <string name="valbot_send">Enviar</string>
+
+    <string name="common_cancel">Cancel·lar</string>
+    <string name="fav_none_saved">Sense llocs guardats</string>
+    <plurals name="fav_saved_count">
+        <item quantity="one">%1$d lloc guardat</item>
+        <item quantity="other">%1$d llocs guardats</item>
+        <item quantity="many">%1$d de llocs guardats</item>
+    </plurals>
+    <string name="fav_empty_title">Encara no tens preferits</string>
+    <string name="fav_empty_text">Pulsa el cor en qualsevol lloc per a guardar-lo i consultar-lo fins i tot sense connexió.</string>
+    <string name="fav_explore">Explorar València</string>
+    <string name="fav_tab_all">Tots</string>
+    <string name="fav_tab_places">Llocs</string>
+    <string name="fav_tab_events">Esdeveniments</string>
+    <string name="fav_offline_summary">%1$d de %2$d disponibles sense connexió</string>
+    <string name="fav_offline_mb">%1$d MB guardats al mòbil</string>
+    <string name="fav_manage">Gestionar</string>
+    <string name="fav_label_lodging">Allotjament</string>
+    <string name="fav_label_event">Esdeveniment</string>
+    <string name="downloads_title">Descàrregues sense connexió</string>
+    <string name="downloads_used_mb">%1$d MB</string>
+    <string name="downloads_quota">usats de %1$d MB reservats per a l’app</string>
+    <string name="downloads_maps_mb">Mapes %1$d MB</string>
+    <string name="downloads_cards_mb">Fitxes %1$d MB</string>
+    <string name="downloads_wifi_only">Descarregar només amb Wi-Fi</string>
+    <string name="downloads_wifi_only_text">Evita usar dades mòbils</string>
+    <string name="downloads_auto_update">Actualitzar automàticament</string>
+    <string name="downloads_auto_update_text">Cada nit amb WorkManager</string>
+    <string name="downloads_map_title">Mapa sense connexió · Centre</string>
+    <string name="downloads_map_text">%1$d MB · actualitzat hui</string>
+    <string name="downloads_content">Contingut descarregat</string>
+    <string name="downloads_empty">Encara no has guardat res. Pulsa «Descarregar» en qualsevol fitxa.</string>
+    <string name="downloads_downloaded">Descarregat</string>
+    <string name="downloads_place_size">Fitxa + fotos · %1$d MB</string>
+    <string name="downloads_event_size">Fitxa + programa · %1$d MB</string>
+    <string name="downloads_remove">Eliminar descàrrega</string>
+    <string name="downloads_clear">Esborrar tot</string>
+    <string name="downloads_clear_title">Esborrar totes les descàrregues?</string>
+    <string name="downloads_clear_text">Hauràs de tornar a descarregar les fitxes per a usar-les sense connexió.</string>
+    <string name="downloads_update">Actualitzar</string>
+    <string name="downloads_updating">Actualitzant…</string>
+
+    <string name="res_title">Les meues reserves</string>
+    <plurals name="res_count">
+        <item quantity="one">%1$d reserva</item>
+        <item quantity="other">%1$d reserves</item>
+        <item quantity="many">%1$d de reserves</item>
+    </plurals>
+    <plurals name="res_pending">
+        <item quantity="one">%1$d pendent</item>
+        <item quantity="other">%1$d pendents</item>
+        <item quantity="many">%1$d de pendents</item>
+    </plurals>
+    <string name="res_tab_upcoming">Pròximes</string>
+    <string name="res_tab_history">Historial</string>
+    <string name="res_this_week">Esta setmana</string>
+    <string name="res_later">Pròximament</string>
+    <string name="res_completed">Completades</string>
+    <string name="res_empty">Encara no tens reserves. Reserva una activitat des de Tickets &amp; Tours.</string>
+    <plurals name="res_people_price">
+        <item quantity="one">%1$d persona · %2$s</item>
+        <item quantity="other">%1$d persones · %2$s</item>
+        <item quantity="many">%1$d de persones · %2$s</item>
+    </plurals>
+    <string name="res_status_confirmed">Confirmada</string>
+    <string name="res_status_pending">Pendent</string>
+    <string name="res_status_completed">Completada</string>
+    <string name="res_status_cancelled">Cancel·lada</string>
+    <string name="res_cancelled">Cancel·lades</string>
+    <string name="book_title">Reservar</string>
+    <string name="book_step">Pas 1 de 2 · Data i persones</string>
+    <string name="book_per_person">%1$s · %2$s per persona</string>
+    <string name="book_times">Horari disponible</string>
+    <string name="book_adults">Adults</string>
+    <string name="book_adults_price">%1$s per persona</string>
+    <string name="book_children">Xiquets</string>
+    <string name="book_children_free">Menors de 12 anys · gratis</string>
+    <string name="book_email_label">Correu per a la confirmació</string>
+    <string name="book_total_note">Total · pagament a l’embarcador</string>
+    <string name="book_confirm">Confirmar reserva</string>
+    <string name="book_submitting">Reservant…</string>
+    <string name="book_needs_connection">Reservar necessita connexió a Internet</string>
+    <string name="book_email_privacy">El teu correu es guarda en el nostre servidor només per a gestionar esta reserva.</string>
+    <string name="book_error_unreachable">No hem pogut connectar amb el servidor. Comprova la connexió i torna-ho a intentar.</string>
+    <string name="book_error_server">El servei de reserves no està disponible ara. Torna-ho a intentar en uns minuts.</string>
+    <string name="book_error_rate_limited">Massa intents seguits. Espera un poc i torna a provar.</string>
+    <string name="book_error_rate_limited_wait">Massa intents seguits. Torna a provar en %1$d min.</string>
+    <string name="book_error_sold_out">Ja no queden places per a eixe dia i horari. Prova amb un altre.</string>
+    <string name="book_error_offer_gone">Esta activitat ja no està disponible.</string>
+    <string name="book_error_invalid_date">Eixa data ja no es pot reservar. Tria’n una altra.</string>
+    <string name="book_error_invalid_slot">Eixe horari ja no existeix. Tria’n un altre.</string>
+    <string name="book_error_invalid_party">El nombre de persones no és vàlid (màxim 20 entre adults i xiquets).</string>
+    <string name="book_error_invalid_email">El servidor no accepta eixe correu. Revisa’l.</string>
+    <string name="book_error_other">No s’ha pogut completar la reserva. Revisa les dades i torna-ho a intentar.</string>
+    <string name="book_prev_week">Setmana anterior</string>
+    <string name="book_next_week">Setmana següent</string>
+    <string name="book_less">Llevar-ne un</string>
+    <string name="book_more">Afegir-ne un</string>
+    <string name="booking_title">Reserva</string>
+    <string name="booking_confirmed">Reserva confirmada!</string>
+    <string name="booking_pending">Reserva pendent</string>
+    <string name="booking_sent_to">Reserva registrada amb el correu %1$s</string>
+    <string name="booking_date">Data</string>
+    <string name="booking_time">Hora</string>
+    <string name="booking_people">Persones</string>
+    <string name="booking_locator">Localitzador</string>
+    <string name="booking_total">Total</string>
+    <string name="booking_show_code">Mostra este codi a l’embarcador. Disponible sense connexió.</string>
+    <string name="booking_share_text">Reserva %1$s: %2$s · %3$s a les %4$s</string>
+
+    <plurals name="booking_adults">
+        <item quantity="one">%1$d adult</item>
+        <item quantity="other">%1$d adults</item>
+        <item quantity="many">%1$d d’adults</item>
+    </plurals>
+    <plurals name="booking_children">
+        <item quantity="one">%1$d xiquet</item>
+        <item quantity="other">%1$d xiquets</item>
+        <item quantity="many">%1$d de xiquets</item>
+    </plurals>
+
+    <string name="profile_title">Perfil i configuració</string>
+    <string name="profile_offline_mb">%1$d MB sense connexió</string>
+    <plurals name="profile_reservations">
+        <item quantity="one">%1$d reserva</item>
+        <item quantity="other">%1$d reserves</item>
+        <item quantity="many">%1$d de reserves</item>
+    </plurals>
+    <string name="profile_prefs">Preferències</string>
+    <string name="profile_notifications_text">Esdeveniments i reserves</string>
+    <string name="profile_location">Ubicació</string>
+    <string name="profile_offline_a11y">Sense connexió i accessibilitat</string>
+    <string name="profile_downloads_text">%1$d MB usats</string>
+    <string name="profile_text_size">Mida del text</string>
+    <string name="profile_text_system">Seguix el del sistema</string>
+    <string name="profile_text_small">Xicotet</string>
+    <string name="profile_text_large">Gran</string>
+    <string name="profile_text_xlarge">Molt gran</string>
+    <string name="profile_account">Compte</string>
+    <string name="profile_privacy">Privadesa i dades</string>
+    <string name="profile_privacy_text">Els teus preferits, reserves i descàrregues es guarden al teu mòbil. Usem la teua ubicació només mentre uses l’app per a ordenar llocs per proximitat i calcular rutes. El mapa i les rutes els servix OpenStreetMap: per a dibuixar-los li arriben la zona que mires i el punt d’eixida i d’arribada de la ruta. Pots canviar-ho quan vulgues.</string>
+    <string name="profile_logout">Tancar la sessió</string>
+    <string name="profile_logout_title">Tancar la sessió?</string>
+    <string name="profile_logout_text">Tornaràs a la pantalla de benvinguda.</string>
+    <string name="notifications_today">Hui</string>
+    <string name="notifications_settings">Configuració de notificacions</string>
+    <string name="notifications_blocked_title">Notificacions desactivades</string>
+    <string name="notifications_blocked_text">Per a poder avisar-te, activa les notificacions de Turismo Valencia en la configuració del mòbil.</string>
+    <string name="location_blocked_title">Ubicació desactivada</string>
+    <string name="location_blocked_text">Per a usar la teua ubicació, permet-la a Turismo Valencia en la configuració del mòbil.</string>
+    <string name="common_open_settings">Obrir configuració</string>
+    <string name="common_not_now">Ara no</string>
+    <string name="reminder_channel_name">Avisos d’esdeveniments</string>
+    <string name="reminder_channel_description">Recordatoris d’actes com la mascletà, uns minuts abans que comencen.</string>
+    <string name="reminder_mascleta_title">Mascletà a les 14:00</string>
+    <string name="reminder_mascleta_text">Plaça de l’Ajuntament · arriba 30 min abans per a agafar lloc.</string>
+
+    <string name="web_more_info">Més informació</string>
+    <string name="web_view_on_web">Veure en la web</string>
+    <string name="home_esencial_title">L’essencial per a veure a València</string>
+    <string name="home_esencial_text">Experiències que et connecten amb l’autèntic estil de vida valencià</string>
+    <string name="home_planes_title">Plans que alimenten l’ànima</string>
+    <string name="home_planes_text">Concerts, exposicions, festivitats i experiències gastronòmiques durant tot l’any</string>
+    <string name="home_sostenible_title">Turisme sostenible</string>
+    <string name="home_sostenible_text">Explora la ciutat de manera sostenible</string>
+    <string name="contact_title">Contacte</string>
+    <string name="contact_brand">València · Millor esta vida</string>
+    <string name="contact_brand_desc">Descobrix la ciutat del sol, la paella i les festes. La teua guia de viatge a València.</string>
+    <string name="contact_cta_title">Parla amb l’oficina de turisme</string>
+    <string name="contact_cta_action">Veure contacte</string>
+    <string name="contact_office">Oficina de Turisme de l’Ajuntament de València</string>
+    <string name="contact_open_map">Obrir mapa</string>
+    <string name="contact_hours">Dl - Dv: 9:00 - 18:00</string>
+    <string name="contact_location">València, Espanya</string>
+    <string name="contact_follow">Seguix-nos</string>
+    <string name="contact_legal">Informació legal</string>
+    <string name="legal_privacy">Política de privadesa</string>
+    <string name="legal_notice">Avís legal</string>
+    <string name="contact_copyright">© 2026 València · Tots els drets reservats</string>
+    <string name="tickets_guides">Guies i més informació</string>
+    <string name="profile_contact">Contacte i xarxes</string>
+    <string name="profile_contact_text">Oficina de turisme, xarxes i mapa</string>
+
+    <string name="detail_guide">Guia completa</string>
+
+    <!-- Política de privadesa: el que afig l’app a la de la web (es pinta davall del text importat de la web) -->
+    <string name="privacy_app_title">L’app al teu mòbil</string>
+    <string name="privacy_app_intro">El que hi ha damunt és la política del lloc web. Ací s’afig el que fa l’app d’Android: quines dades isquen del teu mòbil, on van i per a què. Tota la resta (preferits, descàrregues, configuració, cerques recents i reserves guardades) està només en una base de dades del teu mòbil.</string>
+    <string name="privacy_app_bookings_title">Reserves</string>
+    <string name="privacy_app_bookings_body">En confirmar una reserva, l’app envia al nostre servidor, allotjat a la Unió Europea:</string>
+    <string-array name="privacy_app_bookings_bullets">
+        <item>El teu correu.</item>
+        <item>L’activitat, el dia, l’horari i el nombre de persones.</item>
+        <item>Un identificador aleatori del teu mòbil (mira més avall), per a mostrar-te les teues reserves sense que hages de crear un compte.</item>
+    </string-array>
+    <string name="privacy_app_bookings_use">L’usem només per a gestionar la reserva (execució del contracte, com s’indica al punt 4): confirmar-la, controlar les places i tornar-te el seu localitzador. No demanem dades de pagament: el pagament d’esta versió està simulat. Conservem les dades mentre siguen necessàries per a gestionar la reserva i pots demanar que les esborrem quan vulgues.</string>
+    <string name="privacy_app_device_title">Identificador del mòbil</string>
+    <string name="privacy_app_device_body">La primera vegada que reserves, l’app crea un número aleatori i el guarda al teu mòbil. No conté dades teues ni de l’aparell. S’envia amb cada reserva i cada vegada que l’app consulta les teues reserves. Si esborres les dades de l’app, el mòbil el perd i deixa de veure les seues reserves en l’app (si uses la còpia de seguretat d’Android, en reinstal·lar-la pot tornar amb la resta de les teues dades); en el nostre servidor continuen fins que demanes esborrar-les.</string>
+    <string name="privacy_app_valbot_title">Assistent ValBot</string>
+    <string name="privacy_app_valbot_body">El que escrius a ValBot s’envia al servidor de la web, que el processa amb el servei d’intel·ligència artificial Gemini de Google per a respondre’t (punts 2 i 6). No escrigues dades personals en el xat. Si no hi ha connexió, o el servidor no pot respondre, l’app respon amb respostes bàsiques des del teu mòbil (sense connexió no s’envia res).</string>
+    <string name="privacy_app_map_title">Mapa, rutes i ubicació</string>
+    <string name="privacy_app_map_body">El mapa es descarrega per parts dels servidors d’OpenStreetMap, que veuen la teua adreça IP i la zona que mires. Quan demanes «Com arribar», el punt d’eixida i la destinació s’envien al servei de rutes d’OpenStreetMap Alemanya per a calcular el camí; el punt d’eixida és la teua ubicació si la compartixes i estàs a València o, si no, la Plaça de l’Ajuntament. La ubicació només s’usa si dónes permís, i l’app l’empra al teu mòbil per a mostrar on estàs i les distàncies: no l’envia al nostre servidor. Estos serveis tenen la seua pròpia política de privadesa.</string>
+    <string name="privacy_app_background_title">Actualització automàtica</string>
+    <string name="privacy_app_background_body">Cada vegada que obris l’app amb connexió, esta consulta al nostre servidor el catàleg d’ofertes i, si ja has reservat alguna vegada, les teues reserves (amb l’identificador del mòbil). Si deixes activada «Actualitzar automàticament» en Descàrregues, ho fa també cada nit encara que no la tingues oberta, i només amb Wi-Fi si tens activada «Descarregar només amb Wi-Fi». Pots desactivar-ho en Descàrregues.</string>
+    <string name="privacy_app_none_title">El que l’app no inclou</string>
+    <string name="privacy_app_none_body">L’app no té comptes, publicitat, analítica ni rastrejadors, i no compartix les teues dades amb tercers més enllà dels serveis que es nomenen més amunt.</string>
+    <string name="privacy_app_rights_title">Els teus drets</string>
+    <string name="privacy_app_rights_body">Per a exercir els teus drets sobre les dades de l’app (per exemple, demanar que esborrem les teues reserves), escriu al correu de privadesa del punt 1 indicant el correu amb què vas reservar i el localitzador de la reserva. Més informació al punt 7.</string>
+
+    <!-- Cercador: suggeriments que arma ContentRepository -->
+    <string name="search_offer_subtitle">Experiència · des de %1$s</string>
+    <string name="search_map_dish">Restaurants de %1$s prop</string>
+    <string name="search_map_query">Veure «%1$s» en el mapa</string>
+    <plurals name="search_map_count">
+        <item quantity="one">Mapa · %1$d resultat</item>
+        <item quantity="other">Mapa · %1$d resultats</item>
+        <item quantity="many">Mapa · %1$d resultats</item>
+    </plurals>
+    <string name="search_family_esencial">L’essencial de València</string>
+    <string name="search_family_planes">Plans</string>
+    <string name="search_family_legal">Informació legal</string>
+    <string name="search_family_guide">Guia</string>
+
+    <!-- ValBot: respostes de les regles de l’app (sense connexió o sense resposta del servidor) -->
+    <string name="valbot_greeting">Hola! Sóc ValBot, el teu assistent de turisme a València. En què et puc ajudar?</string>
+    <string-array name="valbot_suggestions">
+        <item>Què veure hui gratis a València?</item>
+        <item>Restaurants de paella prop</item>
+        <item>Com arribe als Jardins del Túria?</item>
+        <item>Què faig amb xiquets?</item>
+        <item>Plans si plou</item>
+        <item>València en 3 dies</item>
+    </string-array>
+    <string name="valbot_reply_hello">Hola! Pregunta’m per llocs, esdeveniments, gastronomia o com arribar a qualsevol lloc.</string>
+    <string name="valbot_reply_free">Hui tens bones opcions sense gastar res. Les més pròximes a tu:</string>
+    <string name="valbot_reply_eat">Per a una bona paella, el bressol és l’Albufera (el Palmar) i la Malvarrosa. Al centre, reserva amb antelació i demana-la amb llenya. Mira estes opcions:</string>
+    <string name="valbot_reply_christmas">Per Nadal, València s’ompli de llums, mercats i pessebres. Ací tens la guia completa:</string>
+    <string name="valbot_reply_itinerary">Per a organitzar-te, estes guies et servixen de base:</string>
+    <string name="valbot_reply_heritage">La València monumental està en estes guies:</string>
+    <string name="valbot_reply_tours">Per a tickets i tours, mira estes guies i reserva des de Tickets &amp; Tours:</string>
+    <string name="valbot_reply_sports">València és ciutat d’esport: carreres, bici, platja i molt més.</string>
+    <string name="valbot_reply_art">Per a exposicions i art, comença per ací:</string>
+    <string name="valbot_reply_contact">Pots contactar amb l’oficina de turisme de dilluns a divendres de 9:00 a 18:00 en el +34 963 000 000 o en info@valencia.com.</string>
+    <string name="valbot_reply_fallas">Les Falles se celebren de l’1 al 19 de març. La mascletà és cada dia a les 14:00 a la Plaça de l’Ajuntament; arriba 30 minuts abans.</string>
+    <string name="valbot_reply_beach">València té 19,5 km d’arena i 8 Banderes Blaves. Des del centre, la L4 et deixa a Les Arenes.</string>
+    <string name="valbot_reply_kids">Amb xiquets funcionen molt bé l’Oceanogràfic i el Jardí del Túria (9 km sense cotxes, amb jocs i bicis).</string>
+    <string name="valbot_reply_rain">Si plou, apunta als museus: el de Belles Arts és gratuït i l’Oceanogràfic té zones cobertes.</string>
+    <string name="valbot_reply_lodging">Per a dormir, el centre històric és el més còmode; Russafa té més ambient i la zona de platja, primera línia de mar.</string>
+    <string name="valbot_reply_eco">València va ser Capital Verda Europea 2024. Un bon pla sostenible: el Jardí del Túria en bici i passeig en barca elèctrica per l’Albufera.</string>
+    <string name="valbot_reply_found">Açò és el que he trobat:</string>
+    <string name="valbot_reply_unknown">Açò encara no ho tinc clar. Prova a preguntar-me per llocs, esdeveniments, gastronomia, allotjaments o com arribar a un lloc. Per a dubtes concrets, contacta amb l’oficina de turisme de València.</string>
+    <string name="valbot_reply_route">%1$s està a %2$s, uns %3$d min a peu des de la teua ubicació. Obri la fitxa i pulsa «Com arribar» per a veure la ruta:</string>
+    <string name="valbot_reply_route_ask">A quin lloc vols anar? Digues-me el nom i et diré quant es tarda caminant.</string>
+
+    <!-- Horari de les entrades que valen tot el dia (el servidor l’envia com «Cualquier hora») -->
+    <string name="book_any_time">A qualsevol hora</string>
+
+    <!-- Les guies de la web només estan en castellà -->
+    <string name="web_only_spanish">Este contingut de la web només està disponible en castellà.</string>
+
+    <!-- Notificacions de demostració (Room les guarda en castellà; la llista les mostra en l’idioma de l’app) -->
+    <string name="notif_demo_2_title">Reserva confirmada</string>
+    <string name="notif_demo_2_body">Passeig en barca per l’Albufera · ds 12 oct, 18:30.</string>
+    <string name="notif_demo_3_title">Fitxes actualitzades</string>
+    <string name="notif_demo_3_body">4 llocs guardats s’han actualitzat per a usar-los sense connexió.</string>
+    <string name="notif_demo_4_title">Ruta sostenible recomanada</string>
+    <string name="notif_demo_4_body">Recorre el Jardí del Túria amb Valenbisi: 9 km sense cotxes.</string>
+    <string name="notif_demo_5_title">ValBot té novetats</string>
+    <string name="notif_demo_5_body">Ara t’entén i respon en castellà, valencià, anglés i francés.</string>
+    <string name="notif_when_10min">Fa 10 min</string>
+    <string name="notif_when_1h">Fa 1 h</string>
+    <string name="notif_when_yesterday">Ahir</string>
+    <string name="notif_when_monday">Dilluns</string>
+    <string name="notif_when_sunday">Diumenge</string>
+</resources>

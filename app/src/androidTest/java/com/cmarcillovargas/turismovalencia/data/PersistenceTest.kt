@@ -290,7 +290,7 @@ class PersistenceTest {
         val app = ApplicationProvider.getApplicationContext<Application>()
         val memory = Room.inMemoryDatabaseBuilder(app, AppDatabase::class.java).build()
         try {
-            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, NoRefreshScheduler)
+            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, NoRefreshScheduler, NoLanguageApplier)
             assertEquals(6, container.favorites.ids.value.size)
             assertEquals(setOf("fallas"), container.reminders.ids.value)
             container.favorites.clear()

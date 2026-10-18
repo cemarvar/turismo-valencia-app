@@ -54,12 +54,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmarcillovargas.turismovalencia.R
+import com.cmarcillovargas.turismovalencia.data.appLanguage
 import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.fake.FakeEventos
 import com.cmarcillovargas.turismovalencia.data.fake.FakeQueVer
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.data.model.InfoKind
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
+import com.cmarcillovargas.turismovalencia.ui.components.InfoNotice
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
 import com.cmarcillovargas.turismovalencia.ui.components.AppButtonStyle
 import com.cmarcillovargas.turismovalencia.ui.components.AppSwitch
@@ -144,6 +147,7 @@ fun DetalleScreen(
     modifier: Modifier = Modifier,
 ) {
     val filters = remember { mutableStateMapOf<Int, String>() }
+    val spanishOnly = LocalContext.current.appLanguage() != LanguageCode.ES
     val item = uiState.item
     if (item == null) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -207,6 +211,10 @@ fun DetalleScreen(
             }
             uiState.page?.let { page ->
                 item(key = "guide") { SectionTitle(stringResource(R.string.detail_guide), Modifier.padding(horizontal = Spacing.m).padding(top = Spacing.s)) }
+                // La guía completa es el texto de la web, solo en español: se avisa si la app está en otro idioma.
+                if (spanishOnly) {
+                    item(key = "guide-spanish-only") { InfoNotice(stringResource(R.string.web_only_spanish), Modifier.padding(horizontal = Spacing.m)) }
+                }
                 webBlocks(page.blocks, filters, onOpenUrl)
                 item(key = "contact") { ContactSummaryCard(onOpenContact, Modifier.padding(horizontal = Spacing.m).padding(bottom = Spacing.m)) }
             }

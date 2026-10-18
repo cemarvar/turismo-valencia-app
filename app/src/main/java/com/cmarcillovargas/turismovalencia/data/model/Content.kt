@@ -107,4 +107,6 @@ data class Offer(
     val placeId: String? = null,
     /** Foto de la web (ruta dentro de `assets/img/`) para las ofertas que no tienen foto en el diseño. */
     val assetImage: String? = null,
+    /** `tag` tal como lo manda el servidor (en español): la traducción cambia `tag`, pero el código que decide por él mira esta clave. */
+    val tagKey: String = tag,
 )

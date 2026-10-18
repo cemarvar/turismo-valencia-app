@@ -72,6 +72,13 @@ android {
         buildConfig = true // API_BASE_URL
         compose = true
     }
+    bundle {
+        // La app cambia de idioma por su cuenta (idioma por app, `data/AppLanguage.kt`): si el App Bundle separara los idiomas en APK
+        // aparte, un idioma que el móvil no tiene instalado no se podría elegir. Todos van dentro (unos pocos KB).
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 room {
@@ -82,6 +89,9 @@ room {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    // Idioma por app (`AppCompatDelegate.setApplicationLocales`): en Android 13+ lo guarda el sistema y en versiones anteriores lo hace
+    // AppCompat (por eso `MainActivity` es una `AppCompatActivity` con un tema AppCompat). Ver `data/AppLanguage.kt`.
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)

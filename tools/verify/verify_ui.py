@@ -1,9 +1,11 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas refresco privacidad)
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas refresco privacidad idiomas)
 El grupo `reservas` necesita el backend local (cd backend && npm start, con Docker Desktop) y la app instalada con su dirección;
 si no lo encuentra, se salta con un aviso.
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
-guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado."""
+guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado.
+Todos los grupos menos `idiomas` esperan la app en español: `start` le pide el idioma con `--es lang ES` (`lang=None` no lo toca) y
+al empezar se fija el idioma de la app en el sistema (`cmd locale set-app-locales`), porque el emulador está en inglés."""
 import io
 import json
 import os
@@ -38,12 +40,19 @@ def adb(*args, binary=False):
 
 
 def nodes():
-    adb("shell", "uiautomator", "dump", "/sdcard/ui.xml")
-    xml = adb("exec-out", "cat", "/sdcard/ui.xml", binary=True).decode("utf-8", "replace")
+    # `uiautomator dump` falla si la pantalla no llega a estar quieta (el cursor parpadeando de un campo de texto, una animación): se
+    # borra el volcado anterior, para no leer sin querer el de la pantalla de antes, y se reintenta.
+    root = None
+    for attempt in range(4):
+        adb("shell", "rm -f /sdcard/ui.xml; uiautomator dump /sdcard/ui.xml")
+        xml = adb("exec-out", "cat", "/sdcard/ui.xml", binary=True).decode("utf-8", "replace")
+        try:
+            root = ET.fromstring(xml)
+            break
+        except ET.ParseError:
+            time.sleep(0.4)
     out = []
-    try:
-        root = ET.fromstring(xml)
-    except ET.ParseError:
+    if root is None:
         return out
     for n in root.iter("node"):
         m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", n.get("bounds") or "")
@@ -69,7 +78,7 @@ def shot():
     return Image.open(io.BytesIO(adb("exec-out", "screencap", "-p", binary=True))).convert("RGB")
 
 
-def start(route=None, *extra, reset=True):
+def start(route=None, *extra, reset=True, lang="ES"):
     adb("shell", "am", "force-stop", PKG)
     # Un diálogo de permisos que quedara abierto de la prueba anterior taparía la app.
     adb("shell", "am", "force-stop", "com.google.android.permissioncontroller")
@@ -78,12 +87,29 @@ def start(route=None, *extra, reset=True):
         args += ["--ez", "resetData", "true"]
     if route:
         args += ["--es", "route", route]
+    if lang:
+        args += ["--es", "lang", lang]
     adb(*args, *extra)
     time.sleep(3.2)
     for _ in range(8):  # espera a que la pantalla esté pintada
         if len(nodes()) > 12:
             break
         time.sleep(0.8)
+
+
+def type_text(text, chunk=3, pause=0.18):
+    """Escribe en el campo enfocado (`input text`) en trozos pequeños: los campos de la app guardan el texto en un `ViewModel` y, si llegan
+    las letras todas de golpe, alguna se pierde (el emulador no es tan rápido como para devolver el estado entre una letra y la siguiente)."""
+    time.sleep(0.9)  # a que el campo tenga el foco y el teclado esté abierto: las letras que llegan antes se pierden
+    text = text.replace(" ", "%s")
+    parts, i = [], 0
+    while i < len(text):
+        step = chunk + (2 if text[i:i + 2] == "%s" else 0)  # no partir «%s» (el espacio) entre dos trozos
+        parts.append(text[i:i + step])
+        i += step
+    for part in parts:
+        adb("shell", "input", "text", part)
+        time.sleep(pause)
 
 
 def swipe_up(n=1, dist=700):
@@ -344,10 +370,14 @@ def g_paginas():
 def g_busqueda():
     print("\n## Buscador")
     for q, want in (("bioparc", "Bioparc"), ("navidad", "La Navidad más luminosa"), ("deporte", "Deportes"), ("alojamiento barato", None)):
-        start("busqueda")
-        adb("shell", "input", "text", q.replace(" ", "%s"))
-        time.sleep(1.4)
-        ns = nodes()
+        # Escribir con `input text` pierde alguna letra de vez en cuando (el emulador tiene sus altibajos): hasta dos intentos.
+        for attempt in range(2):
+            start("busqueda")
+            type_text(q)
+            time.sleep(1.4)
+            ns = nodes()
+            if want is None or find(want, ns=ns) is not None:
+                break
         if want:
             check("buscar «%s» → «%s»" % (q, want), find(want, ns=ns) is not None)
         else:
@@ -435,7 +465,7 @@ def g_persist():
     # Búsquedas recientes
     start("busqueda")
     check("demo: recientes «Mercado Central» y «Fallas 2027»", find("Mercado Central") is not None and find("Fallas 2027") is not None)
-    adb("shell", "input", "text", "bioparc")
+    type_text("bioparc")
     time.sleep(1.2)
     tap_text("Bioparc")
     time.sleep(1.0)
@@ -954,7 +984,8 @@ def g_avisos():
     tap_system_button("Don't allow")
     check("tras el segundo no la app explica cómo permitir la ubicación", wait_for("Ubicación desactivada", 5))
     tap_text("Abrir ajustes")
-    check("«Abrir ajustes» abre los ajustes de la app", wait_focus("com.android.settings") and wait_for("Turismo Valencia", 5, exact=False))
+    opened = wait_focus("com.android.settings", 20) and wait_for("Turismo Valencia", 12, exact=False)  # los Ajustes arrancan en frío tras el reinicio del emulador
+    check("«Abrir ajustes» abre los ajustes de la app", opened, "" if opened else "foco %s · textos %s" % (focused_window().strip(), texts()[:8]))
     back()
     time.sleep(1)
     start("mapa", reset=False)
@@ -1355,9 +1386,155 @@ def g_privacidad():
     check("el aviso legal no lleva ese añadido", find("La app en tu móvil") is None and find("Lo que la app no incluye") is None)
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "refresco": g_refresco, "privacidad": g_privacidad}
+def app_locales():
+    """Idiomas de la app que guarda el sistema (`cmd locale get-app-locales`), como texto: «en», «ca-ES-valencia»…"""
+    m = re.search(r"are \[(.*)\]", adb("shell", "cmd", "locale", "get-app-locales", PKG))
+    return m.group(1) if m else ""
+
+
+def set_app_locale(tags=""):
+    """Fija (o, sin etiquetas, quita) el idioma de la app en el sistema, como en Ajustes → Aplicaciones → Idioma de la app."""
+    adb("shell", "cmd", "locale", "set-app-locales", PKG, *(["--locales", tags] if tags else []))
+
+
+def room_language():
+    rows = app_db("SELECT language FROM settings")[0]
+    return rows[0][0] if rows else None
+
+
+def ask_valbot(question, reply_text, attempts=2):
+    """Escribe una pregunta en ValBot (sin asistente en línea: contesta con las reglas) y espera a que salga `reply_text`.
+    Con el emulador cargado la pregunta puede no llegar a enviarse (el campo aún sin foco, el teclado a medio abrir): se reintenta una
+    vez, que el comportamiento que se prueba (qué contesta ValBot) no depende de ese intento."""
+    for attempt in range(attempts):
+        adb("shell", "input", "tap", "200", "1447")  # el campo de texto, en el diseño de 780x1688
+        time.sleep(0.8)
+        type_text(question)
+        time.sleep(0.6)
+        send = next((n for n in nodes() if n["d"] in ("Enviar", "Send", "Envoyer")), None)  # el control pulsable es su padre: se pulsa en su centro
+        if send:
+            tap(send)
+        else:
+            adb("shell", "input", "tap", "696", "1447")
+        if wait_for(reply_text, 10, exact=False):
+            return True
+        print("   intento %d sin respuesta a «%s»: textos %s" % (attempt + 1, question, texts()[:8]), flush=True)
+    return False
+
+
+def g_idiomas():
+    print("\n## Idiomas: español, valenciano, inglés y francés")
+    # ---- Cambiar desde la hoja de idioma de Perfil
+    start("perfil", "--ez", "chatDown", "true")
+    check("Perfil en español", find("Perfil y ajustes") is not None and find("Español") is not None)
+    tap_text("Idioma")
+    check("la hoja de idioma ofrece los cuatro idiomas", wait_for("Valencià", 4) and all(find(t) for t in ("Español", "English", "Français")))
+    tap_text("English")
+    tap_text("Aplicar")
+    check("«Aplicar» recrea la pantalla en inglés", wait_for("Profile & settings", 8))
+    check("el sistema guarda el idioma de la app", app_locales() == "en", app_locales())
+    check("Perfil: la fila Language dice English", find("Language") is not None and find("English") is not None)
+    check("Room anota el idioma (EN)", room_language() == "EN", str(room_language()))
+
+    # ---- Inglés: contenido, formatos y avisos
+    start("inicio", reset=False, lang=None)
+    check("Inicio en inglés (buscador, secciones y «Cerca de ti»)", all(find(t) for t in ("Search Valencia…", "What to see", "Near you")))
+    check("…y la barra inferior", all(find(t) for t in ("Home", "Map", "Favourites", "Bookings")))
+    check("las fichas salen traducidas (Central Market) y con el formato inglés (4.8 · 2.3k)", find("Central Market") is not None and any("(2.3k)" in t for t in texts()))
+    start("detalle/mercado-central", reset=False, lang=None)
+    check("la ficha traducida: título, información práctica y cifras", find("Valencia Central Market") is not None and find("Practical information") is not None and find("Free admission") is not None)
+    check("…con el aviso de que la guía de la web solo está en español", scroll_to("This content from the website is only available in Spanish.", tries=20) is not None)
+    start("reservas", reset=False, lang=None)
+    check("Mis reservas en inglés", find("My bookings") is not None and find("3 bookings · 1 pending") is not None)
+    check("…con el título de la oferta traducido (Boat trip on La Albufera)", find("Boat trip on La Albufera") is not None)
+    check("…y las fechas en inglés («Sat 24 Oct · 18:30»)", any(re.fullmatch(r"(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} [A-Z][a-z]{2} · \d{2}:\d{2}", t) for t in texts()), str([t for t in texts() if "·" in t][:3]))
+    check("…y el precio con el símbolo delante (2 people · €36)", "2 people · €36" in texts())
+    start("notificaciones", reset=False, lang=None)
+    check("Notificaciones: las de demostración se traducen", all(find(t) is not None for t in ("Mascletà at 14:00", "Booking confirmed", "Guides updated", "ValBot has news")))
+    start("entradas?tab=experiencias", reset=False, lang=None)
+    check("Tickets & Tours en inglés (Book, from €18, Valencian paella workshop)", find("Book") is not None and find("from") is not None and "€18" in texts() and find("Valencian paella workshop") is not None)
+    start("busqueda", reset=False, lang=None)
+    type_text("central market")
+    found = wait_for("Central Market", 8)  # el resultado sale tras la última letra: con el emulador cargado tarda más que un tiempo fijo
+    check("el buscador encuentra por el nombre en inglés", found, "" if found else str(texts()[:8]))
+    start("valbot", "--ez", "chatDown", "true", reset=False, lang=None)
+    check("ValBot saluda en inglés", find("Hello! I’m ValBot, your tourism assistant in Valencia. How can I help you?") is not None)
+    check("ValBot contesta en inglés a una pregunta en inglés", ask_valbot("hello", "Ask me about places"))
+    check("…y avisa de que es una respuesta básica", find("Basic reply · online ValBot unavailable") is not None)
+    start("valbot", "--ez", "chatDown", "true", reset=False, lang=None)
+    check("ValBot entiende una pregunta en español aunque la app esté en inglés y contesta en inglés", ask_valbot("como llego a la lonja", "on foot from your location"))
+
+    # ---- Persistencia: tras cerrar y abrir sigue en inglés
+    start("perfil", reset=False, lang=None)
+    check("tras cerrar y abrir la app sigue en inglés", find("Profile & settings") is not None)
+
+    # ---- El idioma que se elige en Ajustes del móvil (Aplicaciones → Idioma de la app)
+    set_app_locale("ca-ES-valencia")
+    check("desde los ajustes del móvil: valenciano (ca-ES-valencia)", wait_for("Perfil i configuració", 8))
+    check("Room sigue al sistema (VA)", room_language() == "VA", str(room_language()))
+    start("inicio", reset=False, lang=None)
+    check("Inicio en valencià (Cerca a València…, Què veure, Prop de tu, Mercat Central)", all(find(t) for t in ("Cerca a València…", "Què veure", "Prop de tu", "Mercat Central")))
+    start("reservas", reset=False, lang=None)
+    check("Reserves: fechas valencianas («Ds 24 oct · 18:30») y «2 persones · 36 €»", any(re.fullmatch(r"(Dl|Dt|Dc|Dj|Dv|Ds|Dg) \d{1,2} [a-zç]+ · \d{2}:\d{2}", t) for t in texts()) and "2 persones · 36 €" in texts(), str([t for t in texts() if "·" in t][:3]))
+    start("valbot", "--ez", "chatDown", "true", reset=False, lang=None)
+    check("ValBot en valencià", find("Hola! Sóc ValBot, el teu assistent de turisme a València. En què et puc ajudar?") is not None and ask_valbot("hola", "Pregunta’m per llocs"))
+
+    # ---- Francés: con el extra de depuración
+    start("perfil", reset=False, lang="FR")
+    check("francés con el extra de depuración (--es lang FR)", wait_for("Profil et réglages", 8))
+    check("el sistema guarda «fr»", app_locales() == "fr", app_locales())
+    start("inicio", reset=False, lang=None)
+    check("Inicio en français (Rechercher à Valence…, À voir, Près de vous, Marché central)", all(find(t) for t in ("Rechercher à Valence…", "À voir", "Près de vous", "Marché central")))
+    start("reservas", reset=False, lang=None)
+    check("Mes réservations: fechas francesas y «2 personnes · 36 €»", any(re.fullmatch(r"(Lun|Mar|Mer|Jeu|Ven|Sam|Dim) \d{1,2} [a-zéû.]+ · \d{2}:\d{2}", t) for t in texts()) and any(t.replace(" ", " ") == "2 personnes · 36 €" for t in texts()), str([t for t in texts() if "·" in t][:3]))
+    start("valbot", "--ez", "chatDown", "true", reset=False, lang=None)
+    check("ValBot en français", ask_valbot("bonjour", "Posez-moi des questions"))
+    start("pagina/Navidad", reset=False, lang=None)
+    check("una guía de la web: título traducido (Le Noël le plus lumineux) y aviso de que el texto está en español", find("Le Noël le plus lumineux") is not None and find("Ce contenu du site web n’est disponible qu’en espagnol.") is not None)
+
+    # ---- Volver al español desde la hoja
+    start("perfil", reset=False, lang=None)
+    tap_text("Langue")
+    wait_for("Español", 4)
+    tap_text("Español")
+    tap_text("Appliquer")
+    check("desde la hoja, de vuelta al español", wait_for("Perfil y ajustes", 8))
+    check("el sistema guarda «es»", app_locales() == "es", app_locales())
+    check("Room anota ES", room_language() == "ES", str(room_language()))
+    start("pagina/Navidad", reset=False, lang=None)
+    check("en español no sale el aviso de «solo en español»", find("Este contenido de la web solo está disponible en español.") is None and find("La Navidad más luminosa") is not None)
+    start("reservas", reset=False, lang=None)
+    check("en español las fechas y los precios son los de siempre", any(re.fullmatch(r"(Lun|Mar|Mié|Jue|Vie|Sáb|Dom) \d{1,2} [a-z]{3} · \d{2}:\d{2}", t) for t in texts()) and "2 pers. · 36 €" in texts())
+
+    # ---- Primer arranque: manda el idioma del móvil si es uno de los cuatro (inglés en el emulador)…
+    adb("shell", "pm", "clear", PKG)
+    set_app_locale("")
+    start("perfil", reset=False, lang=None)
+    check("primer arranque en un móvil en inglés: la app sale en inglés", wait_for("Profile & settings", 8))
+    check("…y Room lo anota (EN)", room_language() == "EN", str(room_language()))
+    # …y, si no lo es (alemán), el español.
+    device = adb("shell", "cmd", "locale", "get-device-locale").strip()
+    try:
+        adb("shell", "cmd", "locale", "set-device-locale", "de-DE")
+        time.sleep(2.0)
+        adb("shell", "pm", "clear", PKG)
+        set_app_locale("")
+        start("perfil", reset=False, lang=None)
+        check("primer arranque en un móvil en alemán (que la app no ofrece): sale en español", wait_for("Perfil y ajustes", 8))
+        check("…y Room anota ES", room_language() == "ES", str(room_language()))
+    finally:
+        adb("shell", "cmd", "locale", "set-device-locale", device or "en-US")
+        time.sleep(2.0)
+    # Los demás grupos esperan la app en español.
+    set_app_locale("es")
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
+    # El emulador está en inglés y la app sigue el idioma del móvil: los grupos esperan el español.
+    adb("shell", "cmd", "locale", "set-app-locales", PKG, "--locales", "es")
     chosen = sys.argv[1:] or list(GROUPS)
     for g in chosen:
         GROUPS[g]()

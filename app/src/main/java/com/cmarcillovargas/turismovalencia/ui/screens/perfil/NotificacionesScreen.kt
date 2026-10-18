@@ -1,5 +1,6 @@
 package com.cmarcillovargas.turismovalencia.ui.screens.perfil
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmarcillovargas.turismovalencia.R
 import com.cmarcillovargas.turismovalencia.data.AppContainer
+import com.cmarcillovargas.turismovalencia.data.AppStrings
 import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.model.AppNotification
 import com.cmarcillovargas.turismovalencia.data.model.NotificationGroup
@@ -57,13 +59,31 @@ import kotlinx.coroutines.flow.stateIn
 data class NotificacionesUiState(val items: List<AppNotification> = emptyList())
 
 class NotificacionesViewModel(private val container: AppContainer) : ViewModel() {
-    val uiState: StateFlow<NotificacionesUiState> = kotlinx.coroutines.flow.combine(container.notifications.items) { NotificacionesUiState(it.first()) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotificacionesUiState())
+    val uiState: StateFlow<NotificacionesUiState> = kotlinx.coroutines.flow.combine(container.notifications.items) { lists ->
+        NotificacionesUiState(lists.first().map { it.inLanguage(container.strings) })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotificacionesUiState())
 
     fun onRead(id: String) = container.notifications.markRead(id)
 }
 
 private val IconCircle = Spacing.xl + Spacing.xs
+
+/** Título, texto y hora de las cinco notificaciones de demostración (`DemoData`), que la base de datos guarda en español. */
+private class DemoTexts(@param:StringRes val title: Int, @param:StringRes val body: Int, @param:StringRes val whenLabel: Int)
+
+private val DemoNotificationTexts = mapOf(
+    "n1" to DemoTexts(R.string.reminder_mascleta_title, R.string.reminder_mascleta_text, R.string.notif_when_10min),
+    "n2" to DemoTexts(R.string.notif_demo_2_title, R.string.notif_demo_2_body, R.string.notif_when_1h),
+    "n3" to DemoTexts(R.string.notif_demo_3_title, R.string.notif_demo_3_body, R.string.notif_when_yesterday),
+    "n4" to DemoTexts(R.string.notif_demo_4_title, R.string.notif_demo_4_body, R.string.notif_when_monday),
+    "n5" to DemoTexts(R.string.notif_demo_5_title, R.string.notif_demo_5_body, R.string.notif_when_sunday),
+)
+
+/** Las de demostración salen en el idioma de la app; cualquier otra se enseña con el texto con que se guardó. */
+private fun AppNotification.inLanguage(strings: AppStrings): AppNotification {
+    val texts = DemoNotificationTexts[id] ?: return this
+    return copy(title = strings.get(texts.title), body = strings.get(texts.body), whenLabel = strings.get(texts.whenLabel))
+}
 
 @Composable
 fun NotificacionesRoute(

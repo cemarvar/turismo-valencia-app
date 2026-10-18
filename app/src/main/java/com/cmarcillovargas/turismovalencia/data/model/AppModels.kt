@@ -1,6 +1,7 @@
 package com.cmarcillovargas.turismovalencia.data.model
 
 import java.time.LocalDate
+import java.util.Locale
 
 /** `Confirmed` y `Cancelled` los pone el servidor; `Completed` la deduce la app cuando la fecha ya pasó; `Pending` solo existe en los datos de demostración. */
 enum class ReservationStatus { Confirmed, Pending, Completed, Cancelled }
@@ -21,6 +22,12 @@ data class Reservation(
     val locator: String,
 ) {
     val people: Int get() = adults + children
+
+    /**
+     * La reserva con el título y el lugar de su oferta tal como se ven ahora, en el idioma de la app: la base de datos guarda los del
+     * momento de reservar (los de las de demostración, siempre en español).
+     */
+    fun shownAs(offer: Offer?): Reservation = if (offer == null) this else copy(title = offer.title, place = offer.place)
 }
 
 enum class NotificationKind { Event, Booking, Download, Eco, Bot }
@@ -39,7 +46,26 @@ data class AppNotification(
     val itemId: String? = null,
 )
 
-enum class LanguageCode(val code: String) { ES("ES"), VA("VA"), EN("EN"), FR("FR") }
+/**
+ * Idiomas de la app. [tag] es la etiqueta BCP 47 que se le da al sistema: el valenciano es catalán con la variante `valencia`
+ * (`ca-ES-valencia`) y sus recursos viven en `values-ca`. El idioma que de verdad se está mostrando se lee de la cadena
+ * `locale_code` de los recursos (ver [fromCode]), no de la configuración del móvil, porque Android elige los recursos con la lista
+ * entera de idiomas del usuario y esa cadena es lo único que dice cuál ha ganado.
+ */
+enum class LanguageCode(val code: String, val tag: String) {
+    ES("ES", "es"),
+    VA("VA", "ca-ES-valencia"),
+    EN("EN", "en"),
+    FR("FR", "fr"),
+    ;
+
+    val locale: Locale get() = Locale.forLanguageTag(tag)
+
+    companion object {
+        /** El idioma de [code] (`ES`, `VA`, `EN`, `FR`), o `null` si no es ninguno. */
+        fun fromCode(code: String?): LanguageCode? = entries.firstOrNull { it.code == code?.trim()?.uppercase() }
+    }
+}
 
 enum class TextScale(val factor: Float) { System(1f), Small(0.9f), Large(1.15f), ExtraLarge(1.3f) }
 

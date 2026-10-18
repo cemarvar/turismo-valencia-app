@@ -1,5 +1,7 @@
 package com.cmarcillovargas.turismovalencia.data.repo
 
+import com.cmarcillovargas.turismovalencia.R
+import com.cmarcillovargas.turismovalencia.data.AppStrings
 import com.cmarcillovargas.turismovalencia.data.fake.FakeAlojamientos
 import com.cmarcillovargas.turismovalencia.data.fake.FakeEventos
 import com.cmarcillovargas.turismovalencia.data.fake.FakeEventosWeb
@@ -10,6 +12,7 @@ import com.cmarcillovargas.turismovalencia.data.fake.FakeQueVerWeb
 import com.cmarcillovargas.turismovalencia.data.fake.FakeSostenible
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Offer
 import com.cmarcillovargas.turismovalencia.data.model.OfferKind
@@ -20,39 +23,81 @@ import com.cmarcillovargas.turismovalencia.util.ValenciaCenter
 import com.cmarcillovargas.turismovalencia.util.distanceMeters as metersBetween
 import com.cmarcillovargas.turismovalencia.util.formatPrice
 import com.cmarcillovargas.turismovalencia.util.normalizeText
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlin.math.roundToInt
 
 /**
  * Contenido de solo lectura. Las distancias de las fichas se miden desde [origin] (la ubicación del usuario o el centro de
- * Valencia) con las coordenadas reales de cada lugar; quien las muestre debe volver a leer cuando [origin] cambie.
+ * Valencia) con las coordenadas reales de cada lugar; quien las muestre debe volver a leer cuando [origin] cambie. Los textos salen
+ * en el idioma de la app ([setLanguage]; ver `ContentTranslations`): quien los muestre debe volver a leer cuando cambie el idioma, y
+ * `MainActivity` lo asegura recreando las pantallas.
  */
 // TODO(api): el resto del contenido (fichas y guías) sigue siendo el de la app; el catálogo de ofertas ya viene del servidor.
 class ContentRepository(
     private val web: WebContentRepository,
     /** Catálogo de ofertas vigente (`OffersRepository.offers`); sin él, el incluido en la app. */
     offersSource: StateFlow<List<Offer>> = MutableStateFlow(FakeOfertas.map { it.copy(assetImage = web.offerImage(it.id)) }),
+    private val strings: AppStrings = AppStrings(web.appContext),
 ) {
+    private val translations get() = web.translations
+
     /** Fichas con el orden, los títulos y las fotos de los índices de la web; las del diseño del Figma conservan su título y su foto. */
-    private val base: List<ContentItem> = (FakeQueVer + FakeQueVerWeb + FakeGastronomia + FakeAlojamientos + FakeEventos + FakeEventosWeb + FakeSostenible).map { item ->
+    private fun buildBase(): List<ContentItem> = (FakeQueVer + FakeQueVerWeb + FakeGastronomia + FakeAlojamientos + FakeEventos + FakeEventosWeb + FakeSostenible).map { item ->
         val pageId = web.pageIdFor(item.id)
         val meta = pageId?.let(web::meta)
         val tile = pageId?.let { web.tileOf(item.category, it) }
         val fromDesign = item.id in DesignTitles
-        item.copy(
-            title = if (fromDesign || tile == null) item.title else tile.title,
-            detailTitle = item.detailTitle ?: meta?.title?.takeIf { !fromDesign && tile != null },
+        val text = translations.item(item.id)
+        val localized = if (text != null) item.translated(text) else item
+        localized.copy(
+            // Con traducción manda ella; sin ella, el título del Figma o el del índice de la web (en español).
+            title = if (text?.title != null || fromDesign || tile == null) localized.title else tile.title,
+            detailTitle = localized.detailTitle ?: meta?.title?.takeIf { !fromDesign && tile != null },
             pageId = pageId,
             thumbAsset = tile?.image ?: meta?.thumb,
             heroAsset = meta?.hero,
         )
     }
 
+    private var base: List<ContentItem> = buildBase()
+
+    /**
+     * Los textos de cada ficha por los que se busca, ya normalizados (título, zona, etiqueta, subcategoría y palabras clave). Se
+     * calculan una vez por idioma y no en cada letra que se escribe: el buscador filtra todas las fichas con cada pulsación.
+     */
+    @Volatile
+    private var haystacks: Map<String, List<String>> = haystacksOf(base)
+
+    private fun haystacksOf(items: List<ContentItem>): Map<String, List<String>> =
+        items.associate { item -> item.id to (listOf(item.title, item.area, item.eyebrow, item.subcategory) + item.keywords).map(::normalizeText) }
+
     /** Entradas, tours y experiencias: las del servidor o, si no ha llegado ninguna versión, las de la app. Cambia cuando llega una nueva. */
-    val offersFlow: StateFlow<List<Offer>> = offersSource
-    val offers: List<Offer> get() = offersFlow.value
+    val offersFlow: Flow<List<Offer>> = offersSource.map(::localize)
+    private val offersRaw = offersSource
+    val offers: List<Offer> get() = localize(offersRaw.value)
+
+    @Volatile
+    private var localizedOffers: Triple<List<Offer>, LanguageCode, List<Offer>>? = null
+
+    /** Las ofertas con los textos del idioma de la app (las que no tienen traducción, como una oferta nueva del servidor, se ven tal cual). */
+    private fun localize(source: List<Offer>): List<Offer> {
+        val language = translations.language
+        if (language == LanguageCode.ES) return source
+        localizedOffers?.let { (from, lang, result) -> if (from === source && lang == language) return result }
+        return source.map { offer -> translations.offer(offer.id)?.let(offer::translated) ?: offer }.also { localizedOffers = Triple(source, language, it) }
+    }
+
+    /** Cambia el idioma de los textos del contenido y de la web. */
+    fun setLanguage(language: LanguageCode) {
+        web.setLanguage(language)
+        base = buildBase()
+        haystacks = haystacksOf(base)
+        snapshot = snapshotFor(_origin.value)
+    }
 
     private class Snapshot(val items: List<ContentItem>) {
         val byId = items.associateBy { it.id }
@@ -128,7 +173,7 @@ class ContentRepository(
     fun matches(item: ContentItem, query: String): Boolean {
         val q = normalizeText(query).trim()
         if (q.isEmpty()) return false
-        val haystack = (listOf(item.title, item.area, item.eyebrow, item.subcategory) + item.keywords).map(::normalizeText)
+        val haystack = haystacks[item.id] ?: (listOf(item.title, item.area, item.eyebrow, item.subcategory) + item.keywords).map(::normalizeText)
         return q.split(" ").filter { it.isNotBlank() }.all { token -> haystack.any { it.contains(token) } }
     }
 
@@ -146,7 +191,7 @@ class ContentRepository(
             suggestions += SearchSuggestion(item.title, item.area.takeIf { item.distanceMeters <= 0 } ?: "${item.eyebrow} · ${item.area}", kind, item.id)
         }
         offers.take(1).forEach { offer ->
-            suggestions += SearchSuggestion(offer.title, "Experiencia · desde ${formatPrice(offer.priceFromCents)}", SearchSuggestion.Kind.Offer, offer.id)
+            suggestions += SearchSuggestion(offer.title, strings.get(R.string.search_offer_subtitle, formatPrice(offer.priceFromCents)), SearchSuggestion.Kind.Offer, offer.id)
         }
         web.search(q).take(2).forEach { page ->
             suggestions += SearchSuggestion(page.title, page.family.label(), SearchSuggestion.Kind.Guide, page.id)
@@ -154,8 +199,8 @@ class ContentRepository(
         val mapped = items.filter { it.distanceMeters >= 0 }
         if (mapped.isNotEmpty()) {
             val dish = items.firstOrNull { it.category == Category.Gastronomia }
-            val title = dish?.let { "Restaurantes de ${normalizeFirstWord(it.title)} cerca" } ?: "Ver «$query» en el mapa"
-            suggestions += SearchSuggestion(title, "Mapa · ${mapped.size} resultados", SearchSuggestion.Kind.Map, query)
+            val title = dish?.let { strings.get(R.string.search_map_dish, normalizeFirstWord(it.title)) } ?: strings.get(R.string.search_map_query, query)
+            suggestions += SearchSuggestion(title, strings.plural(R.plurals.search_map_count, mapped.size, mapped.size), SearchSuggestion.Kind.Map, query)
         }
         return suggestions
     }
@@ -169,11 +214,13 @@ class ContentRepository(
 
     private fun normalizeFirstWord(title: String): String = title.substringBefore(" ").lowercase()
 
-    private fun WebFamily.label(): String = when (this) {
-        WebFamily.Esencial -> "Lo esencial de Valencia"
-        WebFamily.Planes -> "Planes"
-        WebFamily.Entradas, WebFamily.Tours, WebFamily.Experiencias -> "Tickets & Tours"
-        WebFamily.Legal -> "Información legal"
-        else -> "Guía"
-    }
+    private fun WebFamily.label(): String = strings.get(
+        when (this) {
+            WebFamily.Esencial -> R.string.search_family_esencial
+            WebFamily.Planes -> R.string.search_family_planes
+            WebFamily.Entradas, WebFamily.Tours, WebFamily.Experiencias -> R.string.cat_tickets
+            WebFamily.Legal -> R.string.search_family_legal
+            else -> R.string.search_family_guide
+        },
+    )
 }

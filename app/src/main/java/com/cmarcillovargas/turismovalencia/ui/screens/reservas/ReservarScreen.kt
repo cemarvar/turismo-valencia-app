@@ -62,23 +62,22 @@ import com.cmarcillovargas.turismovalencia.ui.components.ErrorNotice
 import com.cmarcillovargas.turismovalencia.ui.components.Eyebrow
 import com.cmarcillovargas.turismovalencia.ui.components.OfflineBanner
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
+import com.cmarcillovargas.turismovalencia.ui.components.slotLabel
 import com.cmarcillovargas.turismovalencia.ui.theme.PillShape
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 import com.cmarcillovargas.turismovalencia.ui.theme.screenTitle
-import com.cmarcillovargas.turismovalencia.util.formatPrice
 import com.cmarcillovargas.turismovalencia.util.formatMonthYear
+import com.cmarcillovargas.turismovalencia.util.formatPrice
+import com.cmarcillovargas.turismovalencia.util.formatWeekdayNarrow
 import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
 
 private val DayShape = RoundedCornerShape(16.dp)
 private val SummaryShape = RoundedCornerShape(20.dp)
 private val ThumbShape = RoundedCornerShape(16.dp)
 private val CounterSize = 40.dp
 private val FieldShape = RoundedCornerShape(16.dp)
-private val SpanishLocale = Locale("es", "ES")
 
 @Composable
 fun ReservarRoute(
@@ -235,7 +234,7 @@ private fun WeekRow(uiState: ReservarUiState, onSelectDate: (LocalDate) -> Unit)
             ) {
                 val content = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                 Text(
-                    day.dayOfWeek.getDisplayName(TextStyle.NARROW, SpanishLocale).uppercase(),
+                    formatWeekdayNarrow(day.dayOfWeek).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     color = if (selected) content else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -267,7 +266,7 @@ private fun TimeChip(time: String, available: Boolean, selected: Boolean, onClic
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = time,
+            text = slotLabel(time),
             style = MaterialTheme.typography.labelLarge,
             color = when {
                 !available -> colors.outline

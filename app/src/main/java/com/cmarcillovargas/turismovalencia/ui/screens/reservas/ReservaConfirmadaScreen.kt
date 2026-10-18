@@ -61,6 +61,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.AppButtonStyle
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.BottomActionBar
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
+import com.cmarcillovargas.turismovalencia.ui.components.slotLabel
 import com.cmarcillovargas.turismovalencia.ui.components.QrCode
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
@@ -170,7 +171,7 @@ private fun Ticket(reservation: Reservation, offer: Offer?) {
             Column(Modifier.padding(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 Row(Modifier.fillMaxWidth()) {
                     Detail(stringResource(R.string.booking_date), formatShortDate(reservation.date), Modifier.weight(1f))
-                    Detail(stringResource(R.string.booking_time), reservation.time, Modifier.weight(1f))
+                    Detail(stringResource(R.string.booking_time), slotLabel(reservation.time), Modifier.weight(1f))
                     Detail(stringResource(R.string.booking_people), peopleText(reservation), Modifier.weight(1.2f))
                 }
                 Row(Modifier.fillMaxWidth()) {
@@ -217,7 +218,7 @@ private fun peopleText(reservation: Reservation): String = buildString {
 }
 
 private fun share(context: Context, reservation: Reservation) {
-    val text = context.getString(R.string.booking_share_text, reservation.locator, reservation.title, formatShortDate(reservation.date), reservation.time)
+    val text = context.getString(R.string.booking_share_text, reservation.locator, reservation.title, formatShortDate(reservation.date), slotLabel(context.resources, reservation.time))
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_TEXT, text)

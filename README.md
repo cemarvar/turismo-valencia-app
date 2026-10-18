@@ -10,8 +10,9 @@ siguiendo el diseño de Figma pantalla a pantalla.
 > **Estado:** frontend completo y funcional; ValBot conectado a la web, lo del usuario guardado en local con Room, mapa real de
 > OpenStreetMap con ubicación y rutas, avisos de eventos con notificaciones reales, icono propio y pantalla de arranque del sistema.
 > El backend propio (Supabase) está publicado y probado, y la app ya lo usa: lee de él el catálogo de ofertas y hace las reservas
-> reales (reservar exige conexión) y las pone al día cada noche en segundo plano. Aún no hay idiomas ni mapa descargable por zonas (ver
-> [Hoja de ruta](#hoja-de-ruta)).
+> reales (reservar exige conexión) y las pone al día cada noche en segundo plano. Está en cuatro idiomas (español, valenciano, inglés y
+> francés; el texto de las páginas de la web sigue solo en español, ver [`docs/idiomas.md`](docs/idiomas.md)). Aún no hay mapa descargable por
+> zonas (ver [Hoja de ruta](#hoja-de-ruta)).
 
 ## Qué incluye
 
@@ -58,8 +59,8 @@ O abre la carpeta en Android Studio, espera a que sincronice Gradle y pulsa **Ru
 |---|---|
 | `./gradlew assembleDebug` | Compilar el APK de depuración |
 | `./gradlew lint` | Análisis estático |
-| `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room, cliente de la API propia con sus ejemplos del contrato, calendario del refresco nocturno) |
-| `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos), el catálogo de ofertas con su caché, las reservas con un servidor falso (idempotencia, errores), el refresco nocturno con el WorkManager de pruebas y avisos (alarmas y notificaciones reales) |
+| `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room, cliente de la API propia con sus ejemplos del contrato, calendario del refresco nocturno, y los idiomas: formatos, todas las traducciones de textos y de contenido y las reglas de ValBot en los cuatro idiomas) |
+| `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos), el catálogo de ofertas con su caché, las reservas con un servidor falso (idempotencia, errores), el refresco nocturno con el WorkManager de pruebas, avisos (alarmas y notificaciones reales, también en cada idioma) y los idiomas (recursos, contenido traducido, buscador) |
 | `./gradlew assembleReleaseCheck` | APK de publicación (R8) firmado con la clave de depuración y apuntando al backend local, para `tools/verify/verify_release.py` |
 
 Por defecto la app habla con la API publicada. Para que use el backend local (`cd backend && npm start`, con Docker Desktop), desde el
@@ -74,6 +75,8 @@ adb shell am start -n com.cmarcillovargas.turismovalencia/.MainActivity --es rou
 # --ez offline true       simula que no hay conexión
 # --ez emptyFavorites true vacía los favoritos
 # --ez chatFake true        ValBot contesta como Gemini sin llamar al servidor
+# --ez chatDown true        ValBot sin asistente en línea: contesta con las reglas de la app
+# --es lang ES|VA|EN|FR     cambia el idioma de la app (el emulador está en inglés: las pruebas piden el español)
 # --ez resetData true       vuelve a los datos de demostración (lo guardado persiste entre arranques)
 adb emu geo fix -0.3755 39.4745   # (en el emulador) simula estar en Valencia: longitud y latitud
 ```
@@ -138,6 +141,7 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - **Refresco nocturno (emulador):** el trabajo de WorkManager se programa con los ajustes de Descargas (red sin tarifa con «Solo Wi-Fi», a partir de las 3:00), se cancela al apagar «Actualizar automáticamente» y, con la app cerrada y el reloj pasadas las 3:00, el sistema lo ejecuta y deja programado el de la noche siguiente (`verify_ui.py refresco`).
 - **Privacidad (emulador):** la política de privacidad de la web lleva debajo lo que añade la app (`verify_ui.py privacidad`).
 - **Publicación (emulador + backend local):** la versión minificada con R8 arranca, guarda en Room, pide el catálogo, programa y ejecuta el refresco nocturno (WorkManager) y reserva con Retrofit y lee el error «Ya no quedan plazas» (`verify_release.py`).
+- **Idiomas (emulador):** cambiar desde la hoja de idioma y desde los ajustes del móvil, y ver Inicio, fichas, reservas, notificaciones, Tickets & Tours, buscador y ValBot en español, valenciano, inglés y francés; que persiste; y el primer arranque con el móvil en inglés y en alemán (`verify_ui.py idiomas`).
 - **Fotos:** tras cambiar de sección, cada tarjeta muestra su propia foto.
 - **Backend (local):** `cd backend && npm test` prueba la API por HTTP (ofertas, reservas, idempotencia, aforo con peticiones simultáneas, límites y base de datos cerrada).
 
@@ -154,7 +158,8 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - [x] **Permiso de ubicación** real (pantalla de bienvenida, botón del mapa y Perfil)
 - [x] **Notificaciones**: permiso del sistema y aviso de la mascletà (alarma local, 30 min antes)
 - [x] **Icono de la app** y **pantalla de arranque del sistema** (SplashScreen API)
-- [ ] **Idiomas** ES · VA · EN · FR
+- [x] **Idiomas** ES · VA · EN · FR: interfaz, contenido propio (fichas y ofertas), títulos de la web, ValBot sin conexión, avisos y formatos; elegir desde la app o desde los ajustes del móvil ([`docs/idiomas.md`](docs/idiomas.md))
+- [ ] Traducir el texto de las páginas de la web (hoy solo en español; se traducen sus títulos)
 - [ ] Modo oscuro (el diseño de Figma solo define el tema claro)
 
 ## Créditos

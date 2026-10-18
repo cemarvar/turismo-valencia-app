@@ -1,0 +1,444 @@
+<resources>
+    <string name="locale_code">EN</string>
+
+    <!-- A1 · Splash -->
+    <string name="splash_logo_descripcion">Turismo Valencia logo</string>
+    <string name="splash_titulo">Valencia</string>
+    <string name="splash_lema">Life is better here</string>
+
+    <!-- A2–A4 · Onboarding -->
+    <string name="onboarding_saltar">Skip</string>
+    <string name="onboarding_paso">Step %1$d of %2$d</string>
+    <string name="onboarding_siguiente">Next</string>
+    <string name="onboarding_empezar">Get started</string>
+    <string name="onboarding_1_titulo">Discover Valencia at your own pace</string>
+    <string name="onboarding_1_texto">The essentials of the city —what to see, events, food and where to stay— organised like the website and made for walking.</string>
+    <string name="onboarding_1_imagen">City of Arts and Sciences in Valencia at sunset</string>
+    <string name="onboarding_2_titulo">No signal, no problem</string>
+    <string name="onboarding_2_texto">Download guides, routes and the city-centre map to use offline. Your favourites are saved on your phone.</string>
+    <string name="onboarding_2_imagen">Palm trees and a stone bridge in a park in Valencia</string>
+    <string name="onboarding_3_titulo">Ask ValBot</string>
+    <string name="onboarding_3_texto">Your AI assistant recommends plans, routes and restaurants near you, in your language.</string>
+    <string name="onboarding_3_imagen">An arch on a street in Valencia’s old town</string>
+
+    <!-- A5 · Location permission -->
+    <string name="permiso_dialogo_titulo">Allow %1$s to access this device’s location?</string>
+    <string name="permiso_precisa">Precise</string>
+    <string name="permiso_aproximada">Approximate</string>
+    <string name="permiso_mientras_se_usa">While using the app</string>
+    <string name="permiso_solo_esta_vez">Only this time</string>
+    <string name="permiso_no_permitir">Don’t allow</string>
+    <string name="permiso_panel_etiqueta">Location permission</string>
+    <string name="permiso_panel_titulo">Places near you</string>
+    <string name="permiso_panel_texto">We use your location only while you use the app, to sort places by distance and work out walking routes. You can change this in Settings.</string>
+
+    <!-- A6 · Language selection -->
+    <string name="idioma_titulo">App language</string>
+    <string name="idioma_subtitulo">ValBot will also reply in this language.</string>
+    <string name="idioma_aplicar">Apply</string>
+    <string name="idioma_es_detalle">Spanish</string>
+    <string name="idioma_va_detalle">Valencian</string>
+    <string name="idioma_en_detalle">English</string>
+    <string name="idioma_fr_detalle">French</string>
+
+    <string name="common_back">Back</string>
+    <string name="common_share">Share</string>
+    <string name="common_favorite_add">Save to favourites</string>
+    <string name="common_favorite_remove">Remove from favourites</string>
+    <string name="common_notifications">Notifications</string>
+    <string name="common_language">Language</string>
+    <string name="common_filter">Filters</string>
+    <string name="common_search">Search</string>
+    <string name="common_close">Close</string>
+    <string name="offline_banner">Offline · showing saved content</string>
+    <string name="offline_snackbar">No internet connection</string>
+    <string name="offline_retry">Try again</string>
+    <string name="chip_offline_ready">Offline</string>
+    <string name="chip_download">Download</string>
+    <string name="eco_tag">Eco</string>
+    <string name="home_search_hint">Search Valencia…</string>
+    <string name="home_nearby">Near you</string>
+    <string name="home_see_all">See all</string>
+    <string name="cat_que_ver">What to see</string>
+    <string name="cat_gastronomia">Food &amp; drink</string>
+    <string name="cat_alojamientos">Accommodation</string>
+    <string name="cat_eventos">Events</string>
+    <string name="cat_tickets">Tickets &amp; Tours</string>
+    <string name="cat_sostenible">Sustainable</string>
+
+    <string name="common_map">View on map</string>
+    <string name="search_suggestions">Suggestions</string>
+    <string name="search_recent">Recent searches</string>
+    <string name="search_trends">Trending</string>
+    <string name="search_clear">Clear search</string>
+    <string name="search_empty_title">No results</string>
+    <string name="search_empty_text">We couldn’t find “%1$s”. Try different words or ask ValBot.</string>
+    <string name="search_ask_valbot">Ask ValBot</string>
+    <string name="search_quick_horchata">Horchata</string>
+    <string name="search_quick_open_now">Open now</string>
+    <string name="cat_subtitle">%1$s · %2$d %3$s</string>
+    <string name="cat_sort">Sort</string>
+    <string name="cat_all">All</string>
+    <string name="cat_view_list">List</string>
+    <string name="cat_view_grid">Grid</string>
+    <string name="cat_que_ver_banner">Unique places</string>
+    <string name="cat_que_ver_tagline">These are the essential places to visit in Valencia</string>
+    <string name="cat_unit_places">places</string>
+    <string name="cat_gastro_banner">Culinary tradition</string>
+    <string name="cat_gastro_tagline">A gastronomic experience for all the senses</string>
+    <string name="cat_unit_dishes">dishes</string>
+    <string name="cat_aloj_banner">Where to stay</string>
+    <string name="cat_aloj_tagline">Our recommended places to stay, for every taste</string>
+    <string name="cat_unit_zones">areas</string>
+    <string name="cat_eventos_banner">Featured events</string>
+    <string name="cat_eventos_tagline">The Valencian events that fill the heart</string>
+    <string name="cat_unit_events">events</string>
+    <string name="cat_sost_banner">Sustainable tourism</string>
+    <string name="cat_sost_tagline">Travel with the city, not against it</string>
+    <string name="cat_unit_topics">topics</string>
+    <string name="cat_sorted_distance">Sorted by distance</string>
+    <string name="cat_sorted_web">Website order</string>
+    <string name="cat_sort_web">Website order</string>
+    <string name="cat_sorted_rating">Sorted by rating</string>
+    <string name="cat_sorted_name">Sorted by name</string>
+    <string name="cat_sort_distance">Nearest first</string>
+    <string name="cat_sort_rating">Best rated</string>
+    <string name="cat_sort_name">Name (A–Z)</string>
+    <string name="detail_free">Free admission</string>
+    <string name="detail_available_offline">Available offline</string>
+    <string name="detail_info">Practical information</string>
+    <string name="detail_acts">Must-see events</string>
+    <string name="detail_remind_title">Remind me about the %1$s</string>
+    <string name="detail_remind_text">Notification 30 min before</string>
+    <string name="detail_save">Save</string>
+    <string name="detail_saved">Saved</string>
+    <string name="detail_how_to_get">Directions</string>
+    <string name="detail_calendar">Calendar</string>
+    <string name="detail_not_found">We couldn’t find this content</string>
+    <string name="detail_no_calendar">No calendar app is installed</string>
+    <string name="detail_share_chooser">Share with</string>
+
+    <string name="tickets_search_hint">Search tickets and tours</string>
+    <string name="tickets_tab_tickets">Tickets</string>
+    <string name="tickets_tab_tours">Tours</string>
+    <string name="tickets_tab_experiences">Experiences</string>
+    <string name="tickets_empty">No results for your search</string>
+    <string name="tickets_from">from</string>
+    <string name="tickets_reserve">Book</string>
+    <string name="eco_banner_bold">European Green Capital 2024.</string>
+    <string name="eco_banner_text">Get around on foot, by bike or on public transport and support local shops.</string>
+
+    <string name="map_search_hint">Search places on the map</string>
+    <string name="map_all">All</string>
+    <string name="map_saved_only">Only what’s saved offline</string>
+    <string name="map_locate">Centre on my location</string>
+    <string name="map_clear_filters">Clear filters</string>
+    <string name="map_attribution">© OpenStreetMap contributors</string>
+    <string name="map_zoom_in">Zoom in</string>
+    <string name="map_zoom_out">Zoom out</string>
+    <string name="map_details">View details</string>
+    <string name="route_your_location">Your location</string>
+    <string name="route_mode_metro">Metro</string>
+    <string name="route_summary">%1$s · arrive %2$s</string>
+    <string name="route_saved">Route saved</string>
+    <string name="route_save">Save route</string>
+    <string name="route_start">Start navigation</string>
+    <string name="route_step_straight">Continue along %1$s</string>
+    <string name="route_step_left">Turn left towards %1$s</string>
+    <string name="route_step_right">Turn right towards %1$s</string>
+    <string name="route_step_straight_plain">Continue straight</string>
+    <string name="route_step_left_plain">Turn left</string>
+    <string name="route_step_right_plain">Turn right</string>
+    <string name="route_loading">Calculating the route…</string>
+    <string name="route_estimated">Approximate route: the routing service isn’t responding</string>
+    <string name="route_arrived">You have arrived: %1$s</string>
+    <string name="route_entrance">Main entrance</string>
+    <string name="route_no_maps">No maps app is available for navigation</string>
+
+    <string name="nav_inicio">Home</string>
+    <string name="nav_mapa">Map</string>
+    <string name="nav_valbot">ValBot</string>
+    <string name="nav_favoritos">Favourites</string>
+    <string name="nav_reservas">Bookings</string>
+    <string name="valbot_today">Today</string>
+    <string name="valbot_online">Online · Tourism assistant</string>
+    <string name="valbot_offline_status">Offline</string>
+    <string name="valbot_menu">More options</string>
+    <string name="valbot_new_chat">New conversation</string>
+    <string name="valbot_free">Free</string>
+    <string name="valbot_basic_reply">Basic reply · online ValBot unavailable</string>
+    <string name="valbot_unavailable">ValBot isn’t working right now. Sorry for the inconvenience.</string>
+    <string name="valbot_offline_meanwhile">In the meantime you can browse offline:</string>
+    <string name="valbot_my_favorites">My favourites</string>
+    <string name="valbot_saved_map">Saved map</string>
+    <string name="valbot_hint">Type your question…</string>
+    <string name="valbot_hint_offline">ValBot is not available</string>
+    <string name="valbot_mic">Dictate question</string>
+    <string name="valbot_send">Send</string>
+
+    <string name="common_cancel">Cancel</string>
+    <string name="fav_none_saved">No saved places</string>
+    <plurals name="fav_saved_count">
+        <item quantity="one">%1$d saved place</item>
+        <item quantity="other">%1$d saved places</item>
+    </plurals>
+    <string name="fav_empty_title">You have no favourites yet</string>
+    <string name="fav_empty_text">Tap the heart on any place to save it and view it even without a connection.</string>
+    <string name="fav_explore">Explore Valencia</string>
+    <string name="fav_tab_all">All</string>
+    <string name="fav_tab_places">Places</string>
+    <string name="fav_tab_events">Events</string>
+    <string name="fav_offline_summary">%1$d of %2$d available offline</string>
+    <string name="fav_offline_mb">%1$d MB saved on your phone</string>
+    <string name="fav_manage">Manage</string>
+    <string name="fav_label_lodging">Accommodation</string>
+    <string name="fav_label_event">Event</string>
+    <string name="downloads_title">Offline downloads</string>
+    <string name="downloads_used_mb">%1$d MB</string>
+    <string name="downloads_quota">used of %1$d MB reserved for the app</string>
+    <string name="downloads_maps_mb">Maps %1$d MB</string>
+    <string name="downloads_cards_mb">Guides %1$d MB</string>
+    <string name="downloads_wifi_only">Download on Wi-Fi only</string>
+    <string name="downloads_wifi_only_text">Avoids using mobile data</string>
+    <string name="downloads_auto_update">Update automatically</string>
+    <string name="downloads_auto_update_text">Every night with WorkManager</string>
+    <string name="downloads_map_title">Offline map · Centre</string>
+    <string name="downloads_map_text">%1$d MB · updated today</string>
+    <string name="downloads_content">Downloaded content</string>
+    <string name="downloads_empty">You haven’t saved anything yet. Tap “Download” on any place.</string>
+    <string name="downloads_downloaded">Downloaded</string>
+    <string name="downloads_place_size">Guide + photos · %1$d MB</string>
+    <string name="downloads_event_size">Guide + programme · %1$d MB</string>
+    <string name="downloads_remove">Remove download</string>
+    <string name="downloads_clear">Clear all</string>
+    <string name="downloads_clear_title">Clear all downloads?</string>
+    <string name="downloads_clear_text">You’ll need to download the guides again to use them offline.</string>
+    <string name="downloads_update">Update</string>
+    <string name="downloads_updating">Updating…</string>
+
+    <string name="res_title">My bookings</string>
+    <plurals name="res_count">
+        <item quantity="one">%1$d booking</item>
+        <item quantity="other">%1$d bookings</item>
+    </plurals>
+    <plurals name="res_pending">
+        <item quantity="one">%1$d pending</item>
+        <item quantity="other">%1$d pending</item>
+    </plurals>
+    <string name="res_tab_upcoming">Upcoming</string>
+    <string name="res_tab_history">History</string>
+    <string name="res_this_week">This week</string>
+    <string name="res_later">Coming up</string>
+    <string name="res_completed">Completed</string>
+    <string name="res_empty">You have no bookings yet. Book an activity from Tickets &amp; Tours.</string>
+    <plurals name="res_people_price">
+        <item quantity="one">%1$d person · %2$s</item>
+        <item quantity="other">%1$d people · %2$s</item>
+    </plurals>
+    <string name="res_status_confirmed">Confirmed</string>
+    <string name="res_status_pending">Pending</string>
+    <string name="res_status_completed">Completed</string>
+    <string name="res_status_cancelled">Cancelled</string>
+    <string name="res_cancelled">Cancelled</string>
+    <string name="book_title">Book</string>
+    <string name="book_step">Step 1 of 2 · Date and guests</string>
+    <string name="book_per_person">%1$s · %2$s per person</string>
+    <string name="book_times">Available times</string>
+    <string name="book_adults">Adults</string>
+    <string name="book_adults_price">%1$s per person</string>
+    <string name="book_children">Children</string>
+    <string name="book_children_free">Under 12 · free</string>
+    <string name="book_email_label">Email for the confirmation</string>
+    <string name="book_total_note">Total · pay at the jetty</string>
+    <string name="book_confirm">Confirm booking</string>
+    <string name="book_submitting">Booking…</string>
+    <string name="book_needs_connection">Booking needs an internet connection</string>
+    <string name="book_email_privacy">Your email is stored on our server only to manage this booking.</string>
+    <string name="book_error_unreachable">We couldn’t reach the server. Check your connection and try again.</string>
+    <string name="book_error_server">The booking service isn’t available right now. Try again in a few minutes.</string>
+    <string name="book_error_rate_limited">Too many attempts in a row. Wait a moment and try again.</string>
+    <string name="book_error_rate_limited_wait">Too many attempts in a row. Try again in %1$d min.</string>
+    <string name="book_error_sold_out">No places left for that day and time. Try another.</string>
+    <string name="book_error_offer_gone">This activity is no longer available.</string>
+    <string name="book_error_invalid_date">That date can no longer be booked. Choose another.</string>
+    <string name="book_error_invalid_slot">That time no longer exists. Choose another.</string>
+    <string name="book_error_invalid_party">The number of people isn’t valid (maximum 20 adults and children combined).</string>
+    <string name="book_error_invalid_email">The server doesn’t accept that email. Please check it.</string>
+    <string name="book_error_other">The booking couldn’t be completed. Check the details and try again.</string>
+    <string name="book_prev_week">Previous week</string>
+    <string name="book_next_week">Next week</string>
+    <string name="book_less">Remove one</string>
+    <string name="book_more">Add one</string>
+    <string name="booking_title">Booking</string>
+    <string name="booking_confirmed">Booking confirmed!</string>
+    <string name="booking_pending">Booking pending</string>
+    <string name="booking_sent_to">Booking registered with the email %1$s</string>
+    <string name="booking_date">Date</string>
+    <string name="booking_time">Time</string>
+    <string name="booking_people">People</string>
+    <string name="booking_locator">Reference</string>
+    <string name="booking_total">Total</string>
+    <string name="booking_show_code">Show this code at the jetty. Available offline.</string>
+    <string name="booking_share_text">Booking %1$s: %2$s · %3$s at %4$s</string>
+
+    <plurals name="booking_adults">
+        <item quantity="one">%1$d adult</item>
+        <item quantity="other">%1$d adults</item>
+    </plurals>
+    <plurals name="booking_children">
+        <item quantity="one">%1$d child</item>
+        <item quantity="other">%1$d children</item>
+    </plurals>
+
+    <string name="profile_title">Profile &amp; settings</string>
+    <string name="profile_offline_mb">%1$d MB offline</string>
+    <plurals name="profile_reservations">
+        <item quantity="one">%1$d booking</item>
+        <item quantity="other">%1$d bookings</item>
+    </plurals>
+    <string name="profile_prefs">Preferences</string>
+    <string name="profile_notifications_text">Events and bookings</string>
+    <string name="profile_location">Location</string>
+    <string name="profile_offline_a11y">Offline and accessibility</string>
+    <string name="profile_downloads_text">%1$d MB used</string>
+    <string name="profile_text_size">Text size</string>
+    <string name="profile_text_system">Follows system setting</string>
+    <string name="profile_text_small">Small</string>
+    <string name="profile_text_large">Large</string>
+    <string name="profile_text_xlarge">Extra large</string>
+    <string name="profile_account">Account</string>
+    <string name="profile_privacy">Privacy and data</string>
+    <string name="profile_privacy_text">Your favourites, bookings and downloads are saved on your phone. We use your location only while you use the app, to sort places by distance and work out routes. Maps and routes are served by OpenStreetMap: to draw them, it receives the area you’re viewing and the start and end points of the route. You can change this whenever you like.</string>
+    <string name="profile_logout">Log out</string>
+    <string name="profile_logout_title">Log out?</string>
+    <string name="profile_logout_text">You’ll return to the welcome screen.</string>
+    <string name="notifications_today">Today</string>
+    <string name="notifications_settings">Notification settings</string>
+    <string name="notifications_blocked_title">Notifications are off</string>
+    <string name="notifications_blocked_text">To be able to alert you, turn on notifications for Turismo Valencia in your phone’s settings.</string>
+    <string name="location_blocked_title">Location is off</string>
+    <string name="location_blocked_text">To use your location, allow it for Turismo Valencia in your phone’s settings.</string>
+    <string name="common_open_settings">Open settings</string>
+    <string name="common_not_now">Not now</string>
+    <string name="reminder_channel_name">Event alerts</string>
+    <string name="reminder_channel_description">Reminders for events such as the mascletà, a few minutes before they start.</string>
+    <string name="reminder_mascleta_title">Mascletà at 14:00</string>
+    <string name="reminder_mascleta_text">Plaza del Ayuntamiento · arrive 30 min early to get a good spot.</string>
+
+    <string name="web_more_info">More information</string>
+    <string name="web_view_on_web">View on the website</string>
+    <string name="home_esencial_title">The essentials to see in Valencia</string>
+    <string name="home_esencial_text">Experiences that connect you with the authentic Valencian way of life</string>
+    <string name="home_planes_title">Plans that feed the soul</string>
+    <string name="home_planes_text">Concerts, exhibitions, festivals and food experiences all year round</string>
+    <string name="home_sostenible_title">Sustainable Tourism</string>
+    <string name="home_sostenible_text">Explore the city sustainably</string>
+    <string name="contact_title">Contact</string>
+    <string name="contact_brand">Valencia · Life is better here</string>
+    <string name="contact_brand_desc">Discover the city of sunshine, paella and fiestas. Your travel guide to Valencia.</string>
+    <string name="contact_cta_title">Talk to the tourist office</string>
+    <string name="contact_cta_action">View contact</string>
+    <string name="contact_office">Valencia City Council Tourist Office</string>
+    <string name="contact_open_map">Open map</string>
+    <string name="contact_hours">Mon - Fri: 9:00 - 18:00</string>
+    <string name="contact_location">Valencia, Spain</string>
+    <string name="contact_follow">Follow us</string>
+    <string name="contact_legal">Legal information</string>
+    <string name="legal_privacy">Privacy policy</string>
+    <string name="legal_notice">Legal notice</string>
+    <string name="contact_copyright">© 2026 Valencia · All rights reserved</string>
+    <string name="tickets_guides">Guides and more information</string>
+    <string name="profile_contact">Contact and social media</string>
+    <string name="profile_contact_text">Tourist office, social media and map</string>
+
+    <string name="detail_guide">Full guide</string>
+
+    <!-- Privacy policy: what the app adds to the website’s policy (shown below the text imported from the website) -->
+    <string name="privacy_app_title">The app on your phone</string>
+    <string name="privacy_app_intro">The above is the website’s policy. This section adds what the Android app does: what data leaves your phone, where it goes and what for. Everything else (favourites, downloads, settings, recent searches and saved bookings) is kept only in a database on your phone.</string>
+    <string name="privacy_app_bookings_title">Bookings</string>
+    <string name="privacy_app_bookings_body">When you confirm a booking, the app sends the following to our server, hosted in the European Union:</string>
+    <string-array name="privacy_app_bookings_bullets">
+        <item>Your email.</item>
+        <item>The activity, the day, the time and the number of people.</item>
+        <item>A random identifier for your phone (see below), so we can show you your bookings without you having to create an account.</item>
+    </string-array>
+    <string name="privacy_app_bookings_use">We use it only to manage the booking (performance of a contract, as stated in section 4): to confirm it, control the places available and give you its reference. We don’t ask for payment details: payment in this version is simulated. We keep the data for as long as it is needed to manage the booking, and you can ask us to delete it whenever you like.</string>
+    <string name="privacy_app_device_title">Phone identifier</string>
+    <string name="privacy_app_device_body">The first time you book, the app creates a random number and stores it on your phone. It contains no data about you or your device. It is sent with every booking and every time the app checks your bookings. If you clear the app’s data, the phone loses it and stops seeing its bookings in the app (if you use Android backup, it may come back with the rest of your data when you reinstall the app); on our server they remain until you ask for them to be deleted.</string>
+    <string name="privacy_app_valbot_title">ValBot assistant</string>
+    <string name="privacy_app_valbot_body">What you write to ValBot is sent to the website’s server, which processes it with Google’s Gemini artificial intelligence service to answer you (sections 2 and 6). Don’t write personal data in the chat. If there is no connection, or the server can’t answer, the app replies with basic answers from your phone (offline, nothing is sent).</string>
+    <string name="privacy_app_map_title">Map, routes and location</string>
+    <string name="privacy_app_map_body">The map is downloaded in tiles from OpenStreetMap’s servers, which see your IP address and the area you’re viewing. When you ask for “Directions”, the start point and the destination are sent to OpenStreetMap Germany’s routing service to calculate the path; the start point is your location if you share it and you are in Valencia, or otherwise Plaza del Ayuntamiento. Your location is only used if you give permission, and the app uses it on your phone to show where you are and distances: it doesn’t send it to our server. These services have their own privacy policies.</string>
+    <string name="privacy_app_background_title">Automatic update</string>
+    <string name="privacy_app_background_body">Every time you open the app with a connection, it asks our server for the catalogue of offers and, if you have ever booked, your bookings (with the phone identifier). If you leave “Update automatically” on in Downloads, it also does so every night even when the app isn’t open, and only over Wi-Fi if “Download on Wi-Fi only” is on. You can turn this off in Downloads.</string>
+    <string name="privacy_app_none_title">What the app doesn’t include</string>
+    <string name="privacy_app_none_body">The app has no accounts, advertising, analytics or trackers, and doesn’t share your data with third parties beyond the services named above.</string>
+    <string name="privacy_app_rights_title">Your rights</string>
+    <string name="privacy_app_rights_body">To exercise your rights over the app’s data (for example, to ask us to delete your bookings), write to the privacy email in section 1 giving the email you booked with and the booking reference. More information in section 7.</string>
+
+    <!-- Search: suggestions built by ContentRepository -->
+    <string name="search_offer_subtitle">Experience · from %1$s</string>
+    <string name="search_map_dish">Restaurants serving %1$s nearby</string>
+    <string name="search_map_query">View “%1$s” on the map</string>
+    <plurals name="search_map_count">
+        <item quantity="one">Map · %1$d result</item>
+        <item quantity="other">Map · %1$d results</item>
+    </plurals>
+    <string name="search_family_esencial">Valencia essentials</string>
+    <string name="search_family_planes">Plans</string>
+    <string name="search_family_legal">Legal information</string>
+    <string name="search_family_guide">Guide</string>
+
+    <!-- ValBot: replies from the app’s rules (offline, or when the server doesn’t answer) -->
+    <string name="valbot_greeting">Hello! I’m ValBot, your tourism assistant in Valencia. How can I help you?</string>
+    <string-array name="valbot_suggestions">
+        <item>What can I see in Valencia for free today?</item>
+        <item>Paella restaurants nearby</item>
+        <item>How do I get to the Turia Gardens?</item>
+        <item>What can I do with kids?</item>
+        <item>Plans if it rains</item>
+        <item>Valencia in 3 days</item>
+    </string-array>
+    <string name="valbot_reply_hello">Hello! Ask me about places, events, food or how to get anywhere.</string>
+    <string name="valbot_reply_free">There are some great options today that won’t cost you a thing. The closest to you:</string>
+    <string name="valbot_reply_eat">For a proper paella, the home of the dish is La Albufera (El Palmar) and Malvarrosa. In the centre, book ahead and ask for wood-fired. Have a look at these options:</string>
+    <string name="valbot_reply_christmas">At Christmas, Valencia fills with lights, markets and nativity scenes. Here is the full guide:</string>
+    <string name="valbot_reply_itinerary">To help you plan, these guides are a good starting point:</string>
+    <string name="valbot_reply_heritage">Monumental Valencia is in these guides:</string>
+    <string name="valbot_reply_tours">For tickets and tours, see these guides and book from Tickets &amp; Tours:</string>
+    <string name="valbot_reply_sports">Valencia is a city for sport: running, cycling, the beach and much more.</string>
+    <string name="valbot_reply_art">For exhibitions and art, start here:</string>
+    <string name="valbot_reply_contact">You can contact the tourist office Monday to Friday from 9:00 to 18:00 on +34 963 000 000 or at info@valencia.com.</string>
+    <string name="valbot_reply_fallas">Las Fallas take place from 1 to 19 March. The mascletà is held every day at 14:00 in Plaza del Ayuntamiento; arrive 30 minutes early.</string>
+    <string name="valbot_reply_beach">Valencia has 19.5 km of sand and 8 Blue Flags. From the centre, line L4 takes you to Les Arenes.</string>
+    <string name="valbot_reply_kids">With kids, the Oceanogràfic and the Turia Gardens (9 km without cars, with playgrounds and bikes) work really well.</string>
+    <string name="valbot_reply_rain">If it rains, head for the museums: the Fine Arts Museum is free and the Oceanogràfic has covered areas.</string>
+    <string name="valbot_reply_lodging">For sleeping, the historic centre is the most convenient; Ruzafa has more atmosphere and the beach area is right on the seafront.</string>
+    <string name="valbot_reply_eco">Valencia was European Green Capital 2024. A good sustainable plan: the Turia Gardens by bike and an electric boat trip on La Albufera.</string>
+    <string name="valbot_reply_found">This is what I found:</string>
+    <string name="valbot_reply_unknown">I’m not sure about that yet. Try asking me about places, events, food, accommodation or how to get somewhere. For specific questions, contact Valencia’s tourist office.</string>
+    <string name="valbot_reply_route">%1$s is %2$s away, about %3$d min on foot from your location. Open its page and tap “Directions” to see the route:</string>
+    <string name="valbot_reply_route_ask">Where would you like to go? Tell me the name and I’ll tell you how long it takes on foot.</string>
+
+    <!-- Time for tickets valid all day (the server sends it as «Cualquier hora») -->
+    <string name="book_any_time">Any time</string>
+
+    <!-- The website guides are only in Spanish -->
+    <string name="web_only_spanish">This content from the website is only available in Spanish.</string>
+
+    <!-- Demo notifications (Room stores them in Spanish; the list shows them in the app’s language) -->
+    <string name="notif_demo_2_title">Booking confirmed</string>
+    <string name="notif_demo_2_body">Boat trip on La Albufera · Sat 12 Oct, 18:30.</string>
+    <string name="notif_demo_3_title">Guides updated</string>
+    <string name="notif_demo_3_body">4 saved places have been updated so you can use them offline.</string>
+    <string name="notif_demo_4_title">Recommended sustainable route</string>
+    <string name="notif_demo_4_body">Ride through the Turia Gardens on Valenbisi: 9 km without cars.</string>
+    <string name="notif_demo_5_title">ValBot has news</string>
+    <string name="notif_demo_5_body">It now understands and replies in Spanish, Valencian, English and French.</string>
+    <string name="notif_when_10min">10 min ago</string>
+    <string name="notif_when_1h">1 h ago</string>
+    <string name="notif_when_yesterday">Yesterday</string>
+    <string name="notif_when_monday">Monday</string>
+    <string name="notif_when_sunday">Sunday</string>
+</resources>

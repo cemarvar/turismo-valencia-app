@@ -1,0 +1,452 @@
+<resources>
+    <string name="locale_code">FR</string>
+
+    <!-- A1 · Splash -->
+    <string name="splash_logo_descripcion">Logo de Turismo Valencia</string>
+    <string name="splash_titulo">Valencia</string>
+    <string name="splash_lema">Ici, la vie est plus belle</string>
+
+    <!-- A2–A4 · Onboarding -->
+    <string name="onboarding_saltar">Passer</string>
+    <string name="onboarding_paso">Étape %1$d sur %2$d</string>
+    <string name="onboarding_siguiente">Suivant</string>
+    <string name="onboarding_empezar">Commencer</string>
+    <string name="onboarding_1_titulo">Découvrez Valence à votre rythme</string>
+    <string name="onboarding_1_texto">L’essentiel de la ville —à voir, événements, gastronomie et hébergements— organisé comme sur le site web et pensé pour la balade à pied.</string>
+    <string name="onboarding_1_imagen">Cité des Arts et des Sciences de Valence au coucher du soleil</string>
+    <string name="onboarding_2_titulo">Pas de réseau, pas de souci</string>
+    <string name="onboarding_2_texto">Téléchargez des fiches, des itinéraires et la carte du centre pour les consulter hors connexion. Vos favoris sont enregistrés sur votre téléphone.</string>
+    <string name="onboarding_2_imagen">Des palmiers et un pont de pierre dans un parc de Valence</string>
+    <string name="onboarding_3_titulo">Demandez à ValBot</string>
+    <string name="onboarding_3_texto">Votre assistant IA vous recommande des plans, des itinéraires et des restaurants près de chez vous, dans votre langue.</string>
+    <string name="onboarding_3_imagen">Une arche dans une rue de la vieille ville de Valence</string>
+
+    <!-- A5 · Autorisation de localisation -->
+    <string name="permiso_dialogo_titulo">Autoriser %1$s à accéder à la position de cet appareil&#160;?</string>
+    <string name="permiso_precisa">Précise</string>
+    <string name="permiso_aproximada">Approximative</string>
+    <string name="permiso_mientras_se_usa">Pendant l’utilisation de l’appli</string>
+    <string name="permiso_solo_esta_vez">Uniquement cette fois</string>
+    <string name="permiso_no_permitir">Ne pas autoriser</string>
+    <string name="permiso_panel_etiqueta">Autorisation de localisation</string>
+    <string name="permiso_panel_titulo">Lieux près de vous</string>
+    <string name="permiso_panel_texto">Nous utilisons votre position uniquement pendant que vous utilisez l’appli, pour trier les lieux par proximité et calculer des itinéraires à pied. Vous pouvez le modifier dans les Réglages.</string>
+
+    <!-- A6 · Choix de la langue -->
+    <string name="idioma_titulo">Langue de l’appli</string>
+    <string name="idioma_subtitulo">ValBot vous répondra aussi dans cette langue.</string>
+    <string name="idioma_aplicar">Appliquer</string>
+    <string name="idioma_es_detalle">Espagnol</string>
+    <string name="idioma_va_detalle">Valencien</string>
+    <string name="idioma_en_detalle">Anglais</string>
+    <string name="idioma_fr_detalle">Français</string>
+
+    <string name="common_back">Retour</string>
+    <string name="common_share">Partager</string>
+    <string name="common_favorite_add">Enregistrer dans les favoris</string>
+    <string name="common_favorite_remove">Retirer des favoris</string>
+    <string name="common_notifications">Notifications</string>
+    <string name="common_language">Langue</string>
+    <string name="common_filter">Filtres</string>
+    <string name="common_search">Rechercher</string>
+    <string name="common_close">Fermer</string>
+    <string name="offline_banner">Hors connexion · contenu enregistré affiché</string>
+    <string name="offline_snackbar">Pas de connexion Internet</string>
+    <string name="offline_retry">Réessayer</string>
+    <string name="chip_offline_ready">Hors connexion</string>
+    <string name="chip_download">Télécharger</string>
+    <string name="eco_tag">Éco</string>
+    <string name="home_search_hint">Rechercher à Valence…</string>
+    <string name="home_nearby">Près de vous</string>
+    <string name="home_see_all">Tout voir</string>
+    <string name="cat_que_ver">À voir</string>
+    <string name="cat_gastronomia">Gastronomie</string>
+    <string name="cat_alojamientos">Hébergements</string>
+    <string name="cat_eventos">Événements</string>
+    <string name="cat_tickets">Tickets &amp; Tours</string>
+    <string name="cat_sostenible">Durable</string>
+
+    <string name="common_map">Voir sur la carte</string>
+    <string name="search_suggestions">Suggestions</string>
+    <string name="search_recent">Recherches récentes</string>
+    <string name="search_trends">Tendances</string>
+    <string name="search_clear">Effacer la recherche</string>
+    <string name="search_empty_title">Aucun résultat</string>
+    <string name="search_empty_text">Nous n’avons rien trouvé pour «&#160;%1$s&#160;». Essayez d’autres mots ou demandez à ValBot.</string>
+    <string name="search_ask_valbot">Demander à ValBot</string>
+    <string name="search_quick_horchata">Horchata</string>
+    <string name="search_quick_open_now">Ouvert maintenant</string>
+    <string name="cat_subtitle">%1$s · %2$d %3$s</string>
+    <string name="cat_sort">Trier</string>
+    <string name="cat_all">Tous</string>
+    <string name="cat_view_list">Liste</string>
+    <string name="cat_view_grid">Grille</string>
+    <string name="cat_que_ver_banner">Des lieux uniques</string>
+    <string name="cat_que_ver_tagline">Voici les lieux incontournables à visiter à Valence</string>
+    <string name="cat_unit_places">lieux</string>
+    <string name="cat_gastro_banner">Tradition culinaire</string>
+    <string name="cat_gastro_tagline">Une expérience gastronomique pour tous les sens</string>
+    <string name="cat_unit_dishes">plats</string>
+    <string name="cat_aloj_banner">Où dormir</string>
+    <string name="cat_aloj_tagline">Nos hébergements recommandés, pour tous les goûts</string>
+    <string name="cat_unit_zones">quartiers</string>
+    <string name="cat_eventos_banner">Événements à ne pas manquer</string>
+    <string name="cat_eventos_tagline">Les événements valenciens qui font vibrer le cœur</string>
+    <string name="cat_unit_events">événements</string>
+    <string name="cat_sost_banner">Tourisme durable</string>
+    <string name="cat_sost_tagline">Voyagez avec la ville, pas contre elle</string>
+    <string name="cat_unit_topics">thèmes</string>
+    <string name="cat_sorted_distance">Triés par proximité</string>
+    <string name="cat_sorted_web">Ordre du site web</string>
+    <string name="cat_sort_web">Ordre du site web</string>
+    <string name="cat_sorted_rating">Triés par note</string>
+    <string name="cat_sorted_name">Triés par nom</string>
+    <string name="cat_sort_distance">Les plus proches d’abord</string>
+    <string name="cat_sort_rating">Les mieux notés</string>
+    <string name="cat_sort_name">Nom (A–Z)</string>
+    <string name="detail_free">Entrée gratuite</string>
+    <string name="detail_available_offline">Disponible hors connexion</string>
+    <string name="detail_info">Informations pratiques</string>
+    <string name="detail_acts">Temps forts</string>
+    <string name="detail_remind_title">Me prévenir pour la %1$s</string>
+    <string name="detail_remind_text">Notification 30 min avant</string>
+    <string name="detail_save">Enregistrer</string>
+    <string name="detail_saved">Enregistré</string>
+    <string name="detail_how_to_get">Itinéraire</string>
+    <string name="detail_calendar">Calendrier</string>
+    <string name="detail_not_found">Nous n’avons pas trouvé ce contenu</string>
+    <string name="detail_no_calendar">Aucune application de calendrier n’est installée</string>
+    <string name="detail_share_chooser">Partager avec</string>
+
+    <string name="tickets_search_hint">Rechercher des billets et des visites</string>
+    <string name="tickets_tab_tickets">Billets</string>
+    <string name="tickets_tab_tours">Visites</string>
+    <string name="tickets_tab_experiences">Expériences</string>
+    <string name="tickets_empty">Aucun résultat pour votre recherche</string>
+    <string name="tickets_from">à partir de</string>
+    <string name="tickets_reserve">Réserver</string>
+    <string name="eco_banner_bold">Capitale verte européenne 2024.</string>
+    <string name="eco_banner_text">Déplacez-vous à pied, à vélo ou en transports en commun et soutenez le commerce local.</string>
+
+    <string name="map_search_hint">Rechercher des lieux sur la carte</string>
+    <string name="map_all">Tout</string>
+    <string name="map_saved_only">Uniquement ce qui est enregistré hors connexion</string>
+    <string name="map_locate">Centrer sur ma position</string>
+    <string name="map_clear_filters">Supprimer les filtres</string>
+    <string name="map_attribution">© les contributeurs d’OpenStreetMap</string>
+    <string name="map_zoom_in">Zoom avant</string>
+    <string name="map_zoom_out">Zoom arrière</string>
+    <string name="map_details">Voir les détails</string>
+    <string name="route_your_location">Votre position</string>
+    <string name="route_mode_metro">Métro</string>
+    <string name="route_summary">%1$s · arrivée %2$s</string>
+    <string name="route_saved">Itinéraire enregistré</string>
+    <string name="route_save">Enregistrer l’itinéraire</string>
+    <string name="route_start">Démarrer la navigation</string>
+    <string name="route_step_straight">Continuez sur %1$s</string>
+    <string name="route_step_left">Tournez à gauche vers %1$s</string>
+    <string name="route_step_right">Tournez à droite vers %1$s</string>
+    <string name="route_step_straight_plain">Continuez tout droit</string>
+    <string name="route_step_left_plain">Tournez à gauche</string>
+    <string name="route_step_right_plain">Tournez à droite</string>
+    <string name="route_loading">Calcul de l’itinéraire…</string>
+    <string name="route_estimated">Itinéraire approximatif&#160;: le service d’itinéraires ne répond pas</string>
+    <string name="route_arrived">Vous êtes arrivé(e)&#160;: %1$s</string>
+    <string name="route_entrance">Entrée principale</string>
+    <string name="route_no_maps">Aucune application de cartes n’est disponible pour naviguer</string>
+
+    <string name="nav_inicio">Accueil</string>
+    <string name="nav_mapa">Carte</string>
+    <string name="nav_valbot">ValBot</string>
+    <string name="nav_favoritos">Favoris</string>
+    <string name="nav_reservas">Réservations</string>
+    <string name="valbot_today">Aujourd’hui</string>
+    <string name="valbot_online">En ligne · Assistant touristique</string>
+    <string name="valbot_offline_status">Hors connexion</string>
+    <string name="valbot_menu">Plus d’options</string>
+    <string name="valbot_new_chat">Nouvelle conversation</string>
+    <string name="valbot_free">Gratuit</string>
+    <string name="valbot_basic_reply">Réponse basique · ValBot en ligne indisponible</string>
+    <string name="valbot_unavailable">ValBot n’est pas opérationnel pour le moment. Nous nous excusons pour la gêne occasionnée.</string>
+    <string name="valbot_offline_meanwhile">En attendant, vous pouvez consulter hors connexion&#160;:</string>
+    <string name="valbot_my_favorites">Mes favoris</string>
+    <string name="valbot_saved_map">Carte enregistrée</string>
+    <string name="valbot_hint">Écrivez votre question…</string>
+    <string name="valbot_hint_offline">ValBot n’est pas disponible</string>
+    <string name="valbot_mic">Dicter la question</string>
+    <string name="valbot_send">Envoyer</string>
+
+    <string name="common_cancel">Annuler</string>
+    <string name="fav_none_saved">Aucun lieu enregistré</string>
+    <plurals name="fav_saved_count">
+        <item quantity="one">%1$d lieu enregistré</item>
+        <item quantity="other">%1$d lieux enregistrés</item>
+        <item quantity="many">%1$d de lieux enregistrés</item>
+    </plurals>
+    <string name="fav_empty_title">Vous n’avez pas encore de favoris</string>
+    <string name="fav_empty_text">Touchez le cœur sur n’importe quel lieu pour l’enregistrer et le consulter même hors connexion.</string>
+    <string name="fav_explore">Explorer Valence</string>
+    <string name="fav_tab_all">Tous</string>
+    <string name="fav_tab_places">Lieux</string>
+    <string name="fav_tab_events">Événements</string>
+    <string name="fav_offline_summary">%1$d sur %2$d disponibles hors connexion</string>
+    <string name="fav_offline_mb">%1$d Mo enregistrés sur le téléphone</string>
+    <string name="fav_manage">Gérer</string>
+    <string name="fav_label_lodging">Hébergement</string>
+    <string name="fav_label_event">Événement</string>
+    <string name="downloads_title">Téléchargements hors connexion</string>
+    <string name="downloads_used_mb">%1$d Mo</string>
+    <string name="downloads_quota">utilisés sur %1$d Mo réservés à l’appli</string>
+    <string name="downloads_maps_mb">Cartes %1$d Mo</string>
+    <string name="downloads_cards_mb">Fiches %1$d Mo</string>
+    <string name="downloads_wifi_only">Télécharger uniquement en Wi-Fi</string>
+    <string name="downloads_wifi_only_text">Évite d’utiliser les données mobiles</string>
+    <string name="downloads_auto_update">Mettre à jour automatiquement</string>
+    <string name="downloads_auto_update_text">Chaque nuit avec WorkManager</string>
+    <string name="downloads_map_title">Carte hors connexion · Centre</string>
+    <string name="downloads_map_text">%1$d Mo · mise à jour aujourd’hui</string>
+    <string name="downloads_content">Contenu téléchargé</string>
+    <string name="downloads_empty">Vous n’avez encore rien enregistré. Touchez «&#160;Télécharger&#160;» sur n’importe quelle fiche.</string>
+    <string name="downloads_downloaded">Téléchargé</string>
+    <string name="downloads_place_size">Fiche + photos · %1$d Mo</string>
+    <string name="downloads_event_size">Fiche + programme · %1$d Mo</string>
+    <string name="downloads_remove">Supprimer le téléchargement</string>
+    <string name="downloads_clear">Tout effacer</string>
+    <string name="downloads_clear_title">Effacer tous les téléchargements&#160;?</string>
+    <string name="downloads_clear_text">Vous devrez télécharger de nouveau les fiches pour les utiliser hors connexion.</string>
+    <string name="downloads_update">Mettre à jour</string>
+    <string name="downloads_updating">Mise à jour…</string>
+
+    <string name="res_title">Mes réservations</string>
+    <plurals name="res_count">
+        <item quantity="one">%1$d réservation</item>
+        <item quantity="other">%1$d réservations</item>
+        <item quantity="many">%1$d de réservations</item>
+    </plurals>
+    <plurals name="res_pending">
+        <item quantity="one">%1$d en attente</item>
+        <item quantity="other">%1$d en attente</item>
+        <item quantity="many">%1$d en attente</item>
+    </plurals>
+    <string name="res_tab_upcoming">À venir</string>
+    <string name="res_tab_history">Historique</string>
+    <string name="res_this_week">Cette semaine</string>
+    <string name="res_later">Prochainement</string>
+    <string name="res_completed">Terminées</string>
+    <string name="res_empty">Vous n’avez pas encore de réservation. Réservez une activité depuis Tickets &amp; Tours.</string>
+    <plurals name="res_people_price">
+        <item quantity="one">%1$d personne · %2$s</item>
+        <item quantity="other">%1$d personnes · %2$s</item>
+        <item quantity="many">%1$d de personnes · %2$s</item>
+    </plurals>
+    <string name="res_status_confirmed">Confirmée</string>
+    <string name="res_status_pending">En attente</string>
+    <string name="res_status_completed">Terminée</string>
+    <string name="res_status_cancelled">Annulée</string>
+    <string name="res_cancelled">Annulées</string>
+    <string name="book_title">Réserver</string>
+    <string name="book_step">Étape 1 sur 2 · Date et personnes</string>
+    <string name="book_per_person">%1$s · %2$s par personne</string>
+    <string name="book_times">Horaires disponibles</string>
+    <string name="book_adults">Adultes</string>
+    <string name="book_adults_price">%1$s par personne</string>
+    <string name="book_children">Enfants</string>
+    <string name="book_children_free">Moins de 12 ans · gratuit</string>
+    <string name="book_email_label">E-mail pour la confirmation</string>
+    <string name="book_total_note">Total · paiement à l’embarcadère</string>
+    <string name="book_confirm">Confirmer la réservation</string>
+    <string name="book_submitting">Réservation en cours…</string>
+    <string name="book_needs_connection">Réserver nécessite une connexion Internet</string>
+    <string name="book_email_privacy">Votre e-mail est conservé sur notre serveur uniquement pour gérer cette réservation.</string>
+    <string name="book_error_unreachable">Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.</string>
+    <string name="book_error_server">Le service de réservation n’est pas disponible pour le moment. Réessayez dans quelques minutes.</string>
+    <string name="book_error_rate_limited">Trop de tentatives à la suite. Patientez un peu et réessayez.</string>
+    <string name="book_error_rate_limited_wait">Trop de tentatives à la suite. Réessayez dans %1$d min.</string>
+    <string name="book_error_sold_out">Il n’y a plus de places pour ce jour et cet horaire. Essayez-en un autre.</string>
+    <string name="book_error_offer_gone">Cette activité n’est plus disponible.</string>
+    <string name="book_error_invalid_date">Cette date n’est plus réservable. Choisissez-en une autre.</string>
+    <string name="book_error_invalid_slot">Cet horaire n’existe plus. Choisissez-en un autre.</string>
+    <string name="book_error_invalid_party">Le nombre de personnes n’est pas valide (20 au maximum, adultes et enfants confondus).</string>
+    <string name="book_error_invalid_email">Le serveur n’accepte pas cet e-mail. Vérifiez-le.</string>
+    <string name="book_error_other">La réservation n’a pas pu être effectuée. Vérifiez les informations et réessayez.</string>
+    <string name="book_prev_week">Semaine précédente</string>
+    <string name="book_next_week">Semaine suivante</string>
+    <string name="book_less">En retirer un</string>
+    <string name="book_more">En ajouter un</string>
+    <string name="booking_title">Réservation</string>
+    <string name="booking_confirmed">Réservation confirmée&#160;!</string>
+    <string name="booking_pending">Réservation en attente</string>
+    <string name="booking_sent_to">Réservation enregistrée avec l’e-mail %1$s</string>
+    <string name="booking_date">Date</string>
+    <string name="booking_time">Heure</string>
+    <string name="booking_people">Personnes</string>
+    <string name="booking_locator">Référence</string>
+    <string name="booking_total">Total</string>
+    <string name="booking_show_code">Présentez ce code à l’embarcadère. Disponible hors connexion.</string>
+    <string name="booking_share_text">Réservation %1$s&#160;: %2$s · %3$s à %4$s</string>
+
+    <plurals name="booking_adults">
+        <item quantity="one">%1$d adulte</item>
+        <item quantity="other">%1$d adultes</item>
+        <item quantity="many">%1$d d’adultes</item>
+    </plurals>
+    <plurals name="booking_children">
+        <item quantity="one">%1$d enfant</item>
+        <item quantity="other">%1$d enfants</item>
+        <item quantity="many">%1$d d’enfants</item>
+    </plurals>
+
+    <string name="profile_title">Profil et réglages</string>
+    <string name="profile_offline_mb">%1$d Mo hors connexion</string>
+    <plurals name="profile_reservations">
+        <item quantity="one">%1$d réservation</item>
+        <item quantity="other">%1$d réservations</item>
+        <item quantity="many">%1$d de réservations</item>
+    </plurals>
+    <string name="profile_prefs">Préférences</string>
+    <string name="profile_notifications_text">Événements et réservations</string>
+    <string name="profile_location">Position</string>
+    <string name="profile_offline_a11y">Hors connexion et accessibilité</string>
+    <string name="profile_downloads_text">%1$d Mo utilisés</string>
+    <string name="profile_text_size">Taille du texte</string>
+    <string name="profile_text_system">Suit celle du système</string>
+    <string name="profile_text_small">Petite</string>
+    <string name="profile_text_large">Grande</string>
+    <string name="profile_text_xlarge">Très grande</string>
+    <string name="profile_account">Compte</string>
+    <string name="profile_privacy">Confidentialité et données</string>
+    <string name="profile_privacy_text">Vos favoris, réservations et téléchargements sont enregistrés sur votre téléphone. Nous utilisons votre position uniquement pendant que vous utilisez l’appli, pour trier les lieux par proximité et calculer des itinéraires. La carte et les itinéraires sont fournis par OpenStreetMap&#160;: pour les afficher, il reçoit la zone que vous consultez ainsi que les points de départ et d’arrivée de l’itinéraire. Vous pouvez le modifier quand vous le souhaitez.</string>
+    <string name="profile_logout">Se déconnecter</string>
+    <string name="profile_logout_title">Se déconnecter&#160;?</string>
+    <string name="profile_logout_text">Vous reviendrez à l’écran de bienvenue.</string>
+    <string name="notifications_today">Aujourd’hui</string>
+    <string name="notifications_settings">Réglages des notifications</string>
+    <string name="notifications_blocked_title">Notifications désactivées</string>
+    <string name="notifications_blocked_text">Pour pouvoir vous prévenir, activez les notifications de Turismo Valencia dans les réglages du téléphone.</string>
+    <string name="location_blocked_title">Localisation désactivée</string>
+    <string name="location_blocked_text">Pour utiliser votre position, autorisez-la pour Turismo Valencia dans les réglages du téléphone.</string>
+    <string name="common_open_settings">Ouvrir les réglages</string>
+    <string name="common_not_now">Pas maintenant</string>
+    <string name="reminder_channel_name">Alertes d’événements</string>
+    <string name="reminder_channel_description">Rappels d’événements comme la mascletà, quelques minutes avant leur début.</string>
+    <string name="reminder_mascleta_title">Mascletà à 14 h 00</string>
+    <string name="reminder_mascleta_text">Plaza del Ayuntamiento · arrivez 30 min avant pour avoir une bonne place.</string>
+
+    <string name="web_more_info">Plus d’informations</string>
+    <string name="web_view_on_web">Voir sur le site web</string>
+    <string name="home_esencial_title">L’essentiel à voir à Valence</string>
+    <string name="home_esencial_text">Des expériences qui vous relient au véritable art de vivre valencien</string>
+    <string name="home_planes_title">Des plans qui nourrissent l’âme</string>
+    <string name="home_planes_text">Concerts, expositions, fêtes et expériences gastronomiques toute l’année</string>
+    <string name="home_sostenible_title">Tourisme durable</string>
+    <string name="home_sostenible_text">Explorez la ville de façon durable</string>
+    <string name="contact_title">Contact</string>
+    <string name="contact_brand">Valencia · Ici, la vie est plus belle</string>
+    <string name="contact_brand_desc">Découvrez la ville du soleil, de la paella et des fêtes. Votre guide de voyage à Valence.</string>
+    <string name="contact_cta_title">Parlez à l’office de tourisme</string>
+    <string name="contact_cta_action">Voir le contact</string>
+    <string name="contact_office">Office de tourisme de la mairie de Valence</string>
+    <string name="contact_open_map">Ouvrir la carte</string>
+    <string name="contact_hours">Lun - Ven&#160;: 9 h 00 - 18 h 00</string>
+    <string name="contact_location">Valence, Espagne</string>
+    <string name="contact_follow">Suivez-nous</string>
+    <string name="contact_legal">Informations légales</string>
+    <string name="legal_privacy">Politique de confidentialité</string>
+    <string name="legal_notice">Mentions légales</string>
+    <string name="contact_copyright">© 2026 Valencia · Tous droits réservés</string>
+    <string name="tickets_guides">Guides et plus d’informations</string>
+    <string name="profile_contact">Contact et réseaux</string>
+    <string name="profile_contact_text">Office de tourisme, réseaux et carte</string>
+
+    <string name="detail_guide">Guide complet</string>
+
+    <!-- Politique de confidentialité : ce que l’appli ajoute à celle du site web (affiché sous le texte importé du site) -->
+    <string name="privacy_app_title">L’appli sur votre téléphone</string>
+    <string name="privacy_app_intro">Ce qui précède est la politique du site web. Nous ajoutons ici ce que fait l’appli Android&#160;: quelles données quittent votre téléphone, où elles vont et pourquoi. Tout le reste (favoris, téléchargements, réglages, recherches récentes et réservations enregistrées) se trouve uniquement dans une base de données sur votre téléphone.</string>
+    <string name="privacy_app_bookings_title">Réservations</string>
+    <string name="privacy_app_bookings_body">Lorsque vous confirmez une réservation, l’appli envoie à notre serveur, hébergé dans l’Union européenne&#160;:</string>
+    <string-array name="privacy_app_bookings_bullets">
+        <item>Votre e-mail.</item>
+        <item>L’activité, le jour, l’horaire et le nombre de personnes.</item>
+        <item>Un identifiant aléatoire de votre téléphone (voir plus bas), pour vous montrer vos réservations sans que vous ayez à créer de compte.</item>
+    </string-array>
+    <string name="privacy_app_bookings_use">Nous l’utilisons uniquement pour gérer la réservation (exécution du contrat, comme indiqué au point 4)&#160;: la confirmer, contrôler les places et vous communiquer sa référence. Nous ne demandons aucune donnée de paiement&#160;: le paiement est simulé dans cette version. Nous conservons les données aussi longtemps qu’elles sont nécessaires pour gérer la réservation, et vous pouvez demander leur suppression quand vous le souhaitez.</string>
+    <string name="privacy_app_device_title">Identifiant du téléphone</string>
+    <string name="privacy_app_device_body">La première fois que vous réservez, l’appli crée un numéro aléatoire et l’enregistre sur votre téléphone. Il ne contient aucune donnée vous concernant ni concernant l’appareil. Il est envoyé avec chaque réservation et chaque fois que l’appli consulte vos réservations. Si vous effacez les données de l’appli, le téléphone le perd et ne voit plus ses réservations dans l’appli (si vous utilisez la sauvegarde Android, il peut revenir avec le reste de vos données lors d’une réinstallation)&#160;; sur notre serveur, elles y restent jusqu’à ce que vous demandiez leur suppression.</string>
+    <string name="privacy_app_valbot_title">Assistant ValBot</string>
+    <string name="privacy_app_valbot_body">Ce que vous écrivez à ValBot est envoyé au serveur du site web, qui le traite avec le service d’intelligence artificielle Gemini de Google pour vous répondre (points 2 et 6). N’écrivez pas de données personnelles dans la conversation. S’il n’y a pas de connexion, ou si le serveur ne peut pas répondre, l’appli répond avec des réponses basiques depuis votre téléphone (hors connexion, rien n’est envoyé).</string>
+    <string name="privacy_app_map_title">Carte, itinéraires et position</string>
+    <string name="privacy_app_map_body">La carte est téléchargée par morceaux depuis les serveurs d’OpenStreetMap, qui voient votre adresse IP et la zone que vous consultez. Lorsque vous demandez un «&#160;Itinéraire&#160;», le point de départ et la destination sont envoyés au service d’itinéraires d’OpenStreetMap Allemagne pour calculer le chemin&#160;; le point de départ est votre position si vous la partagez et que vous êtes à Valence ou, sinon, la Plaza del Ayuntamiento. La position n’est utilisée que si vous donnez l’autorisation, et l’appli l’emploie sur votre téléphone pour montrer où vous êtes et les distances&#160;: elle ne l’envoie pas à notre serveur. Ces services ont leur propre politique de confidentialité.</string>
+    <string name="privacy_app_background_title">Mise à jour automatique</string>
+    <string name="privacy_app_background_body">Chaque fois que vous ouvrez l’appli avec une connexion, elle interroge notre serveur sur le catalogue d’offres et, si vous avez déjà réservé, sur vos réservations (avec l’identifiant du téléphone). Si vous laissez «&#160;Mettre à jour automatiquement&#160;» activé dans Téléchargements, elle le fait aussi chaque nuit même si elle n’est pas ouverte, et seulement en Wi-Fi si «&#160;Télécharger uniquement en Wi-Fi&#160;» est activé. Vous pouvez le désactiver dans Téléchargements.</string>
+    <string name="privacy_app_none_title">Ce que l’appli n’inclut pas</string>
+    <string name="privacy_app_none_body">L’appli n’a ni comptes, ni publicité, ni outils d’analyse, ni traceurs, et ne partage pas vos données avec des tiers au-delà des services mentionnés ci-dessus.</string>
+    <string name="privacy_app_rights_title">Vos droits</string>
+    <string name="privacy_app_rights_body">Pour exercer vos droits sur les données de l’appli (par exemple, demander la suppression de vos réservations), écrivez à l’adresse e-mail de confidentialité du point 1 en indiquant l’e-mail avec lequel vous avez réservé et la référence de la réservation. Plus d’informations au point 7.</string>
+
+    <!-- Recherche : suggestions construites par ContentRepository -->
+    <string name="search_offer_subtitle">Expérience · à partir de %1$s</string>
+    <string name="search_map_dish">Restaurants de %1$s à proximité</string>
+    <string name="search_map_query">Voir «&#160;%1$s&#160;» sur la carte</string>
+    <plurals name="search_map_count">
+        <item quantity="one">Carte · %1$d résultat</item>
+        <item quantity="other">Carte · %1$d résultats</item>
+        <item quantity="many">Carte · %1$d résultats</item>
+    </plurals>
+    <string name="search_family_esencial">L’essentiel de Valence</string>
+    <string name="search_family_planes">Plans</string>
+    <string name="search_family_legal">Informations légales</string>
+    <string name="search_family_guide">Guide</string>
+
+    <!-- ValBot : réponses des règles de l’appli (hors connexion ou sans réponse du serveur) -->
+    <string name="valbot_greeting">Bonjour&#160;! Je suis ValBot, votre assistant touristique à Valence. Comment puis-je vous aider&#160;?</string>
+    <string-array name="valbot_suggestions">
+        <item>Que voir gratuitement aujourd’hui à Valence&#160;?</item>
+        <item>Restaurants de paella à proximité</item>
+        <item>Comment aller aux Jardins du Turia&#160;?</item>
+        <item>Que faire avec des enfants&#160;?</item>
+        <item>Plans en cas de pluie</item>
+        <item>Valence en 3 jours</item>
+    </string-array>
+    <string name="valbot_reply_hello">Bonjour&#160;! Posez-moi des questions sur les lieux, les événements, la gastronomie ou la façon de vous rendre où vous voulez.</string>
+    <string name="valbot_reply_free">Vous avez aujourd’hui de bonnes options sans rien dépenser. Les plus proches de vous&#160;:</string>
+    <string name="valbot_reply_eat">Pour une bonne paella, son berceau est L’Albufera (El Palmar) et la Malvarrosa. Dans le centre, réservez à l’avance et demandez-la cuite au feu de bois. Voici quelques options&#160;:</string>
+    <string name="valbot_reply_christmas">À Noël, Valence se remplit de lumières, de marchés et de crèches. Voici le guide complet&#160;:</string>
+    <string name="valbot_reply_itinerary">Pour vous organiser, ces guides vous serviront de base&#160;:</string>
+    <string name="valbot_reply_heritage">La Valence monumentale se trouve dans ces guides&#160;:</string>
+    <string name="valbot_reply_tours">Pour les billets et les visites, consultez ces guides et réservez depuis Tickets &amp; Tours&#160;:</string>
+    <string name="valbot_reply_sports">Valence est une ville de sport&#160;: course à pied, vélo, plage et bien plus encore.</string>
+    <string name="valbot_reply_art">Pour les expositions et l’art, commencez ici&#160;:</string>
+    <string name="valbot_reply_contact">Vous pouvez contacter l’office de tourisme du lundi au vendredi de 9 h 00 à 18 h 00 au +34 963 000 000 ou à info@valencia.com.</string>
+    <string name="valbot_reply_fallas">Les Fallas ont lieu du 1er au 19 mars. La mascletà a lieu chaque jour à 14 h 00 sur la Plaza del Ayuntamiento&#160;; arrivez 30 minutes avant.</string>
+    <string name="valbot_reply_beach">Valence compte 19,5 km de sable et 8 Pavillons bleus. Depuis le centre, la ligne L4 vous dépose à Les Arenes.</string>
+    <string name="valbot_reply_kids">Avec des enfants, l’Oceanogràfic et le Jardin du Turia (9 km sans voitures, avec des jeux et des vélos) fonctionnent très bien.</string>
+    <string name="valbot_reply_rain">S’il pleut, misez sur les musées&#160;: celui des Beaux-Arts est gratuit et l’Oceanogràfic a des zones couvertes.</string>
+    <string name="valbot_reply_lodging">Pour dormir, le centre historique est le plus pratique&#160;; Ruzafa a plus d’ambiance et le quartier de la plage, la première ligne de mer.</string>
+    <string name="valbot_reply_eco">Valence a été Capitale verte européenne 2024. Un bon plan durable&#160;: le Jardin du Turia à vélo et une balade en barque électrique sur L’Albufera.</string>
+    <string name="valbot_reply_found">Voici ce que j’ai trouvé&#160;:</string>
+    <string name="valbot_reply_unknown">Je ne suis pas encore sûr de cela. Essayez de me poser des questions sur les lieux, les événements, la gastronomie, les hébergements ou la façon de se rendre quelque part. Pour des questions précises, contactez l’office de tourisme de Valence.</string>
+    <string name="valbot_reply_route">%1$s se trouve à %2$s, environ %3$d min à pied depuis votre position. Ouvrez la fiche et touchez «&#160;Itinéraire&#160;» pour voir le chemin&#160;:</string>
+    <string name="valbot_reply_route_ask">Où voulez-vous aller&#160;? Donnez-moi le nom et je vous dirai combien de temps il faut à pied.</string>
+
+    <!-- Horaire des billets valables toute la journée (le serveur l’envoie comme «Cualquier hora») -->
+    <string name="book_any_time">À toute heure</string>
+
+    <!-- Les guides du site web ne sont qu’en espagnol -->
+    <string name="web_only_spanish">Ce contenu du site web n’est disponible qu’en espagnol.</string>
+
+    <!-- Notifications de démonstration (Room les enregistre en espagnol ; la liste les affiche dans la langue de l’appli) -->
+    <string name="notif_demo_2_title">Réservation confirmée</string>
+    <string name="notif_demo_2_body">Balade en barque sur L’Albufera · sam. 12 oct., 18 h 30.</string>
+    <string name="notif_demo_3_title">Fiches mises à jour</string>
+    <string name="notif_demo_3_body">4 lieux enregistrés ont été mis à jour pour être utilisés hors connexion.</string>
+    <string name="notif_demo_4_title">Itinéraire durable recommandé</string>
+    <string name="notif_demo_4_body">Parcourez le Jardin du Turia en Valenbisi&#160;: 9 km sans voitures.</string>
+    <string name="notif_demo_5_title">ValBot a des nouveautés</string>
+    <string name="notif_demo_5_body">Il comprend et répond désormais en espagnol, valencien, anglais et français.</string>
+    <string name="notif_when_10min">Il y a 10 min</string>
+    <string name="notif_when_1h">Il y a 1 h</string>
+    <string name="notif_when_yesterday">Hier</string>
+    <string name="notif_when_monday">Lundi</string>
+    <string name="notif_when_sunday">Dimanche</string>
+</resources>

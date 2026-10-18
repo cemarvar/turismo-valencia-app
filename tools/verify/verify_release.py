@@ -1,7 +1,7 @@
 """Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, catálogo de ofertas del servidor
 y reservas (Retrofit + kotlinx.serialization: GET, POST con cabeceras y cuerpo, y el cuerpo de los errores), el refresco nocturno
 (WorkManager con su `WorkerFactory`: se programa y, al lanzarlo adelantando el reloj, el trabajo pone todo al día), ValBot (OkHttp),
-mapa, ruta y aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones).
+mapa, ruta, aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones) y el cambio de idioma (AppCompat).
 Una versión minificada puede romperse sin que la de depuración lo note (p. ej. al añadir una librería de Kotlin fuera de
 `packageScope`), así que conviene pasarla tras tocar dependencias o `app/build.gradle.kts`.
 
@@ -55,6 +55,9 @@ def main():
         v.check("APK instalado", "Success" in out, out.strip()[:80])
     v.adb("logcat", "-c")
     v.adb("shell", "pm", "clear", v.PKG)
+    # El emulador está en inglés y la app sigue el idioma del móvil: la prueba espera el español (la versión de publicación no admite
+    # el extra `--es lang`, así que se fija el idioma de la app en el sistema).
+    v.set_app_locale("es")
 
     # Primer arranque: crea la base de datos y la rellena con la demostración
     restart()
@@ -168,6 +171,26 @@ def main():
     time.sleep(1.2)
     v.check("apagar el aviso cancela la alarma", len(v.wait_alarms(0)) == 0)
     v.back()
+
+    # Idiomas: el idioma por app de AppCompat (AppCompatActivity, su servicio de almacenamiento y LocaleManager) y los recursos de cada
+    # idioma bajo R8, cambiando desde la hoja de Inicio y desde los ajustes del móvil.
+    tab("inicio")
+    v.check("Idiomas: Inicio en español, con el chip «ES»", wait_for("Buscar en Valencia…", 5) and v.find("ES") is not None)
+    v.tap_text("ES")
+    v.check("Idiomas: la hoja ofrece los cuatro idiomas", wait_for("Valencià", 4) and all(v.find(t) for t in ("Español", "English", "Français")))
+    v.tap_text("English")
+    v.tap_text("Aplicar")
+    v.check("Idiomas: «Aplicar» pasa la app a inglés (AppCompat bajo R8)", wait_for("Search Valencia…", 8) and v.find("What to see") is not None)
+    v.check("Idiomas: las fichas salen traducidas (Central Market) con el formato inglés", wait_for("Central Market", 5) and any("(2.3k)" in t for t in v.texts()))
+    v.check("Idiomas: el sistema guarda «en»", v.app_locales() == "en", v.app_locales())
+    restart()
+    v.check("Idiomas: tras cerrar y abrir la app sigue en inglés", wait_for("Search Valencia…", 8))
+    v.set_app_locale("fr")
+    v.check("Idiomas: desde los ajustes del móvil, francés", wait_for("Rechercher à Valence…", 8) and v.find("À voir") is not None)
+    v.set_app_locale("ca-ES-valencia")
+    v.check("Idiomas: desde los ajustes del móvil, valenciano (ca-ES-valencia → values-ca)", wait_for("Cerca a València…", 8) and v.find("Què veure") is not None)
+    v.set_app_locale("es")
+    v.check("Idiomas: de vuelta al español", wait_for("Buscar en Valencia…", 8) and v.find("Qué ver") is not None)
 
     log = v.adb("shell", "logcat", "-d", "-t", "3000")
     bad = [l for l in log.split("\n") if ("FATAL EXCEPTION" in l or "IllegalAccessError" in l or "NoSuchMethodError" in l or "ClassNotFoundException" in l) and v.PKG in log]

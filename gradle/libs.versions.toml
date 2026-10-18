@@ -18,11 +18,13 @@ coreSplashscreen = "1.2.0"
 kotlinxSerialization = "1.8.1"
 retrofit = "3.0.0"
 workManager = "2.11.2"
+appcompat = "1.7.1"
 ksp = "2.3.12"
 orgJson = "20240303"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

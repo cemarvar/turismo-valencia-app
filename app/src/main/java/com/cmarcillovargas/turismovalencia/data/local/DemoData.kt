@@ -1,6 +1,7 @@
 package com.cmarcillovargas.turismovalencia.data.local
 
 import androidx.room.withTransaction
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.NotificationGroup
 import com.cmarcillovargas.turismovalencia.data.model.NotificationKind
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
@@ -21,11 +22,15 @@ class DemoData(private val content: ContentRepository) {
         if (db.settings().current() == null) populate(db)
     }
 
-    /** Deja la base de datos como en el primer arranque (también lo usa el gancho de depuración `resetData`). */
+    /**
+     * Deja la base de datos como en el primer arranque (también lo usa el gancho de depuración `resetData`). El idioma no es parte de
+     * la demostración: se conserva el que se esté usando.
+     */
     suspend fun populate(
         db: AppDatabase,
         today: LocalDate = LocalDate.now(),
         now: Long = System.currentTimeMillis(),
+        language: LanguageCode = LanguageCode.ES,
     ) = db.withTransaction {
         db.favorites().run {
             clear()
@@ -54,7 +59,7 @@ class DemoData(private val content: ContentRepository) {
         }
         // Como en el primer arranque: sin catálogo del servidor recibido (se vuelve a pedir cuando haya conexión).
         db.offers().clearCache()
-        db.settings().save(SettingsEntity())
+        db.settings().save(SettingsEntity(language = language))
     }
 
     private fun reservations(today: LocalDate, now: Long): List<ReservationEntity> = listOf(

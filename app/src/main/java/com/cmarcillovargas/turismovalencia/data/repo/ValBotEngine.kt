@@ -1,5 +1,7 @@
 package com.cmarcillovargas.turismovalencia.data.repo
 
+import com.cmarcillovargas.turismovalencia.R
+import com.cmarcillovargas.turismovalencia.data.AppStrings
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.util.formatDistance
@@ -27,87 +29,221 @@ interface ValBotRules {
 }
 
 /**
- * Respuestas de ValBot con reglas sobre el contenido de la app: la alternativa cuando no hay conexión o el servidor
- * (`/api/chat`, Gemini) no responde. Las respuestas en línea pasan por [decorate] para llevar sus fichas.
+ * Palabras que activan una regla: [contains] se busca dentro del texto (valen las raíces: «gratuit» sirve para «gratuito» y
+ * «gratuït»; un espacio al principio o al final la ciñe a palabras enteras: « ir a » no vale dentro de «voir à») y [words] solo si
+ * aparecen como palabra entera (las cortas, como «art» o «sea», darían falsos positivos). Van en
+ * minúsculas y sin tildes, y juntan los cuatro idiomas de la app: se entiende la pregunta en cualquiera de ellos, y la respuesta
+ * sale en el idioma elegido.
  */
-class ValBotEngine(private val content: ContentRepository, private val web: WebContentRepository) : ValBotRules {
+internal class Keywords(val contains: List<String> = emptyList(), val words: List<String> = emptyList())
 
-    override val greeting = "¡Hola! Soy ValBot, tu asistente de turismo en Valencia. ¿En qué puedo ayudarte?"
+/** La pregunta ya normalizada, con sus palabras separadas. */
+private class Question(raw: String) {
+    val text = normalizeText(raw)
+    private val tokens = text.split(NonWord).filter { it.isNotEmpty() }.toSet()
 
-    override val suggestions = listOf(
-        "¿Qué ver hoy gratis en Valencia?",
-        "Restaurantes de paella cerca",
-        "¿Cómo llego al Jardín del Turia?",
-        "¿Qué hago con niños?",
-        "Planes si llueve",
-        "Valencia en 3 días",
-    )
+    /** Con un espacio a cada lado, una expresión de [Keywords.contains] que empieza o acaba en espacio solo vale entre palabras. */
+    private val padded = " $text "
+
+    fun matches(keywords: Keywords) = keywords.contains.any { padded.contains(it) } || keywords.words.any { it in tokens }
+
+    private companion object {
+        val NonWord = Regex("[^a-z0-9·]+")
+    }
+}
+
+/**
+ * Lo que ValBot entiende de una pregunta, en el orden en que se prueban las reglas (gana la primera que encaja). Las palabras juntan el
+ * español, el valenciano, el inglés y el francés, en ese orden dentro de cada lista.
+ */
+internal enum class Intent(val keywords: Keywords) {
+    Hello(
+        Keywords(
+            contains = listOf("hola", "buenas", "buenos dias", "bon dia", "bones", "hello", "good morning", "good afternoon", "good evening", "bonjour", "bonsoir", "salut"),
+            words = listOf("hi", "hey"),
+        ),
+    ),
+    Free(
+        Keywords(
+            contains = listOf("gratis", "gratuit", "sin gastar", "sense gastar", "free of charge", "for free", "sans depenser"),
+            words = listOf("free"),
+        ),
+    ),
+    Route(
+        Keywords(
+            contains = listOf(
+                "como llego", "como llegar", "como voy", " ir a ", "ruta a",
+                "com arribe", "com arribar", "com vaig", "anar a ",
+                "how do i get", "how to get", "how can i get", "directions", "get to ", "route to",
+                "comment aller", "comment arriver", "comment se rendre", "comment j'arrive", "aller a ",
+            ),
+        ),
+    ),
+    Eat(
+        Keywords(
+            contains = listOf(
+                "paella", "cenar", "restaurant", "arroz", "gastronom",
+                "sopar", "menjar", "arros",
+                "dinner", "lunch", "food", "dining", "rice",
+                "manger", "diner", "dejeuner", "riz", "cuisine",
+            ),
+            words = listOf("comer", "comida", "comidas", "eat", "eating"),
+        ),
+    ),
+    Christmas(
+        Keywords(
+            contains = listOf("navidad", "belen", "luces", "nadal", "pessebre", "llums", "christmas", "xmas", "nativity", "noel", "creche", "lumieres"),
+        ),
+    ),
+    Itinerary(
+        Keywords(
+            contains = listOf(
+                "3 dias", "tres dias", "itinerario", "imprescindible", "que ver",
+                "3 dies", "tres dies", "itinerari", "que veure",
+                "3 days", "three days", "itinerary", "must see", "must-see", "what to see", "things to see", "top sights",
+                "3 jours", "trois jours", "itineraire", "incontournable", "que voir", "a voir",
+            ),
+        ),
+    ),
+    Heritage(
+        Keywords(
+            contains = listOf("muralla", "torres de", "serranos", "quart", "patrimonio", "unesco", "serrans", "patrimoni", "heritage", "muraille", "tours de", "patrimoine"),
+            words = listOf("walls", "towers"),
+        ),
+    ),
+    Tours(
+        Keywords(
+            contains = listOf(
+                "visita guiada", "bus turistico", "tourist card", "tarjeta", "entrada", "ticket",
+                "visites guiades", "bus turistic", "targeta", "tiquet",
+                "guided", "tourist bus",
+                "visite guidee", "bus touristique", "carte touristique", "billet", "entree",
+            ),
+            // «tour» solo entero: «tourist office» y «office de tourisme» son preguntas de contacto.
+            words = listOf("tour", "tours", "pass"),
+        ),
+    ),
+    Sports(
+        Keywords(
+            contains = listOf("deporte", "correr", "running", "surf", "futbol", "esport", "football", "soccer", "courir", "marathon", "maraton"),
+            words = listOf("sport", "sports"),
+        ),
+    ),
+    Art(
+        Keywords(
+            contains = listOf("exposicion", "exposicio", "exhibition", "gallery", "galleries", "galerie"),
+            words = listOf("arte", "art", "arts", "exposition", "expositions"),
+        ),
+    ),
+    Contact(
+        Keywords(
+            contains = listOf("contacto", "telefono", "email", "correo", "oficina", "contacte", "telefon", "correu", "contact", "phone", "office", "courriel", "e-mail", "telephone", "bureau"),
+        ),
+    ),
+    Fallas(
+        Keywords(
+            contains = listOf("fallas", "falles", "mascleta", "pirotecn", "pyrotech", "fireworks", "feu d'artifice", "feux d'artifice"),
+        ),
+    ),
+    Beach(
+        Keywords(
+            words = listOf("playa", "playas", "mar", "platja", "platges", "beach", "beaches", "sea", "plage", "plages", "mer"),
+        ),
+    ),
+    Kids(
+        Keywords(
+            contains = listOf("nino", "familia", "hijos", "famille", "family", "enfant", "xiquet"),
+            words = listOf("nen", "nens", "fills", "kid", "kids", "child", "children"),
+        ),
+    ),
+    Rain(
+        Keywords(
+            contains = listOf("llueve", "lluvia", "museo", "museu", "museum", "musee", "pluie", "pleut"),
+            words = listOf("plou", "ploure", "pluja", "rain", "rains", "rainy", "raining"),
+        ),
+    ),
+    Lodging(
+        Keywords(
+            contains = listOf("hotel", "dormir", "alojamiento", "hospedar", "allotjament", "accommodation", "hostel", "lodging", "hebergement", "logement"),
+            words = listOf("sleep", "stay"),
+        ),
+    ),
+    Eco(
+        Keywords(
+            contains = listOf("sostenible", "bici", "sustainable", "bicycle", "durable"),
+            words = listOf("eco", "ecoturismo", "ecotourism", "ecotourisme", "verde", "verd", "green", "vert", "bike", "velo"),
+        ),
+    ),
+}
+
+/** La intención de [question] o `null` si ninguna regla encaja. */
+internal fun detectIntent(question: String): Intent? {
+    val q = Question(question)
+    return Intent.entries.firstOrNull { q.matches(it.keywords) }
+}
+
+/**
+ * Respuestas de ValBot con reglas sobre el contenido de la app: la alternativa cuando no hay conexión o el servidor
+ * (`/api/chat`, Gemini) no responde. Las respuestas en línea pasan por [decorate] para llevar sus fichas. Los textos están en
+ * `strings.xml` (un archivo por idioma) y salen en el idioma de la app ([strings]).
+ */
+class ValBotEngine(
+    private val content: ContentRepository,
+    private val web: WebContentRepository,
+    private val strings: AppStrings,
+) : ValBotRules {
+
+    override val greeting: String get() = strings.get(R.string.valbot_greeting)
+
+    override val suggestions: List<String> get() = strings.array(R.array.valbot_suggestions)
 
     override fun reply(question: String): BotReply {
-        val q = normalizeText(question)
-        return when {
-            q.hasAny("hola", "buenas", "buenos dias", "hello") ->
-                BotReply("¡Hola! Pregúntame por lugares, eventos, gastronomía o cómo llegar a cualquier sitio.")
+        val intent = detectIntent(question)
+        return when (intent) {
+            Intent.Hello -> BotReply(strings.get(R.string.valbot_reply_hello))
 
-            q.hasAny("gratis", "gratuit", "sin gastar") -> {
+            Intent.Free -> {
                 val free = content.all.filter { it.isFree && it.category == Category.QueVer }.sortedBy { it.distanceMeters }.take(2)
-                BotReply("Hoy tienes buenas opciones sin gastar nada. Las más cercanas a ti:", free.map { it.id })
+                BotReply(strings.get(R.string.valbot_reply_free), free.map { it.id })
             }
 
-            q.hasAny("como llego", "como llegar", "como voy", "ir a ", "ruta a") -> routeReply(q)
+            Intent.Route -> routeReply(normalizeText(question))
 
-            q.hasAny("paella", "cenar", "comer", "restaurante", "arroz", "gastronom") ->
-                BotReply(
-                    "Para una buena paella, la cuna es La Albufera (El Palmar) y la Malvarrosa. En el centro, reserva con antelación y pide leña. Mira estas opciones:",
-                    listOf("paella", "albufera"),
-                )
+            Intent.Eat -> BotReply(strings.get(R.string.valbot_reply_eat), listOf("paella", "albufera"))
 
-            q.hasAny("navidad", "belen", "luces") ->
-                BotReply("En Navidad, Valencia se llena de luces, mercados y belenes. Aquí tienes la guía completa:", pageIds = listOf("Navidad"))
+            Intent.Christmas -> BotReply(strings.get(R.string.valbot_reply_christmas), pageIds = listOf("Navidad"))
 
-            q.hasAny("3 dias", "tres dias", "itinerario", "imprescindible", "que ver") ->
-                BotReply("Para organizarte, estas guías te sirven de base:", pageIds = listOf("ValenciaTresDias", "VisitasImprescindibles"))
+            Intent.Itinerary -> BotReply(strings.get(R.string.valbot_reply_itinerary), pageIds = listOf("ValenciaTresDias", "VisitasImprescindibles"))
 
-            q.hasAny("muralla", "torres de", "serranos", "quart", "patrimonio", "unesco") ->
-                BotReply("La Valencia monumental está en estas guías:", pageIds = listOf("CiudadAmurallada", "PatrimonioHumanidad"))
+            Intent.Heritage -> BotReply(strings.get(R.string.valbot_reply_heritage), pageIds = listOf("CiudadAmurallada", "PatrimonioHumanidad"))
 
-            q.hasAny("tour", "visita guiada", "bus turistico", "tourist card", "tarjeta", "entrada", "ticket") ->
-                BotReply("Para tickets y tours, mira estas guías y reserva desde Tickets & Tours:", pageIds = listOf("ValenciaCard", "BusTuristico", "CentroHistorico"))
+            Intent.Tours -> BotReply(strings.get(R.string.valbot_reply_tours), pageIds = listOf("ValenciaCard", "BusTuristico", "CentroHistorico"))
 
-            q.hasAny("deporte", "correr", "running", "surf", "futbol") ->
-                BotReply("Valencia es ciudad de deporte: carreras, bici, playa y mucho más.", pageIds = listOf("Deportes"))
+            Intent.Sports -> BotReply(strings.get(R.string.valbot_reply_sports), pageIds = listOf("Deportes"))
 
-            q.hasAny("exposicion", "exposiciones", "arte") ->
-                BotReply("Para exposiciones y arte, empieza por aquí:", pageIds = listOf("Exposicion", "MonumentosMuseos"))
+            Intent.Art -> BotReply(strings.get(R.string.valbot_reply_art), pageIds = listOf("Exposicion", "MonumentosMuseos"))
 
-            q.hasAny("contacto", "telefono", "email", "correo", "oficina") ->
-                BotReply("Puedes contactar con la oficina de turismo de lunes a viernes de 9:00 a 18:00 en el +34 963 000 000 o en info@valencia.com.")
+            Intent.Contact -> BotReply(strings.get(R.string.valbot_reply_contact))
 
-            q.hasAny("fallas", "mascleta", "falles", "pirotecn") ->
-                BotReply("Las Fallas se celebran del 1 al 19 de marzo. La mascletà es cada día a las 14:00 en la Plaza del Ayuntamiento; llega 30 minutos antes.", listOf("fallas"))
+            Intent.Fallas -> BotReply(strings.get(R.string.valbot_reply_fallas), listOf("fallas"))
 
-            q.hasAny("playa", "mar ") ->
-                BotReply("Valencia tiene 19,5 km de arena y 8 Banderas Azules. Desde el centro, la L4 te deja en Les Arenes.", listOf("playas", "la-marina"))
+            Intent.Beach -> BotReply(strings.get(R.string.valbot_reply_beach), listOf("playas", "la-marina"))
 
-            q.hasAny("nino", "familia", "hijos") ->
-                BotReply("Con niños funcionan muy bien el Oceanogràfic y el Jardín del Turia (9 km sin coches, con juegos y bicis).", listOf("oceanografic", "jardin-turia"))
+            Intent.Kids -> BotReply(strings.get(R.string.valbot_reply_kids), listOf("oceanografic", "jardin-turia"))
 
-            q.hasAny("llueve", "lluvia", "museo") ->
-                BotReply("Si llueve, apunta a los museos: el de Bellas Artes es gratuito y el Oceanogràfic tiene zonas cubiertas.", listOf("museo-bellas-artes", "oceanografic"))
+            Intent.Rain -> BotReply(strings.get(R.string.valbot_reply_rain), listOf("museo-bellas-artes", "oceanografic"))
 
-            q.hasAny("hotel", "dormir", "alojamiento", "hospedar") ->
-                BotReply("Para dormir, el centro histórico es lo más cómodo; Ruzafa tiene más ambiente y la zona playa, primera línea de mar.", listOf("aloj-centro", "aloj-ruzafa"))
+            Intent.Lodging -> BotReply(strings.get(R.string.valbot_reply_lodging), listOf("aloj-centro", "aloj-ruzafa"))
 
-            q.hasAny("sostenible", "eco", "bici", "verde") ->
-                BotReply("Valencia fue Capital Verde Europea 2024. Un buen plan sostenible: Jardín del Turia en bici y paseo en barca eléctrica por la Albufera.", listOf("jardin-turia", "albufera-barca"))
+            Intent.Eco -> BotReply(strings.get(R.string.valbot_reply_eco), listOf("jardin-turia", "albufera-barca"))
 
-            else -> {
+            null -> {
                 val found = content.all.filter { content.matches(it, question) }.take(2)
                 val guides = web.search(question).take(2).map { it.id }
                 if (found.isNotEmpty() || guides.isNotEmpty()) {
-                    BotReply("Esto es lo que he encontrado:", found.map { it.id }, guides)
+                    BotReply(strings.get(R.string.valbot_reply_found), found.map { it.id }, guides)
                 } else {
-                    BotReply("No tengo claro eso todavía. Prueba a preguntarme por lugares, eventos, gastronomía, alojamientos o cómo llegar a un sitio. Para dudas concretas, contacta con la oficina de turismo de Valencia.")
+                    BotReply(strings.get(R.string.valbot_reply_unknown))
                 }
             }
         }
@@ -124,22 +260,21 @@ class ValBotEngine(private val content: ContentRepository, private val web: WebC
         return BotReply(text, itemIds, pageIds)
     }
 
-    private fun routeReply(q: String): BotReply {
+    /** [normalized] es la pregunta ya pasada por `normalizeText`. */
+    private fun routeReply(normalized: String): BotReply {
         val target: ContentItem? = content.all.firstOrNull { item ->
             val title = normalizeText(item.title)
-            q.contains(title) || item.keywords.any { it.length > 3 && q.contains(normalizeText(it)) }
+            normalized.contains(title) || item.keywords.any { it.length > 3 && normalized.contains(normalizeText(it)) }
         }
         return if (target != null) {
             BotReply(
-                "${target.title} está a ${formatDistance(target.distanceMeters)}, unos ${walkMinutes(target.distanceMeters)} min a pie desde tu ubicación. Abre la ficha y pulsa «Cómo llegar» para ver la ruta:",
+                strings.get(R.string.valbot_reply_route, target.title, formatDistance(target.distanceMeters), walkMinutes(target.distanceMeters)),
                 listOf(target.id),
             )
         } else {
-            BotReply("¿A qué lugar quieres ir? Dime el nombre y te digo cuánto se tarda andando.")
+            BotReply(strings.get(R.string.valbot_reply_route_ask))
         }
     }
-
-    private fun String.hasAny(vararg words: String) = words.any { contains(it) }
 
     private companion object {
         /** Alojamientos y Sostenible tienen títulos genéricos («Centro histórico», «Ecoturismo»): darían fichas fuera de lugar. */

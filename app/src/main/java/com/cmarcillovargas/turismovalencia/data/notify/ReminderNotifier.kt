@@ -12,11 +12,16 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.cmarcillovargas.turismovalencia.MainActivity
 import com.cmarcillovargas.turismovalencia.R
+import com.cmarcillovargas.turismovalencia.data.AppLanguagePrefs
+import com.cmarcillovargas.turismovalencia.data.AppStrings
 
 /** Muestra la notificación de un aviso de evento; al tocarla se abre la ficha del evento. */
 class ReminderNotifier(context: Context) {
     private val context = context.applicationContext
     private val manager = NotificationManagerCompat.from(this.context)
+
+    /** Los textos van en el último idioma de la app, que se lee aparte de Room: la alarma despierta el proceso sin abrir la base de datos. */
+    private val strings = AppStrings(this.context, AppLanguagePrefs.read(this.context))
 
     /**
      * Muestra el aviso y devuelve `true`. Si el sistema no deja notificar (falta el permiso o están apagadas) no hace nada
@@ -31,8 +36,8 @@ class ReminderNotifier(context: Context) {
         val notification = NotificationCompat.Builder(context, ChannelId)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setColor(ContextCompat.getColor(context, R.color.notification_accent))
-            .setContentTitle(context.getString(reminder.title))
-            .setContentText(context.getString(reminder.text))
+            .setContentTitle(strings.get(reminder.title))
+            .setContentText(strings.get(reminder.text))
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
@@ -45,10 +50,11 @@ class ReminderNotifier(context: Context) {
     /** Quita el aviso de la bandeja (lo usan las pruebas). */
     fun dismiss(reminder: EventReminder) = manager.cancel(Tag, notificationId(reminder))
 
+    // Se vuelve a crear con cada aviso: si el idioma cambió, el nombre y la descripción del canal se actualizan.
     private fun ensureChannel() {
         val channel = NotificationChannelCompat.Builder(ChannelId, NotificationManagerCompat.IMPORTANCE_HIGH)
-            .setName(context.getString(R.string.reminder_channel_name))
-            .setDescription(context.getString(R.string.reminder_channel_description))
+            .setName(strings.get(R.string.reminder_channel_name))
+            .setDescription(strings.get(R.string.reminder_channel_description))
             .build()
         manager.createNotificationChannel(channel)
     }

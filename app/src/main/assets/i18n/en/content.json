@@ -1,0 +1,2159 @@
+{
+ "items": {
+  "lonja-seda": {
+   "subcategory": "Monuments",
+   "eyebrow": "Monument · UNESCO",
+   "title": "Silk Exchange",
+   "area": "Ciutat Vella",
+   "ratingCount": "5.1k",
+   "summary": "One of the finest works of European civil Gothic.",
+   "description": "Declared a UNESCO World Heritage Site in 1996, La Lonja was the setting for the transactions that made Valencia the largest trading port in the western Mediterranean. Its Hall of Columns, with spiral pillars that look like stone palm trees, is one of the most photographed spaces in the city.",
+   "openUntil": "Open · until 19:00",
+   "stats": [
+    [
+     "1996",
+     "UNESCO"
+    ],
+    [
+     "15th c.",
+     "BUILT"
+    ],
+    [
+     "4.8",
+     "RATING"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Mon–Sat 10:00–19:00 · Sun 10:00–15:00"
+    ],
+    [
+     "Address",
+     "Plaça del Mercat, s/n · Ciutat Vella"
+    ],
+    [
+     "Admission",
+     "€2 · free on Sundays"
+    ]
+   ],
+   "keywords": [
+    "silk exchange",
+    "lonja",
+    "la lonja",
+    "gothic",
+    "monument",
+    "unesco",
+    "world heritage"
+   ]
+  },
+  "catedral-caliz": {
+   "subcategory": "Monuments",
+   "eyebrow": "Monument",
+   "title": "Cathedral & Holy Grail",
+   "area": "Pl. de la Reina",
+   "ratingCount": "4.4k",
+   "summary": "13th-century Gothic cathedral that houses the Holy Grail.",
+   "description": "The Chapel of the Holy Chalice houses one of the most valuable relics in the Christian world: the cup that, according to tradition, Jesus used at the Last Supper. The Cathedral celebrates the Third Holy Chalice Jubilee Year until 29 October 2026. From the Micalet bell tower (207 steps) you can see the whole city.",
+   "openUntil": "Open · until 18:30",
+   "stats": [
+    [
+     "13th c.",
+     "BUILT"
+    ],
+    [
+     "207",
+     "STEPS UP THE MICALET"
+    ],
+    [
+     "2026",
+     "JUBILEE YEAR"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Mon–Sat 10:00–18:30 · Sun services only"
+    ],
+    [
+     "Address",
+     "Plaça de la Reina, s/n · Ciutat Vella"
+    ],
+    [
+     "Admission",
+     "Cultural visit €9 · Micalet extra"
+    ]
+   ],
+   "keywords": [
+    "cathedral",
+    "holy grail",
+    "holy chalice",
+    "chalice",
+    "micalet",
+    "gothic"
+   ]
+  },
+  "mercado-central": {
+   "subcategory": "Monuments",
+   "eyebrow": "Market · Free",
+   "title": "Central Market",
+   "detailTitle": "Valencia Central Market",
+   "detailEyebrow": "Historic centre · Asset of Cultural Interest",
+   "area": "Ciutat Vella",
+   "ratingCount": "2.3k",
+   "summary": "The largest fresh produce market in Europe.",
+   "description": "The largest fresh produce market in Europe. A Modernista cathedral of iron, stained glass and tiles where the aromas of the huerta and the Mediterranean have filled every corner since 1928.",
+   "openUntil": "Open · until 15:00",
+   "stats": [
+    [
+     "8,000 m²",
+     "FLOOR AREA"
+    ],
+    [
+     "250+",
+     "FRESH STALLS"
+    ],
+    [
+     "1928",
+     "OPENED"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Mon–Sat 7:30–15:00 · closed Sundays and public holidays"
+    ],
+    [
+     "Address",
+     "Plaça de la Ciutat de Bruges · Ciutat Vella"
+    ],
+    [
+     "Getting there",
+     "Xàtiva metro (L3, L5, L9) · 5 min on foot from La Lonja"
+    ]
+   ],
+   "keywords": [
+    "central market",
+    "market",
+    "mercat",
+    "fresh produce",
+    "modernista",
+    "food market"
+   ]
+  },
+  "barrio-carmen": {
+   "subcategory": "Neighbourhoods",
+   "eyebrow": "Neighbourhood",
+   "title": "El Carmen district",
+   "area": "Ciutat Vella",
+   "ratingCount": "1.8k",
+   "summary": "The oldest and most bohemian quarter in Valencia.",
+   "description": "The oldest, most bohemian and most vibrant quarter in Valencia. A unique cocktail of medieval walls, street art, avant-garde museums and squares full of Mediterranean life. The Serranos Towers (1392–1398) and the Quart Towers can be visited free of charge all year round.",
+   "stats": [
+    [
+     "1,000+",
+     "YEARS OF HISTORY"
+    ],
+    [
+     "2",
+     "MEDIEVAL TOWERS"
+    ],
+    [
+     "14th c.",
+     "CITY WALLS"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Streets open 24 h · Serranos Towers 10:00–19:00"
+    ],
+    [
+     "Address",
+     "Serranos Towers · Ciutat Vella"
+    ],
+    [
+     "Getting there",
+     "Bus 28 and 94 · 10 min on foot from the Cathedral"
+    ]
+   ],
+   "keywords": [
+    "el carmen",
+    "carmen",
+    "neighbourhood",
+    "serranos",
+    "quart",
+    "street art",
+    "bohemian",
+    "old town"
+   ]
+  },
+  "oceanografic": {
+   "subcategory": "Museums",
+   "eyebrow": "Aquarium",
+   "title": "Oceanogràfic",
+   "area": "City of Arts and Sciences",
+   "ratingCount": "28k",
+   "summary": "The largest aquarium in Europe.",
+   "description": "110,000 m² and 42 million litres of salt water. Europe’s biggest aquarium brings together the world’s most important marine ecosystems, the longest underwater tunnel on the continent and the only family of beluga whales in Europe. Opened on 14 February 2003.",
+   "openUntil": "Open · until 19:00",
+   "featureLabel": "Featured · City of Arts",
+   "featureSubtitle": "The largest aquarium in Europe",
+   "stats": [
+    [
+     "110,000 m²",
+     "FLOOR AREA"
+    ],
+    [
+     "42 M",
+     "LITRES OF WATER"
+    ],
+    [
+     "8",
+     "ECOSYSTEMS"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "10:00–19:00 · depending on season"
+    ],
+    [
+     "Address",
+     "C/ d’Eduardo Primo Yúfera, 1B"
+    ],
+    [
+     "Admission",
+     "From €33 · book online with a discount"
+    ]
+   ],
+   "keywords": [
+    "oceanografic",
+    "aquarium",
+    "belugas",
+    "dolphinarium",
+    "city of arts",
+    "sea life"
+   ]
+  },
+  "albufera": {
+   "subcategory": "Nature",
+   "eyebrow": "Natural park",
+   "title": "La Albufera Natural Park",
+   "area": "El Palmar",
+   "ratingCount": "9.6k",
+   "summary": "Spain’s largest lake and the birthplace of paella.",
+   "description": "Just 15 minutes from Valencia, nature in its purest state: a Ramsar site, a natural park since 1986 and the most spectacular sunset in the Mediterranean. A boat trip is the most complete experience; autumn, with the rice fields ripe and the highest concentration of birds, is the most special time.",
+   "stats": [
+    [
+     "21,000 ha",
+     "OF PARK"
+    ],
+    [
+     "300+",
+     "BIRD SPECIES"
+    ],
+    [
+     "1986",
+     "NATURAL PARK"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Free access · boat jetties from 9:00 to sunset"
+    ],
+    [
+     "Address",
+     "El Palmar and El Saler · 10 km to the south"
+    ],
+    [
+     "Getting there",
+     "Bus 24 from Plaza del Ayuntamiento"
+    ]
+   ],
+   "keywords": [
+    "albufera",
+    "natural park",
+    "lake",
+    "boat",
+    "palmar",
+    "sunset",
+    "paella",
+    "birds"
+   ]
+  },
+  "iglesia-san-nicolas": {
+   "subcategory": "Monuments",
+   "eyebrow": "Monument",
+   "title": "Church of San Nicolás",
+   "area": "El Carmen district",
+   "ratingCount": "3.2k",
+   "summary": "The “Valencian Sistine Chapel”.",
+   "description": "Almost 2,000 m² of Baroque frescoes designed by Palomino cover a 15th-century Gothic structure in the most surprising monument in the historic centre. There is a multimedia projection every hour from 11:00; arrive 10 minutes early to get the best spot.",
+   "stats": [
+    [
+     "2,000 m²",
+     "OF FRESCOES"
+    ],
+    [
+     "15th c.",
+     "GOTHIC STRUCTURE"
+    ],
+    [
+     "45 min",
+     "VISIT"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "10:30–18:30 · closed to tourism on Mondays"
+    ],
+    [
+     "Address",
+     "C/ Caballeros, 35 · El Carmen district"
+    ],
+    [
+     "Admission",
+     "From €10 · includes audio guide"
+    ]
+   ],
+   "keywords": [
+    "san nicolas",
+    "sistine chapel",
+    "frescoes",
+    "church",
+    "baroque"
+   ]
+  },
+  "jardin-turia": {
+   "subcategory": "Nature",
+   "eyebrow": "Park · Free",
+   "title": "Turia Gardens",
+   "area": "Turia riverbed",
+   "ratingCount": "12k",
+   "summary": "Spain’s largest urban park, 9 km without cars.",
+   "description": "9 kilometres of green park that cross Valencia from west to east along the old bed of its river. It links the Parque de Cabecera and the Bioparc with the City of Arts and Sciences and never closes: it is the city’s open-air gym and green lung. Valencia was European Green Capital in 2024.",
+   "stats": [
+    [
+     "9 km",
+     "CAR-FREE"
+    ],
+    [
+     "6",
+     "AREAS"
+    ],
+    [
+     "24 h",
+     "OPEN"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Open 24 hours all year round"
+    ],
+    [
+     "Address",
+     "Old bed of the Turia river · from Cabecera to the City of Arts"
+    ],
+    [
+     "Getting there",
+     "Valenbisi and cycle lane · Alameda metro (L3, L5)"
+    ]
+   ],
+   "keywords": [
+    "turia",
+    "gardens",
+    "park",
+    "bike",
+    "walk",
+    "free"
+   ]
+  },
+  "la-marina": {
+   "subcategory": "Neighbourhoods",
+   "eyebrow": "Waterfront · Free",
+   "title": "La Marina",
+   "area": "Seaside districts",
+   "ratingCount": "3.9k",
+   "summary": "Valencia’s balcony on the sea.",
+   "description": "A former port reinvented, where the avant-garde architecture of the Veles e Vents, the historic Tinglados warehouses and the Clock Building sit alongside more than 15 restaurants with sea views and around 40 water-sports companies. Access is completely free.",
+   "stats": [
+    [
+     "15+",
+     "RESTAURANTS"
+    ],
+    [
+     "40",
+     "WATER-SPORTS COMPANIES"
+    ],
+    [
+     "Free",
+     "ENTRY"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Open 24 hours · restaurants vary"
+    ],
+    [
+     "Address",
+     "Marina Real Juan Carlos I · Seaside districts"
+    ],
+    [
+     "Getting there",
+     "Tram L4 and L6 · bus 4 and 30"
+    ]
+   ],
+   "keywords": [
+    "marina",
+    "port",
+    "veles e vents",
+    "america's cup",
+    "sailing",
+    "sea"
+   ]
+  },
+  "mestalla": {
+   "subcategory": "Monuments",
+   "eyebrow": "Stadium · Sport",
+   "title": "Mestalla",
+   "area": "Avenida de Suecia",
+   "ratingCount": "6.3k",
+   "summary": "The oldest stadium in LaLiga.",
+   "description": "The black-and-white coliseum, opened in 1923: the oldest stadium in Spanish top-flight football, with over a hundred years of history and home to Valencia CF. Whether or not you are a fan, the stadium and museum tour is one of the most recommended in Valencia.",
+   "stats": [
+    [
+     "1923",
+     "OPENED"
+    ],
+    [
+     "100+",
+     "YEARS OF HISTORY"
+    ],
+    [
+     "L5",
+     "ARAGÓN METRO"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Tours 10:00–18:00 · no tours on match days"
+    ],
+    [
+     "Address",
+     "Av. de Suecia, s/n"
+    ],
+    [
+     "Admission",
+     "From €12 · buy online to avoid queues"
+    ]
+   ],
+   "keywords": [
+    "mestalla",
+    "stadium",
+    "football",
+    "soccer",
+    "valencia cf"
+   ]
+  },
+  "museo-bellas-artes": {
+   "subcategory": "Museums",
+   "eyebrow": "Museum · Free",
+   "title": "Fine Arts Museum",
+   "area": "Turia Gardens",
+   "ratingCount": "2.8k",
+   "summary": "The second most important art gallery in Spain.",
+   "description": "From Valencian Gothic to Sorolla, taking in Velázquez, Goya, El Greco, Botticelli and Van Dyck, in a 17th-century Baroque palace beside the Turia Gardens. Admission is completely free.",
+   "openUntil": "Open · until 20:00",
+   "stats": [
+    [
+     "14th–19th c.",
+     "COLLECTION"
+    ],
+    [
+     "1683",
+     "BUILDING"
+    ],
+    [
+     "Free",
+     "ADMISSION"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Tue–Sun 10:00–20:00"
+    ],
+    [
+     "Address",
+     "C/ San Pío V, 9 · beside the Turia Gardens"
+    ],
+    [
+     "Admission",
+     "Free"
+    ]
+   ],
+   "keywords": [
+    "fine arts",
+    "museum",
+    "sorolla",
+    "gallery",
+    "painting",
+    "san pio"
+   ]
+  },
+  "playas": {
+   "subcategory": "Nature",
+   "eyebrow": "Beaches · Free",
+   "title": "Valencia beaches",
+   "area": "Malvarrosa · Arenas",
+   "ratingCount": "7.4k",
+   "summary": "19.5 km of golden sand and 8 Blue Flags.",
+   "description": "From El Cabanyal to La Devesa, from the liveliest seafront promenade in Spain to the unspoilt dunes of La Albufera Natural Park. Valencia is one of the few big cities where you can go to the beach by metro: line L4 drops you at Les Arenes and bus 19 reaches Malvarrosa.",
+   "stats": [
+    [
+     "19.5 km",
+     "OF SAND"
+    ],
+    [
+     "8",
+     "BLUE FLAGS"
+    ],
+    [
+     "300+",
+     "DAYS OF SUN"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Free access · lifeguards in season"
+    ],
+    [
+     "Address",
+     "Paseo de Neptuno · Las Arenas beach"
+    ],
+    [
+     "Getting there",
+     "Tram L4 (Les Arenes) · bus 19 to Malvarrosa"
+    ]
+   ],
+   "keywords": [
+    "beach",
+    "beaches",
+    "malvarrosa",
+    "arenas",
+    "cabanyal",
+    "sea",
+    "sand"
+   ]
+  },
+  "ruzafa": {
+   "subcategory": "Neighbourhoods",
+   "eyebrow": "Neighbourhood",
+   "title": "Ruzafa",
+   "area": "Eixample",
+   "ratingCount": "2.1k",
+   "summary": "The most vibrant neighbourhood in Valencia.",
+   "description": "From a 9th-century Arab garden to the epicentre of signature cuisine, contemporary art and the city’s most creative nightlife. A multicultural neighbourhood where long-established bars compete with restaurants run by Michelin-starred chefs. It has no visiting hours: it works at any time of day.",
+   "stats": [
+    [
+     "9th c.",
+     "ARAB ORIGIN"
+    ],
+    [
+     "10 min",
+     "ON FOOT FROM THE CENTRE"
+    ],
+    [
+     "24 h",
+     "ATMOSPHERE"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "No set hours · from the morning snack to the last drink"
+    ],
+    [
+     "Address",
+     "C/ Cádiz and surrounding streets · Eixample"
+    ],
+    [
+     "Getting there",
+     "Xàtiva and Bailén metro · 10 min on foot"
+    ]
+   ],
+   "keywords": [
+    "ruzafa",
+    "neighbourhood",
+    "food",
+    "art",
+    "galleries",
+    "bars",
+    "nightlife"
+   ]
+  },
+  "bioparc": {
+   "subcategory": "Nature",
+   "eyebrow": "Zoo · Parque de Cabecera",
+   "title": "Bioparc",
+   "area": "Parque de Cabecera",
+   "ratingCount": "8.2k",
+   "summary": "A piece of Africa in Valencia.",
+   "description": "More than 6,000 animals of 150 species in 100,000 m² of African habitats where the barriers are practically invisible. A new-generation zoo on the banks of the old Turia riverbed.",
+   "stats": [
+    [
+     "6,000",
+     "ANIMALS"
+    ],
+    [
+     "150",
+     "SPECIES"
+    ],
+    [
+     "100,000 m²",
+     "HABITATS"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Open 365 days a year"
+    ],
+    [
+     "Address",
+     "Av. Pío Baroja, 3 · Parque de Cabecera"
+    ],
+    [
+     "Admission",
+     "Adult €32.50 · reduced €24.00"
+    ],
+    [
+     "Getting there",
+     "Metro L3 and L5 · Nou d’Octubre or Av. del Cid"
+    ]
+   ],
+   "keywords": [
+    "bioparc",
+    "zoo",
+    "animals",
+    "africa",
+    "kids",
+    "family"
+   ]
+  },
+  "cac": {
+   "subcategory": "Museums",
+   "eyebrow": "Architecture · Calatrava",
+   "title": "City of Arts and Sciences",
+   "area": "Old Turia riverbed",
+   "ratingCount": "21k",
+   "summary": "Six unique buildings along almost two kilometres of the old Turia riverbed.",
+   "description": "Designed by Santiago Calatrava and Félix Candela, it combines interactive science, Europe’s largest aquarium, 3D cinema and an opera house (Palau de les Arts). We recommend spending a full day there and buying tickets online.",
+   "stats": [
+    [
+     "6",
+     "BUILDINGS"
+    ],
+    [
+     "2 km",
+     "LONG"
+    ],
+    [
+     "€47.75",
+     "3-VENUE PACK"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Depends on the venue · check opening times online"
+    ],
+    [
+     "Address",
+     "Av. del Professor López Piñero, 7"
+    ],
+    [
+     "Tickets",
+     "3-venue pack from €47.75"
+    ],
+    [
+     "Getting there",
+     "Metro L3, L5, L7 and L9 · Alameda · 15 min through the Turia Gardens"
+    ]
+   ],
+   "keywords": [
+    "cac",
+    "city of arts",
+    "sciences",
+    "calatrava",
+    "hemisferic",
+    "museu",
+    "umbracle",
+    "palau"
+   ]
+  },
+  "paella": {
+   "subcategory": "Rice dishes",
+   "eyebrow": "Gastronomy",
+   "title": "Paella valenciana",
+   "area": "Gastronomy · signature dish",
+   "summary": "The jewel of Valencian cuisine.",
+   "description": "The most international dish of Valencian gastronomy: our contribution to world cuisine. Born in La Albufera in the 18th century, it is today the gastronomic symbol of Valencia. It is cooked over a wood fire, with chicken, rabbit, garrofón beans and green beans, and eaten straight from the pan.",
+   "stats": [
+    [
+     "18th c.",
+     "ORIGIN"
+    ],
+    [
+     "Albufera",
+     "BIRTHPLACE OF THE DISH"
+    ],
+    [
+     "Wood",
+     "TRADITIONAL FIRE"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "El Palmar and La Albufera · Malvarrosa and the seafront"
+    ],
+    [
+     "When",
+     "It is a lunchtime dish: book ahead in summer"
+    ]
+   ],
+   "keywords": [
+    "paella",
+    "rice",
+    "albufera",
+    "restaurant",
+    "eat",
+    "dinner",
+    "typical dish"
+   ]
+  },
+  "fideua": {
+   "subcategory": "Rice dishes",
+   "eyebrow": "Gastronomy",
+   "title": "Fideuà",
+   "area": "Gastronomy · seafood dish",
+   "summary": "The seafood dish par excellence.",
+   "description": "Born by accident on a boat in Grau de Gandia, fideuà is paella’s seafaring cousin: same technique, same fire, same ritual, but with noodles instead of rice. It is served with alioli.",
+   "stats": [
+    [
+     "Gandia",
+     "ORIGIN"
+    ],
+    [
+     "Noodles",
+     "INSTEAD OF RICE"
+    ],
+    [
+     "Alioli",
+     "ACCOMPANIMENT"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "Restaurants in El Grau and along the seafront"
+    ]
+   ],
+   "keywords": [
+    "fideua",
+    "noodles",
+    "seafood",
+    "fish",
+    "paella"
+   ]
+  },
+  "arroz-horno": {
+   "subcategory": "Rice dishes",
+   "eyebrow": "Gastronomy",
+   "title": "Arròs al forn",
+   "area": "Gastronomy · home cooking",
+   "summary": "The great unknown of Valencian cuisine.",
+   "description": "The dish Valencians keep for themselves. Born from the stew pot and the baker’s oven, arròs al forn is the most authentic, hearty and homely face of rice cooking.",
+   "stats": [
+    [
+     "Oven",
+     "COOKING"
+    ],
+    [
+     "Stew pot",
+     "ORIGIN"
+    ],
+    [
+     "Homemade",
+     "STYLE"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "Traditional eateries in the centre and Ruzafa"
+    ]
+   ],
+   "keywords": [
+    "baked rice",
+    "oven",
+    "arros al forn",
+    "homemade"
+   ]
+  },
+  "arroz-negro": {
+   "subcategory": "Rice dishes",
+   "eyebrow": "Gastronomy",
+   "title": "Arròs negre",
+   "area": "Gastronomy · creamy rice",
+   "summary": "The most mysterious rice in Valencia.",
+   "description": "Black as the sea at night. Cuttlefish ink stains every grain of rice and concentrates the flavour of the Mediterranean in a dish that surprises as much for its look as for its taste.",
+   "stats": [
+    [
+     "Cuttlefish",
+     "INGREDIENT"
+    ],
+    [
+     "Ink",
+     "COLOUR"
+    ],
+    [
+     "Alioli",
+     "ACCOMPANIMENT"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "Restaurants at the port and in La Marina"
+    ]
+   ],
+   "keywords": [
+    "black rice",
+    "squid ink",
+    "cuttlefish",
+    "arros negre"
+   ]
+  },
+  "all-i-pebre": {
+   "subcategory": "Stews",
+   "eyebrow": "Gastronomy",
+   "title": "All i pebre",
+   "area": "Gastronomy · La Albufera stew",
+   "summary": "The dish of the fishermen of La Albufera.",
+   "description": "Garlic and paprika. The eel stew of the fishermen of La Albufera, which rivals Valencian paella in history and tradition. Catarroja, El Palmar and the lake where it was born.",
+   "stats": [
+    [
+     "Eel",
+     "INGREDIENT"
+    ],
+    [
+     "Garlic and paprika",
+     "FLAVOUR"
+    ],
+    [
+     "El Palmar",
+     "ORIGIN"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "El Palmar and Catarroja"
+    ]
+   ],
+   "keywords": [
+    "all i pebre",
+    "eel",
+    "albufera",
+    "stew"
+   ]
+  },
+  "esgarraet": {
+   "subcategory": "Tapas",
+   "eyebrow": "Gastronomy",
+   "title": "Esgarraet",
+   "area": "Gastronomy · traditional tapa",
+   "summary": "The best-kept secret of Valencian cuisine.",
+   "description": "Four ingredients, your hands and patience: the contrast between salt cod and the sweetness of roasted pepper. A traditional Easter tapa that is enjoyed all year round.",
+   "stats": [
+    [
+     "4",
+     "INGREDIENTS"
+    ],
+    [
+     "Salt cod",
+     "STAR OF THE DISH"
+    ],
+    [
+     "All year",
+     "SEASON"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "Tapas bars in El Carmen and around the Central Market"
+    ]
+   ],
+   "keywords": [
+    "esgarraet",
+    "cod",
+    "pepper",
+    "tapa",
+    "tapas"
+   ]
+  },
+  "arroz-senyoret": {
+   "subcategory": "Rice dishes",
+   "eyebrow": "Gastronomy",
+   "title": "Arròs del senyoret",
+   "area": "Gastronomy · seafood rice",
+   "summary": "The rice of the gentlemen.",
+   "description": "All the seafood peeled: no shells and no mess. Prawns, squid, cuttlefish and monkfish, all cleaned, on a fish stock and salmorreta base, where convenience is the luxury.",
+   "stats": [
+    [
+     "Seafood",
+     "PEELED"
+    ],
+    [
+     "Fish stock",
+     "BASE"
+    ],
+    [
+     "Coast",
+     "ORIGIN"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "Restaurants in Malvarrosa and La Marina"
+    ]
+   ],
+   "keywords": [
+    "senyoret",
+    "seafood",
+    "rice",
+    "peeled"
+   ]
+  },
+  "bunyol": {
+   "subcategory": "Sweets and drinks",
+   "eyebrow": "Gastronomy",
+   "title": "Bunyols de carabassa",
+   "area": "Gastronomy · Fallas dessert",
+   "summary": "The most Fallas dessert in Valencia.",
+   "description": "The smell that defines the Fallas of Valencia. Fluffy inside, crisp outside, rolled in sugar and served with hot chocolate: the most Valencian sweet treat.",
+   "stats": [
+    [
+     "Pumpkin",
+     "INGREDIENT"
+    ],
+    [
+     "Fallas",
+     "SEASON"
+    ],
+    [
+     "Chocolate",
+     "ACCOMPANIMENT"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try them",
+     "Street stalls in March and fritter shops in the centre"
+    ]
+   ],
+   "keywords": [
+    "fritters",
+    "bunyol",
+    "pumpkin",
+    "fallas",
+    "dessert",
+    "buñuelos"
+   ]
+  },
+  "horchata": {
+   "subcategory": "Sweets and drinks",
+   "eyebrow": "Gastronomy",
+   "title": "Horchata and fartons",
+   "area": "Gastronomy · typical drink",
+   "summary": "The most Valencian drink in the world.",
+   "description": "White, cold, creamy and sweet. Horchata made from tiger nuts from Alboraya is the liquid gold of Valencia: lactose-free, gluten-free and with a Designation of Origin. It is drunk with fartons for dipping.",
+   "stats": [
+    [
+     "Tiger nut",
+     "INGREDIENT"
+    ],
+    [
+     "D.O.",
+     "PROTECTED ORIGIN"
+    ],
+    [
+     "Alboraya",
+     "BIRTHPLACE"
+    ]
+   ],
+   "info": [
+    [
+     "Where to try it",
+     "Horchata bars in Alboraya and the centre"
+    ]
+   ],
+   "keywords": [
+    "horchata",
+    "orxata",
+    "tiger nut",
+    "chufa",
+    "fartons",
+    "drink"
+   ]
+  },
+  "fallas": {
+   "subcategory": "Festivities",
+   "eyebrow": "Event",
+   "title": "Fallas 2027",
+   "detailTitle": "Les Falles de València",
+   "detailEyebrow": "Events · UNESCO 2016 · 1–19 March",
+   "area": "Centre",
+   "summary": "19 days of gunpowder, ephemeral art, flowers and fire.",
+   "description": "19 days of gunpowder, ephemeral art, flowers and fire. Valencia’s biggest festival combines satire, tradition and the most impressive pyrotechnic spectacle in Europe.",
+   "dateLabel": "15–19 March",
+   "featureLabel": "Featured event · 15–19 March",
+   "featureSubtitle": "Historic centre · UNESCO heritage",
+   "stats": [
+    [
+     "400+",
+     "MONUMENTS"
+    ],
+    [
+     "19",
+     "DAYS OF FESTIVITIES"
+    ],
+    [
+     "1M+",
+     "VISITORS"
+    ]
+   ],
+   "info": [
+    [
+     "When",
+     "1–19 March · UNESCO Intangible Cultural Heritage 2016"
+    ],
+    [
+     "Where",
+     "Plaza del Ayuntamiento and every neighbourhood of Valencia"
+    ]
+   ],
+   "acts": [
+    [
+     "Mascletà",
+     "1–19 Mar · 14:00"
+    ],
+    [
+     "Plantà",
+     "15 Mar · night"
+    ],
+    [
+     "Ofrenda",
+     "17–18 Mar"
+    ],
+    [
+     "Cremà",
+     "19 Mar · midnight"
+    ]
+   ],
+   "keywords": [
+    "fallas",
+    "falles",
+    "mascleta",
+    "planta",
+    "ofrenda",
+    "crema",
+    "festival",
+    "gunpowder",
+    "fireworks"
+   ]
+  },
+  "corpus-christi": {
+   "subcategory": "Festivities",
+   "eyebrow": "Event · La Festa Grossa",
+   "title": "Corpus Christi",
+   "area": "Historic centre",
+   "summary": "Valencia’s Great Festival since the 14th century.",
+   "description": "A historic procession, medieval dances, the eleven Rocas pulled by horses and the fight between Virtue and the Seven Deadly Sins. It takes place 60 days after Easter.",
+   "dateLabel": "60 days after Easter",
+   "stats": [
+    [
+     "14th c.",
+     "ORIGIN"
+    ],
+    [
+     "11",
+     "ROCAS"
+    ],
+    [
+     "60",
+     "DAYS AFTER EASTER"
+    ]
+   ],
+   "info": [
+    [
+     "When",
+     "The Sunday after Corpus Thursday"
+    ]
+   ],
+   "keywords": [
+    "corpus",
+    "procession",
+    "rocas",
+    "festa grossa"
+   ]
+  },
+  "gran-feria": {
+   "subcategory": "Festivals",
+   "eyebrow": "Event · Since 1871",
+   "title": "Gran Feria de Julio",
+   "area": "Viveros and centre",
+   "summary": "A whole month of festivities in high summer.",
+   "description": "Concerts under the stars in Viveros, fireworks every Saturday, the Jazz Festival, the Band Competition and the Battle of Flowers. All of July, since 1871.",
+   "dateLabel": "All of July",
+   "stats": [
+    [
+     "1871",
+     "SINCE"
+    ],
+    [
+     "31",
+     "DAYS"
+    ],
+    [
+     "Saturdays",
+     "FIREWORKS"
+    ]
+   ],
+   "info": [
+    [
+     "When",
+     "All month of July"
+    ]
+   ],
+   "keywords": [
+    "fair",
+    "july",
+    "viveros",
+    "jazz",
+    "battle of flowers"
+   ]
+  },
+  "festivales-verano": {
+   "subcategory": "Festivals",
+   "eyebrow": "Event · Festival season",
+   "title": "Summer festivals",
+   "area": "Comunitat Valenciana",
+   "summary": "Nine festivals from April to September 2026.",
+   "description": "Nine festivals that turn the Comunitat Valenciana into the musical epicentre of the Mediterranean every summer. From urban indie to reggae, from the beach to the CAC, from techno to big international names.",
+   "dateLabel": "April–September",
+   "stats": [
+    [
+     "9",
+     "FESTIVALS"
+    ],
+    [
+     "6",
+     "MONTHS"
+    ],
+    [
+     "2026",
+     "SEASON"
+    ]
+   ],
+   "info": [
+    [
+     "When",
+     "April–September 2026"
+    ]
+   ],
+   "keywords": [
+    "festival",
+    "music",
+    "summer",
+    "concerts"
+   ]
+  },
+  "festivos": {
+   "subcategory": "Festivities",
+   "eyebrow": "Calendar · 2026",
+   "title": "Public holidays calendar",
+   "area": "City of Valencia",
+   "summary": "14 public holidays: national, regional and local.",
+   "description": "The full calendar of non-working days in the city of Valencia for 2026, with the traditions and celebrations of each date.",
+   "dateLabel": "All 2026",
+   "stats": [
+    [
+     "14",
+     "PUBLIC HOLIDAYS"
+    ],
+    [
+     "2026",
+     "CALENDAR"
+    ],
+    [
+     "Local",
+     "SCOPE"
+    ]
+   ],
+   "info": [
+    [
+     "Tip",
+     "Many museums and markets close on public holidays: check the opening hours"
+    ]
+   ],
+   "keywords": [
+    "holidays",
+    "calendar",
+    "public holiday",
+    "days off"
+   ]
+  },
+  "deportes": {
+   "subcategory": "Sports",
+   "eyebrow": "Sport · 365 days",
+   "title": "Sports",
+   "area": "The whole city",
+   "summary": "Valencia, city of running, cycling and the sea.",
+   "description": "The Mediterranean climate, 9 kilometres of linear park, 20 km of beach and 160 km of cycle lanes make Valencia the ideal destination for sport all year round. Marathon, popular races, sailing and much more.",
+   "dateLabel": "All year",
+   "stats": [
+    [
+     "9 km",
+     "TURIA GARDENS"
+    ],
+    [
+     "20 km",
+     "OF BEACH"
+    ],
+    [
+     "160 km",
+     "CYCLE LANES"
+    ]
+   ],
+   "info": [
+    [
+     "When",
+     "All year · the Valencia Marathon is on 6 December"
+    ],
+    [
+     "Tip",
+     "Register for the Marathon well in advance: it sells out in hours"
+    ]
+   ],
+   "keywords": [
+    "sport",
+    "running",
+    "marathon",
+    "cycling",
+    "bike",
+    "sailing",
+    "race"
+   ]
+  },
+  "aloj-centro": {
+   "subcategory": "Centre",
+   "eyebrow": "Area · Historic centre",
+   "title": "Historic centre",
+   "area": "Plaza del Ayuntamiento",
+   "ratingCount": "3.4k",
+   "summary": "Four options for every budget.",
+   "description": "Four options for every budget in the heart of the city, a few steps from the Cathedral, the Central Market and La Lonja de la Seda.",
+   "stats": [
+    [
+     "4",
+     "OPTIONS"
+    ],
+    [
+     "5 min",
+     "TO THE CATHEDRAL"
+    ],
+    [
+     "L3 · L5",
+     "METRO"
+    ]
+   ],
+   "info": [
+    [
+     "Area",
+     "Plaza del Ayuntamiento · Ciutat Vella"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "accommodation",
+    "centre",
+    "sleep",
+    "town hall"
+   ]
+  },
+  "aloj-gran-via": {
+   "subcategory": "Centre",
+   "eyebrow": "Area · L’Eixample",
+   "title": "Gran Vía district",
+   "area": "L’Eixample",
+   "ratingCount": "1.9k",
+   "summary": "Valencia’s elegant Eixample.",
+   "description": "Grand avenues with Modernista buildings, the Turia Gardens at the door and the best food district in the city a step away.",
+   "stats": [
+    [
+     "Modernista",
+     "ARCHITECTURE"
+    ],
+    [
+     "Turia",
+     "AT THE DOOR"
+    ],
+    [
+     "Food",
+     "AREA"
+    ]
+   ],
+   "info": [
+    [
+     "Area",
+     "Gran Vía Marqués del Turia · L’Eixample"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "gran via",
+    "eixample",
+    "accommodation"
+   ]
+  },
+  "aloj-ruzafa": {
+   "subcategory": "Neighbourhoods",
+   "eyebrow": "Area · Ruzafa",
+   "title": "Ruzafa district",
+   "area": "Eixample",
+   "ratingCount": "2.2k",
+   "summary": "Valencia’s SoHo.",
+   "description": "The most creative and cosmopolitan neighbourhood in Valencia: art galleries, design bars, world cuisine and the energy of a neighbourhood that never stops. 10 minutes on foot from everything.",
+   "stats": [
+    [
+     "10 min",
+     "ON FOOT FROM THE CENTRE"
+    ],
+    [
+     "Art",
+     "GALLERIES"
+    ],
+    [
+     "Night",
+     "ATMOSPHERE"
+    ]
+   ],
+   "info": [
+    [
+     "Area",
+     "C/ Cádiz and surrounding streets · Eixample"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "ruzafa",
+    "accommodation",
+    "soho"
+   ]
+  },
+  "aloj-cac": {
+   "subcategory": "Beach and sea",
+   "eyebrow": "Area · City of Arts",
+   "title": "City of Arts and Sciences",
+   "area": "Av. de França",
+   "ratingCount": "1.1k",
+   "summary": "Four hotels facing Valencia’s most iconic landmark.",
+   "description": "The Oceanogràfic, the Palau de les Arts and the Museu de les Ciències on your doorstep, with the Turia Gardens as a walk to the centre.",
+   "stats": [
+    [
+     "4",
+     "HOTELS"
+    ],
+    [
+     "0 min",
+     "TO THE OCEANOGRÀFIC"
+    ],
+    [
+     "30 min",
+     "ON FOOT TO THE CENTRE"
+    ]
+   ],
+   "info": [
+    [
+     "Area",
+     "Av. de França · City of Arts and Sciences"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "city of arts",
+    "calatrava",
+    "accommodation"
+   ]
+  },
+  "aloj-playa": {
+   "subcategory": "Beach and sea",
+   "eyebrow": "Area · Las Arenas beach",
+   "title": "Beach area and seafront promenade",
+   "area": "Paseo de Neptuno",
+   "ratingCount": "1.6k",
+   "summary": "Three beachfront hotels.",
+   "description": "From the great historic luxury resort to the boutique hotel with Sorolla’s light and the family classic with history since 1916.",
+   "stats": [
+    [
+     "3",
+     "HOTELS"
+    ],
+    [
+     "1916",
+     "FAMILY CLASSIC"
+    ],
+    [
+     "1st line",
+     "OF BEACH"
+    ]
+   ],
+   "info": [
+    [
+     "Area",
+     "Paseo de Neptuno · Las Arenas beach"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "beach",
+    "promenade",
+    "accommodation",
+    "resort"
+   ]
+  },
+  "aloj-barato-exclusivo": {
+   "subcategory": "Centre",
+   "eyebrow": "Selection · Price",
+   "title": "From luxury to budget",
+   "area": "The whole city",
+   "ratingCount": "980",
+   "summary": "Exclusive and budget hotels, all well located.",
+   "description": "From historic seafront luxury to the best budget options. Exclusive and affordable hotels, all well located.",
+   "stats": [
+    [
+     "5★",
+     "GRAND LUXURY"
+    ],
+    [
+     "€",
+     "BUDGET"
+    ],
+    [
+     "All",
+     "WELL LOCATED"
+    ]
+   ],
+   "info": [
+    [
+     "Tip",
+     "Book ahead for Fallas and in summer"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "cheap",
+    "budget",
+    "luxury",
+    "accommodation"
+   ]
+  },
+  "albufera-barca": {
+   "eyebrow": "Sustainable",
+   "title": "La Albufera by boat",
+   "area": "El Palmar",
+   "ratingCount": "1.1k",
+   "summary": "Electric boat trip on the lake.",
+   "description": "The boat trip is the most complete way to get to know La Albufera: electric boats, bilingual guides and the best light of the day at sunset, among rice fields and migratory birds.",
+   "stats": [
+    [
+     "1 h",
+     "TRIP"
+    ],
+    [
+     "Electric",
+     "BOATS"
+    ],
+    [
+     "ES · EN",
+     "GUIDES"
+    ]
+   ],
+   "info": [
+    [
+     "Opening hours",
+     "Every day until sunset"
+    ],
+    [
+     "Jetty",
+     "El Palmar · 11 km from the centre"
+    ],
+    [
+     "Getting there",
+     "Bus 24 from Plaza del Ayuntamiento"
+    ]
+   ],
+   "keywords": [
+    "albufera",
+    "boat",
+    "trip",
+    "palmar",
+    "eco",
+    "sunset"
+   ]
+  },
+  "ecoturismo": {
+   "eyebrow": "Valencia · Ecotourism · Responsible tourism",
+   "title": "Ecotourism",
+   "detailTitle": "Ecotourism in Valencia",
+   "area": "Nature trails and protected areas",
+   "summary": "Nature trails and protected areas",
+   "description": "Valencia is much more than city and beach: 21,000 hectares of Albufera, more than 300 bird species and four natural parks a step from the centre. Signposted, flat trails, observatories and visitor centres.",
+   "stats": [
+    [
+     "21,000",
+     "HECTARES OF ALBUFERA"
+    ],
+    [
+     "300+",
+     "BIRD SPECIES"
+    ],
+    [
+     "4",
+     "NATURAL PARKS"
+    ]
+   ],
+   "info": [
+    [
+     "Tip",
+     "Autumn, with the rice fields ripe, is the best time for birds"
+    ]
+   ],
+   "keywords": [
+    "ecotourism",
+    "nature",
+    "birds",
+    "trails",
+    "natural park"
+   ]
+  },
+  "muevete": {
+   "eyebrow": "Valencia · Mobility · Transport",
+   "title": "Getting around Valencia",
+   "area": "Public transport, Valenbisi and pedestrian areas",
+   "summary": "Public transport, Valenbisi and pedestrian areas",
+   "description": "Almost 200 km of cycle lanes, flat terrain, metro and tram to the beach and a Turia Gardens free of cars. The city is best explored on foot, by bike or on public transport.",
+   "stats": [
+    [
+     "200 km",
+     "CYCLE LANES"
+    ],
+    [
+     "9 km",
+     "TURIA GARDENS"
+    ],
+    [
+     "Metro",
+     "AND TRAM TO THE BEACH"
+    ]
+   ],
+   "info": [
+    [
+     "Tip",
+     "Valenbisi: weekly pass for visitors at any station"
+    ]
+   ],
+   "keywords": [
+    "mobility",
+    "bike",
+    "valenbisi",
+    "metro",
+    "public transport"
+   ]
+  },
+  "viaje-responsable": {
+   "eyebrow": "Valencia · Responsible tourism",
+   "title": "Responsible travel",
+   "area": "Positive impact on the local community",
+   "summary": "Positive impact on the local community",
+   "description": "Being a responsible tourist in Valencia takes no effort: it is small everyday decisions that add up. These are the commitments you can adopt during your stay.",
+   "stats": [
+    [
+     "Local",
+     "SHOPPING"
+    ],
+    [
+     "0",
+     "PLASTICS"
+    ],
+    [
+     "On foot",
+     "GETTING AROUND"
+    ]
+   ],
+   "info": [
+    [
+     "Commitment",
+     "Choose local shops and restaurants"
+    ]
+   ],
+   "keywords": [
+    "responsible",
+    "commitments",
+    "local community"
+   ]
+  },
+  "comercio-local": {
+   "eyebrow": "Valencia · Sustainable shopping",
+   "title": "Local shops",
+   "area": "Neighbourhood markets and small shops",
+   "summary": "Neighbourhood markets and small shops",
+   "description": "Neighbourhood markets, long-established shops and small local businesses: buying here is the most direct way to make sure tourism leaves value in the city.",
+   "stats": [
+    [
+     "Markets",
+     "NEIGHBOURHOOD"
+    ],
+    [
+     "Km 0",
+     "PRODUCE"
+    ],
+    [
+     "Family",
+     "BUSINESSES"
+    ]
+   ],
+   "info": [
+    [
+     "Tip",
+     "Markets open in the morning: go early"
+    ]
+   ],
+   "keywords": [
+    "local",
+    "markets",
+    "shops",
+    "sustainable shopping"
+   ]
+  },
+  "consejos": {
+   "eyebrow": "Valencia · Responsible travel · Practical guide",
+   "title": "Tips for travelling better",
+   "area": "Practical guide for travellers",
+   "summary": "Practical guide for travellers",
+   "description": "A practical guide with tips to reduce your footprint while travelling: water, energy, waste and respect for natural spaces.",
+   "stats": [
+    [
+     "Water",
+     "SAVING"
+    ],
+    [
+     "Waste",
+     "RECYCLING"
+    ],
+    [
+     "Respect",
+     "NATURAL SPACES"
+    ]
+   ],
+   "info": [
+    [
+     "Tip",
+     "Bring a reusable bottle: there are fountains all over the city"
+    ]
+   ],
+   "keywords": [
+    "tips",
+    "footprint",
+    "practical guide"
+   ]
+  },
+  "viaje-sostenible": {
+   "eyebrow": "Valencia · Smart tourism",
+   "title": "Sustainable and smart city",
+   "area": "European Green Capital 2024",
+   "summary": "European Green Capital 2024",
+   "description": "Valencia is not just sustainable: it is smart. European Green Capital 2024 and European Capital of Smart Tourism 2022, the city combines technology, nature and culture for better travel.",
+   "stats": [
+    [
+     "2024",
+     "GREEN CAPITAL"
+    ],
+    [
+     "2022",
+     "SMART TOURISM"
+    ],
+    [
+     "Green",
+     "CITY"
+    ]
+   ],
+   "info": [
+    [
+     "Fact",
+     "European Green Capital 2024 and European Capital of Smart Tourism 2022"
+    ]
+   ],
+   "keywords": [
+    "green capital",
+    "smart",
+    "sustainable city"
+   ]
+  }
+ },
+ "offers": {
+  "albufera-barca": {
+   "tag": "Excursion",
+   "title": "Boat trip on La Albufera",
+   "duration": "1 h",
+   "place": "El Palmar",
+   "extra": "Spanish/English",
+   "description": "Tour the lake in an electric boat with a bilingual guide, among rice fields and migratory birds."
+  },
+  "taller-paella": {
+   "tag": "Gastronomic",
+   "title": "Valencian paella workshop",
+   "duration": "3 h",
+   "place": "Central Market",
+   "extra": "meal included",
+   "description": "Learn to cook an authentic Valencian paella with a local chef. Ingredients and tasting included."
+  },
+  "kayak-albufera": {
+   "tag": "Excursion",
+   "title": "Kayaking on La Albufera",
+   "duration": "2 h",
+   "place": "El Palmar",
+   "extra": "guide and life jacket included",
+   "description": "Kayak route along the canals of the Natural Park at dawn. Guide, kayak and life jacket included."
+  },
+  "excursion-albufera-paella": {
+   "tag": "Excursion",
+   "title": "La Albufera excursion with paella",
+   "duration": "5 h",
+   "place": "La Albufera",
+   "extra": "lunch included",
+   "description": "Visit to the Natural Park with a boat trip and a traditional paella lunch included."
+  },
+  "paddle-surf": {
+   "tag": "Water sports",
+   "title": "Paddle surfing at Las Arenas",
+   "duration": "1.5 h",
+   "place": "Las Arenas beach",
+   "extra": "equipment included",
+   "description": "Beginner paddle surf lesson in the Mediterranean with a qualified instructor. Equipment included."
+  },
+  "taller-horchata": {
+   "tag": "Gastronomic",
+   "title": "Horchata and fartons workshop",
+   "duration": "2 h",
+   "place": "Central Market",
+   "extra": "tasting included",
+   "description": "Learn to make traditional tiger-nut horchata and fartons in this unique workshop in Valencia."
+  },
+  "tour-ruzafa": {
+   "tag": "Gastronomic",
+   "title": "Ruzafa tour: art and food",
+   "duration": "3 h",
+   "place": "Ruzafa",
+   "extra": "tastings included",
+   "description": "Discover Valencia’s trendiest neighbourhood with tastings in its best bars and visits to art galleries."
+  },
+  "ruta-ciutat-vella": {
+   "tag": "Tour",
+   "title": "Guided walk through Ciutat Vella",
+   "duration": "2 h",
+   "place": "Historic centre",
+   "extra": "Spanish/English",
+   "description": "A guided walk through El Carmen, La Lonja, the Central Market and Plaza del Ayuntamiento with an official guide."
+  },
+  "visita-catedral": {
+   "tag": "Tour",
+   "title": "Guided visit to the Cathedral",
+   "duration": "1.5 h",
+   "place": "Valencia Cathedral",
+   "extra": "Spanish/English",
+   "description": "Discover the Cathedral’s secrets: the Holy Chalice, the Gothic chapel and the views from the Micalet."
+  },
+  "tour-lonja-catedral": {
+   "tag": "Tour",
+   "title": "La Lonja de la Seda and the Cathedral",
+   "duration": "2 h",
+   "place": "Historic centre",
+   "extra": "bilingual guide",
+   "description": "A combined visit to the two great monuments of the historic centre with a bilingual guide."
+  },
+  "tour-ciudad-artes": {
+   "tag": "Tour",
+   "title": "City of Arts and Sciences tour",
+   "duration": "2.5 h",
+   "place": "City of Arts and Sciences",
+   "extra": "tickets included",
+   "description": "Guided visit to Calatrava’s complex with admission to the Museu de les Ciències and L’Hemisfèric included."
+  },
+  "ruta-bici": {
+   "tag": "Tour",
+   "title": "Bike ride around Valencia",
+   "duration": "2 h",
+   "place": "Turia Gardens",
+   "extra": "bike included",
+   "description": "Pedal through the Turia Gardens, the beaches and the City of Arts. Bike included."
+  },
+  "tour-carmen-nocturno": {
+   "tag": "Tour",
+   "title": "Night tour of El Carmen",
+   "duration": "2 h",
+   "place": "El Carmen district",
+   "extra": "street art and legends",
+   "description": "A night-time walk through Valencia’s most bohemian neighbourhood: street art, historic bars and medieval legends."
+  },
+  "tourist-card-72": {
+   "tag": "Tickets",
+   "title": "Valencia Tourist Card 72 h",
+   "duration": "72 h",
+   "place": "The whole city",
+   "extra": "transport and museums",
+   "description": "The card that opens up the whole of Valencia: free transport, 14 museums included, a free tapa and discounts of up to 50% on more than 130 tourist services."
+  },
+  "bus-turistico": {
+   "tag": "Tickets",
+   "title": "Valencia Tourist Bus",
+   "duration": "24–48 h",
+   "place": "17 stops",
+   "extra": "100% electric",
+   "description": "The double-decker tourist bus, 100% electric, runs through the 17 key points of Valencia. Hop on and off whenever you like for 24 or 48 hours."
+  },
+  "entrada-oceanografic": {
+   "tag": "Tickets",
+   "title": "Oceanogràfic ticket",
+   "duration": "Full day",
+   "place": "City of Arts and Sciences",
+   "extra": "dolphinarium included",
+   "description": "Admission to Europe’s largest aquarium with the dolphinarium show included. Avoid queues by buying online."
+  }
+ },
+ "pages": {
+  "BaratoExclusivo": {
+   "title": "Where to stay in Valencia",
+   "eyebrow": "Accommodation · Valencia"
+  },
+  "BarrioGranVia": {
+   "title": "Staying in Gran Vía",
+   "eyebrow": "Accommodation · Gran Vía district · Valencia’s Eixample"
+  },
+  "BarrioRuzada": {
+   "title": "Staying in Ruzafa",
+   "eyebrow": "Accommodation · Ruzafa district · Valencia’s SoHo"
+  },
+  "Centro": {
+   "title": "Staying in the centre of Valencia",
+   "eyebrow": "Accommodation · Historic centre · Plaza del Ayuntamiento"
+  },
+  "CiudadArtesCienciasAloj": {
+   "title": "Staying next to Calatrava’s City",
+   "eyebrow": "Accommodation · City of Arts and Sciences · Av. de França"
+  },
+  "ZonaPlayaPaseoMaritimo": {
+   "title": "Staying by the Mediterranean",
+   "eyebrow": "Accommodation · Beach area · Seafront promenade · Las Arenas beach"
+  },
+  "BusTuristico": {
+   "title": "Valencia’s red bus",
+   "eyebrow": "Tickets · The Red Bus · València Bus Turístic · Since 1999"
+  },
+  "ValenciaCard": {
+   "title": "Valencia Tourist Card",
+   "eyebrow": "Tickets · Valencia’s official tourist card"
+  },
+  "Bioparc": {
+   "title": "BIOPARC Valencia",
+   "eyebrow": "Valencia · Parque de Cabecera · Open 365 days"
+  },
+  "CAC": {
+   "title": "City of Arts and Sciences",
+   "eyebrow": "Valencia · Architecture · Calatrava · Candela"
+  },
+  "CiudadAmurallada": {
+   "title": "The walled city",
+   "eyebrow": "Medieval Valencia · 14th–15th centuries"
+  },
+  "MonumentosMuseos": {
+   "title": "Monuments and museums",
+   "eyebrow": "Valencia · Culture · Over 60 venues"
+  },
+  "Navidad": {
+   "title": "The brightest Christmas",
+   "eyebrow": "Christmas · Valencia · December 2025"
+  },
+  "PatrimonioHumanidad": {
+   "title": "World Heritage",
+   "eyebrow": "Valencia · UNESCO · World Heritage"
+  },
+  "ValenciaTresDias": {
+   "title": "Valencia in 3 days",
+   "eyebrow": "Valencia · Itinerary · 3 days"
+  },
+  "VisitasImprescindibles": {
+   "title": "10 must-see sights",
+   "eyebrow": "Valencia · Travel guide · Must-sees"
+  },
+  "CorpusChristi": {
+   "title": "Corpus Christi in Valencia",
+   "eyebrow": "Events · La Festa Grossa · 60 days after Easter"
+  },
+  "Fallas": {
+   "title": "Les Falles of Valencia",
+   "eyebrow": "Events · UNESCO Intangible Cultural Heritage 2016 · 1–19 March"
+  },
+  "FestivalesVerano": {
+   "title": "Music festivals in Valencia",
+   "eyebrow": "Events · Festival season · April–September 2026"
+  },
+  "Festivos": {
+   "title": "Public holidays in Valencia 2026",
+   "eyebrow": "Events · Public holidays calendar 2026"
+  },
+  "GranFeria": {
+   "title": "Gran Feria of Valencia",
+   "eyebrow": "Events · Since 1871 · All of July"
+  },
+  "ActividadesGastronomicas": {
+   "title": "Food and experiences in Valencia",
+   "eyebrow": "Food experiences · Visit València · Mediterranean flavours"
+  },
+  "Excursiones": {
+   "title": "Day trips from Valencia",
+   "eyebrow": "Experiences · Day trips from Valencia · Province and surroundings"
+  },
+  "Nauticas": {
+   "title": "Water sports in Valencia",
+   "eyebrow": "Water experiences · Marina de València · Mediterranean"
+  },
+  "AllPebre": {
+   "title": "All i Pebre d’Anguila (eel stew)",
+   "eyebrow": "Gastronomy · All i Pebre · The dish of the fishermen of La Albufera"
+  },
+  "ArrozHorno": {
+   "title": "Baked rice",
+   "eyebrow": "Gastronomy · Arròs al Forn · The great unknown of Valencian cuisine"
+  },
+  "ArrozNegro": {
+   "title": "Valencian black rice",
+   "eyebrow": "Gastronomy · Arròs Negre · The most mysterious rice in Valencia"
+  },
+  "ArrozSenyoret": {
+   "title": "Arròs del Senyoret",
+   "eyebrow": "Gastronomy · Arròs del Senyoret · The gentlemen’s rice that conquered the coast"
+  },
+  "Buenuelo": {
+   "title": "Pumpkin fritters",
+   "eyebrow": "Gastronomy · Bunyol de Carabassa · The most Fallas dessert in Valencia"
+  },
+  "Esgarraet": {
+   "title": "Valencian esgarraet",
+   "eyebrow": "Gastronomy · Traditional Valencian tapa · Easter and all year round"
+  },
+  "Fideua": {
+   "title": "Valencian fideuà",
+   "eyebrow": "Gastronomy · Originally from Gandia · The seafood dish par excellence"
+  },
+  "Horchata": {
+   "title": "Valencia’s horchata",
+   "eyebrow": "Gastronomy · Orxata de Xufa · The most Valencian drink in the world"
+  },
+  "Paella": {
+   "title": "Valencian paella",
+   "eyebrow": "Gastronomy · The jewel of Valencian cuisine"
+  },
+  "AvisoLegal": {
+   "title": "Legal notice",
+   "eyebrow": "Turismo Valencia · Legal information"
+  },
+  "PoliticaPrivacidad": {
+   "title": "Privacy policy",
+   "eyebrow": "Turismo Valencia · Legal information"
+  },
+  "Deportes": {
+   "title": "Sport in Valencia",
+   "eyebrow": "Valencia · Sport · 365 days, no excuses"
+  },
+  "Espectaculo": {
+   "title": "Theatre and shows",
+   "eyebrow": "Valencia · Living culture · Shows and leisure"
+  },
+  "Exposicion": {
+   "title": "Exhibitions in Valencia",
+   "eyebrow": "Valencia · Art and culture · Museums and galleries"
+  },
+  "Familia": {
+   "title": "Valencia with kids",
+   "eyebrow": "Valencia · Family · Plans for children"
+  },
+  "FiestasTradicionales": {
+   "title": "Festivals and traditions",
+   "eyebrow": "Valencia · Tradition · All year round"
+  },
+  "Naturaleza": {
+   "title": "Nature in Valencia",
+   "eyebrow": "Valencia · Nature · Kilometres of fresh air"
+  },
+  "Albufera": {
+   "title": "L’Albufera of Valencia",
+   "eyebrow": "Natural Park · Ramsar site · 10 km south of Valencia"
+  },
+  "BarrioCarmen": {
+   "title": "El Carmen district",
+   "eyebrow": "Ciutat Vella · Historic centre · Over 1,000 years of history"
+  },
+  "CatedralCaliz": {
+   "title": "The Chapel of the Holy Chalice",
+   "eyebrow": "Valencia Cathedral · Historic centre · Jubilee Year 2025–2026"
+  },
+  "IglesiaSanNicolas": {
+   "title": "Church of San Nicolás",
+   "eyebrow": "El Carmen district · Historic centre · C/ Caballeros, 35"
+  },
+  "JardinTuria": {
+   "title": "Turia Gardens",
+   "eyebrow": "Valencia · European Green Capital 2024 · Spain’s largest urban park"
+  },
+  "LaMarina": {
+   "title": "La Marina de Valencia",
+   "eyebrow": "Seaside districts · On the Mediterranean · Marina Real Juan Carlos I"
+  },
+  "LonjaSeda": {
+   "title": "La Lonja de la Seda (Silk Exchange)",
+   "eyebrow": "Historic centre · UNESCO heritage · 15th century"
+  },
+  "MercadoCentral": {
+   "title": "Valencia Central Market",
+   "eyebrow": "Historic centre · Asset of Cultural Interest · Mon–Sat 7:30–15:00"
+  },
+  "Mestalla": {
+   "title": "Camp de Mestalla",
+   "eyebrow": "Valencia Club de Fútbol · Opened 1923 · The oldest stadium in LaLiga"
+  },
+  "MuseoBellasArtes": {
+   "title": "Fine Arts Museum",
+   "eyebrow": "C/ San Pío V · Beside the Turia Gardens · Free admission · Tue–Sun 10:00–20:00"
+  },
+  "Oceanografic": {
+   "title": "Oceanogràfic Valencia",
+   "eyebrow": "City of Arts and Sciences · The largest aquarium in Europe"
+  },
+  "Playes": {
+   "title": "Valencia beaches",
+   "eyebrow": "Mediterranean · 19.5 km of golden sand · 8 Blue Flags"
+  },
+  "Ruzafa": {
+   "title": "Ruzafa",
+   "eyebrow": "Eixample district · From the Arabic Ruṣāfa, “garden” · Eixample neighbourhood"
+  },
+  "ComercioLocal": {
+   "title": "Shop local",
+   "eyebrow": "Valencia · Sustainable shopping · Local businesses"
+  },
+  "Consejos": {
+   "title": "Tips for visiting Valencia",
+   "eyebrow": "Valencia · Responsible travel · Practical guide"
+  },
+  "Ecoturismo": {
+   "title": "Ecotourism in Valencia",
+   "eyebrow": "Valencia · Ecotourism · Responsible tourism"
+  },
+  "MueveteValencia": {
+   "title": "Getting around Valencia",
+   "eyebrow": "Valencia · Mobility · Transport and getting around"
+  },
+  "ViajeResponsable": {
+   "title": "Responsible travel",
+   "eyebrow": "Valencia · Responsible tourism · Traveller’s commitments"
+  },
+  "ViajeSostenible": {
+   "title": "Make your trip to Valencia smarter",
+   "eyebrow": "Valencia · Smart tourism · Sustainable city"
+  },
+  "Bici": {
+   "title": "Valencia by bike",
+   "eyebrow": "Bike tours · Guided visits on wheels · Valencia Bike-Friendly"
+  },
+  "CentroHistorico": {
+   "title": "Historic centre tours",
+   "eyebrow": "Guided tours · Historic centre of Valencia · Walking tours"
+  },
+  "CienciasArtes": {
+   "title": "Guided visits at the City of Arts",
+   "eyebrow": "Guided tours · Ciutat de les Arts i les Ciències · cac.es"
+  },
+  "PaseoMaritimo": {
+   "title": "Valencia’s seafront promenade",
+   "eyebrow": "Urban beaches · Seafront promenade · Paseo Neptuno · Valencia"
+  },
+  "PrivadoGrupo": {
+   "title": "Your Valencia, made to measure",
+   "eyebrow": "Private tours and groups · Official guides · Visit València"
+  }
+ },
+ "tiles": {
+  "Navidad": "Christmas",
+  "VisitasImprescindibles": "10 must-see sights",
+  "ValenciaTresDias": "Valencia in 3 days",
+  "CiudadAmurallada": "Valencia, the walled city",
+  "PatrimonioHumanidad": "World Heritage",
+  "MonumentosMuseos": "Monuments & Museums",
+  "CAC": "City of Arts and Sciences",
+  "Entradas": "Visits & tours",
+  "Bioparc": "Bioparc",
+  "Espectaculo": "Shows",
+  "Familia": "Family",
+  "Naturaleza": "Nature",
+  "FiestasTradicionales": "Traditional festivals",
+  "Deportes": "Sport",
+  "Exposicion": "Exhibitions",
+  "MueveteValencia": "Get around Valencia",
+  "Ecoturismo": "Try ecotourism",
+  "ComercioLocal": "Shop local",
+  "Consejos": "Tips for going your own way",
+  "ViajeSostenible": "Make your trip more sustainable",
+  "ViajeResponsable": "Travel responsibly"
+ },
+ "sections": {
+  "quever": {
+   "title": "Unique places",
+   "subtitle": "These are the essential places to visit in Valencia"
+  },
+  "eventos": {
+   "title": "Featured events",
+   "subtitle": "The Valencian events that fill the heart"
+  },
+  "gastronomia": {
+   "title": "Culinary tradition",
+   "subtitle": "A gastronomic experience for all the senses"
+  },
+  "alojamientos": {
+   "title": "Where to stay",
+   "subtitle": "Our recommended places to stay, for every taste"
+  }
+ }
+}

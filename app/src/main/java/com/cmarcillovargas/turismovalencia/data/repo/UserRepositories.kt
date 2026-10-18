@@ -1,5 +1,7 @@
 package com.cmarcillovargas.turismovalencia.data.repo
 
+import com.cmarcillovargas.turismovalencia.data.LanguageApplier
+import com.cmarcillovargas.turismovalencia.data.NoLanguageApplier
 import com.cmarcillovargas.turismovalencia.data.local.DownloadDao
 import com.cmarcillovargas.turismovalencia.data.local.FavoriteDao
 import com.cmarcillovargas.turismovalencia.data.local.NotificationDao
@@ -178,8 +180,12 @@ class ReservationsRepository(
     }
 }
 
-/** Ajustes del usuario y estado de la app (si la bienvenida ya se hizo). */
-class SettingsRepository(private val store: SettingsStore) {
+/**
+ * Ajustes del usuario y estado de la app (si la bienvenida ya se hizo). [languageApplier] es quien cambia de verdad el idioma de
+ * los recursos al elegir uno; las pruebas le pasan [NoLanguageApplier] para no cambiar el del móvil.
+ */
+class SettingsRepository(private val store: SettingsStore, private val languageApplier: LanguageApplier = NoLanguageApplier) {
+    /** Idioma de la app: el último que se eligió o con el que arrancó `MainActivity` (ver [syncLanguage]). */
     val language: StateFlow<LanguageCode> = store.select { it.language }
 
     val notificationsEnabled: StateFlow<Boolean> = store.select { it.notificationsEnabled }
@@ -191,8 +197,19 @@ class SettingsRepository(private val store: SettingsStore) {
     /** La bienvenida (splash, onboarding y permiso) ya se hizo: no se repite al abrir la app. */
     val onboardingDone: StateFlow<Boolean> = store.select { it.onboardingDone }
 
-    // TODO(i18n): aplicar el idioma al contenido y al locale de la app.
-    fun setLanguage(value: LanguageCode) = store.update { it.copy(language = value) }
+    /** El usuario elige un idioma: se guarda y se le pide al sistema, que recrea la actividad con los recursos del idioma nuevo. */
+    fun setLanguage(value: LanguageCode) {
+        store.update { it.copy(language = value) }
+        languageApplier.apply(value)
+    }
+
+    /**
+     * Anota el idioma con el que Android ha arrancado la actividad (el elegido en la app, el que se eligió en los ajustes del móvil o,
+     * la primera vez, el del móvil si es uno de los cuatro). No se lo pide al sistema: ya lo está usando.
+     */
+    fun syncLanguage(value: LanguageCode) {
+        if (language.value != value) store.update { it.copy(language = value) }
+    }
 
     fun setNotificationsEnabled(value: Boolean) = store.update { it.copy(notificationsEnabled = value) }
 

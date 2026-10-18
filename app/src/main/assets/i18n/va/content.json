@@ -1,0 +1,2152 @@
+{
+ "items": {
+  "lonja-seda": {
+   "subcategory": "Monuments",
+   "eyebrow": "Monument · UNESCO",
+   "title": "Llotja de la Seda",
+   "area": "Ciutat Vella",
+   "ratingCount": "5,1 k",
+   "summary": "Una de les obres més belles del gòtic civil europeu.",
+   "description": "Declarada Patrimoni de la Humanitat en 1996, la Llotja va ser l’escenari de les transaccions que van convertir València en el major port comercial de la Mediterrània occidental. La seua Sala de Columnes, amb pilars helicoïdals que semblen palmeres de pedra, és un dels espais més fotografiats de la ciutat.",
+   "openUntil": "Obert · fins a les 19:00",
+   "stats": [
+    [
+     "1996",
+     "UNESCO"
+    ],
+    [
+     "S. XV",
+     "CONSTRUCCIÓ"
+    ],
+    [
+     "4,8",
+     "VALORACIÓ"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Dl–Ds 10:00–19:00 · Dg 10:00–15:00"
+    ],
+    [
+     "Adreça",
+     "Plaça del Mercat, s/n · Ciutat Vella"
+    ],
+    [
+     "Entrada",
+     "2 € · diumenges gratis"
+    ]
+   ],
+   "keywords": [
+    "llotja",
+    "llotja de la seda",
+    "lonja",
+    "gòtic",
+    "monument",
+    "unesco"
+   ]
+  },
+  "catedral-caliz": {
+   "subcategory": "Monuments",
+   "eyebrow": "Monument",
+   "title": "Catedral i Sant Calze",
+   "area": "Pl. de la Reina",
+   "ratingCount": "4,4 k",
+   "summary": "Catedral gòtica del segle XIII que custodia el Sant Calze.",
+   "description": "La Capella del Sant Calze alberga una de les relíquies més valuoses del món cristià: la copa que, segons la tradició, va utilitzar Jesucrist en l’Últim Sopar. La Catedral celebra el Tercer Any Jubilar del Sant Calze fins al 29 d’octubre de 2026. Des del Micalet (207 escalons) es veu tota la ciutat.",
+   "openUntil": "Obert · fins a les 18:30",
+   "stats": [
+    [
+     "S. XIII",
+     "CONSTRUCCIÓ"
+    ],
+    [
+     "207",
+     "ESCALONS DEL MICALET"
+    ],
+    [
+     "2026",
+     "ANY JUBILAR"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Dl–Ds 10:00–18:30 · Dg culte"
+    ],
+    [
+     "Adreça",
+     "Plaça de la Reina, s/n · Ciutat Vella"
+    ],
+    [
+     "Entrada",
+     "Visita cultural 9 € · Micalet a banda"
+    ]
+   ],
+   "keywords": [
+    "catedral",
+    "sant calze",
+    "calze",
+    "micalet",
+    "gòtic"
+   ]
+  },
+  "mercado-central": {
+   "subcategory": "Monuments",
+   "eyebrow": "Mercat · Gratis",
+   "title": "Mercat Central",
+   "detailTitle": "Mercat Central de València",
+   "detailEyebrow": "Centre històric · Bé d’interés cultural",
+   "area": "Ciutat Vella",
+   "ratingCount": "2,3 k",
+   "summary": "El major mercat de productes frescos d’Europa.",
+   "description": "El major mercat de productes frescos d’Europa. Una catedral modernista de ferro, vidrieres i taulells on les aromes de l’horta i de la Mediterrània omplen cada racó des de 1928.",
+   "openUntil": "Obert · fins a les 15:00",
+   "stats": [
+    [
+     "8.000 m²",
+     "DE SUPERFÍCIE"
+    ],
+    [
+     "+250",
+     "PARADES FRESQUES"
+    ],
+    [
+     "1928",
+     "INAUGURACIÓ"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Dl–Ds 7:30–15:00 h · tancat diumenges i festius"
+    ],
+    [
+     "Adreça",
+     "Plaça de la Ciutat de Bruges · Ciutat Vella"
+    ],
+    [
+     "Com arribar",
+     "Metro Xàtiva (L3, L5, L9) · a 5 min a peu de la Llotja"
+    ]
+   ],
+   "keywords": [
+    "mercat central",
+    "mercat",
+    "fresc",
+    "modernista",
+    "mercado"
+   ]
+  },
+  "barrio-carmen": {
+   "subcategory": "Barris",
+   "eyebrow": "Barri",
+   "title": "Barri del Carme",
+   "area": "Ciutat Vella",
+   "ratingCount": "1,8 k",
+   "summary": "El barri més antic i bohemi de València.",
+   "description": "El barri més antic, més bohemi i més vibrant de València. Un còctel únic de muralles medievals, art urbà, museus d’avantguarda i places plenes de vida mediterrània. Les Torres de Serrans (1392–1398) i les Torres de Quart tenen entrada gratuïta tot l’any.",
+   "stats": [
+    [
+     "+1.000",
+     "ANYS D’HISTÒRIA"
+    ],
+    [
+     "2",
+     "TORRES MEDIEVALS"
+    ],
+    [
+     "S. XIV",
+     "MURALLES"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Carrers oberts les 24 h · Torres de Serrans 10:00–19:00"
+    ],
+    [
+     "Adreça",
+     "Torres de Serrans · Ciutat Vella"
+    ],
+    [
+     "Com arribar",
+     "Bus 28 i 94 · a 10 min a peu de la Catedral"
+    ]
+   ],
+   "keywords": [
+    "carme",
+    "barri",
+    "serrans",
+    "quart",
+    "art urbà",
+    "bohemi",
+    "carmen"
+   ]
+  },
+  "oceanografic": {
+   "subcategory": "Museus",
+   "eyebrow": "Aquari",
+   "title": "Oceanogràfic",
+   "area": "Ciutat de les Arts i les Ciències",
+   "ratingCount": "28 k",
+   "summary": "L’aquari més gran d’Europa.",
+   "description": "110.000 m² i 42 milions de litres d’aigua salada. El major aquari d’Europa reunix els ecosistemes marins més importants del món, el túnel submarí més llarg del continent i l’única família de belugues d’Europa. Inaugurat el 14 de febrer de 2003.",
+   "openUntil": "Obert · fins a les 19:00",
+   "featureLabel": "Destacat · Ciutat de les Arts",
+   "featureSubtitle": "L’aquari més gran d’Europa",
+   "stats": [
+    [
+     "110.000 m²",
+     "DE SUPERFÍCIE"
+    ],
+    [
+     "42 M",
+     "LITRES D’AIGUA"
+    ],
+    [
+     "8",
+     "ECOSISTEMES"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "10:00–19:00 · segons temporada"
+    ],
+    [
+     "Adreça",
+     "C/ d’Eduardo Primo Yúfera, 1B"
+    ],
+    [
+     "Entrada",
+     "Des de 33 € · reserva en línia amb descompte"
+    ]
+   ],
+   "keywords": [
+    "oceanogràfic",
+    "oceanografic",
+    "aquari",
+    "belugues",
+    "delfinari",
+    "ciutat de les arts"
+   ]
+  },
+  "albufera": {
+   "subcategory": "Natura",
+   "eyebrow": "Parc natural",
+   "title": "Parc Natural de l’Albufera",
+   "area": "El Palmar",
+   "ratingCount": "9,6 k",
+   "summary": "El llac més gran d’Espanya i el bressol de la paella.",
+   "description": "A només 15 minuts de València, la natura en estat pur: zona Ramsar, parc natural des de 1986 i la posta de sol més espectacular de la Mediterrània. El passeig en barca és l’experiència més completa; la tardor, amb els arrossars madurs i la màxima concentració d’aus, és el moment més especial.",
+   "stats": [
+    [
+     "21.000 ha",
+     "DE PARC"
+    ],
+    [
+     "300+",
+     "ESPÈCIES D’AUS"
+    ],
+    [
+     "1986",
+     "PARC NATURAL"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Accés lliure · embarcadors de 9:00 a la posta de sol"
+    ],
+    [
+     "Adreça",
+     "El Palmar i El Saler · a 10 km al sud"
+    ],
+    [
+     "Com arribar",
+     "Bus 24 des de la Plaça de l’Ajuntament"
+    ]
+   ],
+   "keywords": [
+    "albufera",
+    "parc natural",
+    "llac",
+    "barca",
+    "palmar",
+    "posta de sol",
+    "paella",
+    "aus"
+   ]
+  },
+  "iglesia-san-nicolas": {
+   "subcategory": "Monuments",
+   "eyebrow": "Monument",
+   "title": "Església de Sant Nicolau",
+   "area": "Barri del Carme",
+   "ratingCount": "3,2 k",
+   "summary": "La «Capella Sixtina valenciana».",
+   "description": "Quasi 2.000 m² de frescos barrocs dissenyats per Palomino cobrixen una estructura gòtica del segle XV en el monument més sorprenent del centre històric. Hi ha una projecció multimèdia cada hora des de les 11:00 h; arriba 10 minuts abans per a trobar el millor lloc.",
+   "stats": [
+    [
+     "2.000 m²",
+     "DE FRESCOS"
+    ],
+    [
+     "S. XV",
+     "ESTRUCTURA GÒTICA"
+    ],
+    [
+     "45 min",
+     "DE RECORREGUT"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "10:30–18:30 · dilluns tancat al turisme"
+    ],
+    [
+     "Adreça",
+     "C/ dels Cavallers, 35 · Barri del Carme"
+    ],
+    [
+     "Entrada",
+     "Des de 10 € · inclou audioguia"
+    ]
+   ],
+   "keywords": [
+    "sant nicolau",
+    "san nicolas",
+    "capella sixtina",
+    "frescos",
+    "església"
+   ]
+  },
+  "jardin-turia": {
+   "subcategory": "Natura",
+   "eyebrow": "Parc · Gratis",
+   "title": "Jardí del Túria",
+   "area": "Llit del Túria",
+   "ratingCount": "12 k",
+   "summary": "El parc urbà més gran d’Espanya, 9 km sense cotxes.",
+   "description": "9 quilòmetres de parc verd que travessen València d’oest a est per l’antic llit del seu riu. Connecta el Parc de Capçalera i el Bioparc amb la Ciutat de les Arts i les Ciències i no tanca mai: és el gimnàs a l’aire lliure i el pulmó verd de la ciutat. València va ser Capital Verda Europea 2024.",
+   "stats": [
+    [
+     "9 km",
+     "SENSE COTXES"
+    ],
+    [
+     "6",
+     "ZONES"
+    ],
+    [
+     "24 h",
+     "OBERT"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Obert les 24 h tot l’any"
+    ],
+    [
+     "Adreça",
+     "Antic llit del riu Túria · de Capçalera a la Ciutat de les Arts"
+    ],
+    [
+     "Com arribar",
+     "Valenbisi i carril bici · metro Alameda (L3, L5)"
+    ]
+   ],
+   "keywords": [
+    "jardí",
+    "túria",
+    "turia",
+    "parc",
+    "bici",
+    "passeig",
+    "gratis"
+   ]
+  },
+  "la-marina": {
+   "subcategory": "Barris",
+   "eyebrow": "Front marítim · Gratis",
+   "title": "La Marina",
+   "area": "Poblats Marítims",
+   "ratingCount": "3,9 k",
+   "summary": "El balcó marítim de València.",
+   "description": "Un antic port reinventat on l’arquitectura d’avantguarda del Veles e Vents, els Tinglados històrics i l’Edifici del Rellotge conviuen amb més de 15 restaurants amb vistes a la mar i unes 40 empreses d’activitats nàutiques. L’accés és completament gratuït.",
+   "stats": [
+    [
+     "15+",
+     "RESTAURANTS"
+    ],
+    [
+     "40",
+     "EMPRESES NÀUTIQUES"
+    ],
+    [
+     "Gratis",
+     "ACCÉS"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Obert les 24 h · restaurants segons el local"
+    ],
+    [
+     "Adreça",
+     "Marina Reial Joan Carles I · Poblats Marítims"
+    ],
+    [
+     "Com arribar",
+     "Tramvia L4 i L6 · bus 4 i 30"
+    ]
+   ],
+   "keywords": [
+    "marina",
+    "port",
+    "veles e vents",
+    "copa amèrica",
+    "nàutica",
+    "mar"
+   ]
+  },
+  "mestalla": {
+   "subcategory": "Monuments",
+   "eyebrow": "Estadi · Esport",
+   "title": "Mestalla",
+   "area": "Avinguda de Suècia",
+   "ratingCount": "6,3 k",
+   "summary": "L’estadi més antic de LaLiga.",
+   "description": "El coliseu blanc i negre, inaugurat en 1923: l’estadi més veterà de l’elit del futbol espanyol, amb més de cent anys d’història i casa del València CF. Tant si eres aficionat com si no, la visita a l’estadi i al museu és una de les més recomanades de València.",
+   "stats": [
+    [
+     "1923",
+     "INAUGURACIÓ"
+    ],
+    [
+     "+100",
+     "ANYS D’HISTÒRIA"
+    ],
+    [
+     "L5",
+     "METRO ARAGÓ"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Visites 10:00–18:00 · no hi ha visita els dies de partit"
+    ],
+    [
+     "Adreça",
+     "Av. de Suècia, s/n"
+    ],
+    [
+     "Entrada",
+     "Des de 12 € · compra en línia per a evitar esperes"
+    ]
+   ],
+   "keywords": [
+    "mestalla",
+    "estadi",
+    "futbol",
+    "valencia cf"
+   ]
+  },
+  "museo-bellas-artes": {
+   "subcategory": "Museus",
+   "eyebrow": "Museu · Gratis",
+   "title": "Museu de Belles Arts",
+   "area": "Jardí del Túria",
+   "ratingCount": "2,8 k",
+   "summary": "La segona pinacoteca més important d’Espanya.",
+   "description": "Del gòtic valencià a Sorolla, passant per Velázquez, Goya, el Greco, Botticelli i Van Dyck, en un palau barroc del segle XVII junt al Jardí del Túria. La visita és completament gratuïta.",
+   "openUntil": "Obert · fins a les 20:00",
+   "stats": [
+    [
+     "S. XIV–XIX",
+     "COL·LECCIÓ"
+    ],
+    [
+     "1683",
+     "EDIFICI"
+    ],
+    [
+     "Gratis",
+     "ENTRADA"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Dm–Dg 10:00–20:00"
+    ],
+    [
+     "Adreça",
+     "C/ de Sant Pius V, 9 · junt al Jardí del Túria"
+    ],
+    [
+     "Entrada",
+     "Gratuïta"
+    ]
+   ],
+   "keywords": [
+    "belles arts",
+    "museu",
+    "sorolla",
+    "pinacoteca",
+    "sant pius",
+    "pintura"
+   ]
+  },
+  "playas": {
+   "subcategory": "Natura",
+   "eyebrow": "Platges · Gratis",
+   "title": "Platges de València",
+   "area": "Malva-rosa · Arenes",
+   "ratingCount": "7,4 k",
+   "summary": "19,5 km d’arena daurada i 8 Banderes Blaves.",
+   "description": "Del Cabanyal a la Devesa, del passeig marítim més animat d’Espanya a les dunes verges del Parc Natural de l’Albufera. València és una de les poques grans ciutats on pots anar a la platja en metro: la L4 et deixa a Les Arenes i el bus 19 arriba a la Malva-rosa.",
+   "stats": [
+    [
+     "19,5 km",
+     "D’ARENA"
+    ],
+    [
+     "8",
+     "BANDERES BLAVES"
+    ],
+    [
+     "300+",
+     "DIES DE SOL"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Accés lliure · socorristes en temporada"
+    ],
+    [
+     "Adreça",
+     "Passeig de Neptú · Platja de les Arenes"
+    ],
+    [
+     "Com arribar",
+     "Tramvia L4 (Les Arenes) · bus 19 a la Malva-rosa"
+    ]
+   ],
+   "keywords": [
+    "platja",
+    "platges",
+    "malva-rosa",
+    "arenes",
+    "cabanyal",
+    "mar",
+    "arena"
+   ]
+  },
+  "ruzafa": {
+   "subcategory": "Barris",
+   "eyebrow": "Barri",
+   "title": "Russafa",
+   "area": "Eixample",
+   "ratingCount": "2,1 k",
+   "summary": "El barri més vibrant de València.",
+   "description": "Del jardí àrab del segle IX a l’epicentre de la gastronomia d’autor, l’art contemporani i la vida nocturna més creativa de la ciutat. És un barri multicultural on els bars de tota la vida competixen amb restaurants de cuiners amb estrella Michelin. No té horaris de visita: funciona a qualsevol hora.",
+   "stats": [
+    [
+     "S. IX",
+     "ORIGEN ÀRAB"
+    ],
+    [
+     "10 min",
+     "A PEU DEL CENTRE"
+    ],
+    [
+     "24 h",
+     "AMBIENT"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Sense horari · de l’esmorzaret a l’última copa"
+    ],
+    [
+     "Adreça",
+     "C/ de Cadis i voltants · Eixample"
+    ],
+    [
+     "Com arribar",
+     "Metro Xàtiva i Bailén · a 10 min a peu"
+    ]
+   ],
+   "keywords": [
+    "russafa",
+    "ruzafa",
+    "barri",
+    "gastronomia",
+    "art",
+    "galeries",
+    "bars"
+   ]
+  },
+  "bioparc": {
+   "subcategory": "Natura",
+   "eyebrow": "Zoo · Parc de Capçalera",
+   "title": "Bioparc",
+   "area": "Parc de Capçalera",
+   "ratingCount": "8,2 k",
+   "summary": "Un tros d’Àfrica a València.",
+   "description": "Més de 6.000 animals de 150 espècies en 100.000 m² d’hàbitats africans on les barreres són pràcticament invisibles. Un zoològic de nova generació a la vora de l’antic llit del Túria.",
+   "stats": [
+    [
+     "6.000",
+     "ANIMALS"
+    ],
+    [
+     "150",
+     "ESPÈCIES"
+    ],
+    [
+     "100.000 m²",
+     "HÀBITATS"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Obert els 365 dies de l’any"
+    ],
+    [
+     "Adreça",
+     "Av. de Pius Baroja, 3 · Parc de Capçalera"
+    ],
+    [
+     "Entrada",
+     "Adult 32,50 € · reduïda 24,00 €"
+    ],
+    [
+     "Com arribar",
+     "Metro L3 i L5 · Nou d’Octubre o Av. del Cid"
+    ]
+   ],
+   "keywords": [
+    "bioparc",
+    "zoo",
+    "animals",
+    "àfrica",
+    "xiquets",
+    "família"
+   ]
+  },
+  "cac": {
+   "subcategory": "Museus",
+   "eyebrow": "Arquitectura · Calatrava",
+   "title": "Ciutat de les Arts i les Ciències",
+   "area": "Antic llit del Túria",
+   "ratingCount": "21 k",
+   "summary": "Sis recintes únics en quasi dos quilòmetres de l’antic llit del Túria.",
+   "description": "Obra de Santiago Calatrava i Félix Candela, combina ciència interactiva, el major aquari d’Europa, cinema en 3D i un palau de les arts. Es recomana dedicar-li un dia complet i comprar les entrades en línia.",
+   "stats": [
+    [
+     "6",
+     "RECINTES"
+    ],
+    [
+     "2 km",
+     "DE LLARG"
+    ],
+    [
+     "47,75 €",
+     "PACK 3 RECINTES"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Segons recinte · consulta els horaris en línia"
+    ],
+    [
+     "Adreça",
+     "Av. del Professor López Piñero, 7"
+    ],
+    [
+     "Entrades",
+     "Pack de 3 recintes des de 47,75 €"
+    ],
+    [
+     "Com arribar",
+     "Metro L3, L5, L7 i L9 · Alameda · 15 min pel Jardí del Túria"
+    ]
+   ],
+   "keywords": [
+    "cac",
+    "ciutat de les arts",
+    "ciències",
+    "calatrava",
+    "hemisfèric",
+    "museu",
+    "umbracle",
+    "palau"
+   ]
+  },
+  "paella": {
+   "subcategory": "Arrossos",
+   "eyebrow": "Gastronomia",
+   "title": "Paella valenciana",
+   "area": "Gastronomia · plat típic",
+   "summary": "La joia de la cuina valenciana.",
+   "description": "El plat més internacional de la gastronomia valenciana: la nostra contribució a la cuina universal. Nascuda a l’Albufera en el segle XVIII, hui és el símbol gastronòmic de València. Es cuina a foc de llenya, amb pollastre, conill, garrofó i bajoqueta, i es menja directament de la paella.",
+   "stats": [
+    [
+     "S. XVIII",
+     "ORIGEN"
+    ],
+    [
+     "Albufera",
+     "BRESSOL DEL PLAT"
+    ],
+    [
+     "Llenya",
+     "FOC TRADICIONAL"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-la",
+     "El Palmar i l’Albufera · Malva-rosa i passeig marítim"
+    ],
+    [
+     "Quan",
+     "És plat de migdia: reserva amb antelació a l’estiu"
+    ]
+   ],
+   "keywords": [
+    "paella",
+    "arròs",
+    "albufera",
+    "restaurant",
+    "menjar",
+    "sopar",
+    "plat típic"
+   ]
+  },
+  "fideua": {
+   "subcategory": "Arrossos",
+   "eyebrow": "Gastronomia",
+   "title": "Fideuà",
+   "area": "Gastronomia · plat mariner",
+   "summary": "El plat mariner per excel·lència.",
+   "description": "Nascuda per accident en una barca del Grau de Gandia, la fideuà és la cosina marinera de la paella: mateixa tècnica, mateix foc, mateix ritual, però amb fideus en lloc d’arròs. Se servix amb allioli.",
+   "stats": [
+    [
+     "Gandia",
+     "ORIGEN"
+    ],
+    [
+     "Fideus",
+     "EN LLOC D’ARRÒS"
+    ],
+    [
+     "Allioli",
+     "ACOMPANYAMENT"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-la",
+     "Restaurants del Grau i del passeig marítim"
+    ]
+   ],
+   "keywords": [
+    "fideuà",
+    "fideua",
+    "fideus",
+    "mariner",
+    "marisc"
+   ]
+  },
+  "arroz-horno": {
+   "subcategory": "Arrossos",
+   "eyebrow": "Gastronomia",
+   "title": "Arròs al forn",
+   "area": "Gastronomia · cuina de casa",
+   "summary": "El gran desconegut de la cuina valenciana.",
+   "description": "El plat que els valencians guarden per a si mateixos. Nascut de l’olla i del forn del forner, l’arròs al forn és la cara més autèntica, contundent i casolana de la cuina d’arrossos.",
+   "stats": [
+    [
+     "Forn",
+     "COCCIÓ"
+    ],
+    [
+     "Olla",
+     "ORIGEN"
+    ],
+    [
+     "Casolà",
+     "ESTIL"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-lo",
+     "Cases de menjars del centre i de Russafa"
+    ]
+   ],
+   "keywords": [
+    "arròs al forn",
+    "forn",
+    "casolà"
+   ]
+  },
+  "arroz-negro": {
+   "subcategory": "Arrossos",
+   "eyebrow": "Gastronomia",
+   "title": "Arròs negre",
+   "area": "Gastronomia · arròs melós",
+   "summary": "L’arròs més misteriós de València.",
+   "description": "Negre com la mar de nit. La tinta de la sípia tenyeix cada gra d’arròs i concentra el sabor de la Mediterrània en un plat que sorprén tant per l’aspecte com pel sabor.",
+   "stats": [
+    [
+     "Sípia",
+     "INGREDIENT"
+    ],
+    [
+     "Tinta",
+     "COLOR"
+    ],
+    [
+     "Allioli",
+     "ACOMPANYAMENT"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-lo",
+     "Restaurants del port i de La Marina"
+    ]
+   ],
+   "keywords": [
+    "arròs negre",
+    "sípia",
+    "tinta"
+   ]
+  },
+  "all-i-pebre": {
+   "subcategory": "Guisats",
+   "eyebrow": "Gastronomia",
+   "title": "All i pebre",
+   "area": "Gastronomia · guisat de l’Albufera",
+   "summary": "El plat dels pescadors de l’Albufera.",
+   "description": "All i pimentó. El guisat d’anguila dels pescadors de l’Albufera que rivalitza en història i solera amb la paella valenciana. Catarroja, el Palmar i el llac que el va veure nàixer.",
+   "stats": [
+    [
+     "Anguila",
+     "INGREDIENT"
+    ],
+    [
+     "All i pimentó",
+     "SABOR"
+    ],
+    [
+     "El Palmar",
+     "ORIGEN"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-lo",
+     "El Palmar i Catarroja"
+    ]
+   ],
+   "keywords": [
+    "all i pebre",
+    "anguila",
+    "albufera",
+    "guisat"
+   ]
+  },
+  "esgarraet": {
+   "subcategory": "Tapes",
+   "eyebrow": "Gastronomia",
+   "title": "Esgarraet",
+   "area": "Gastronomia · tapa tradicional",
+   "summary": "El secret més ben guardat de la cuina valenciana.",
+   "description": "Quatre ingredients, les mans i paciència: el contrast entre el bacallà salat i la dolçor del pebrot rostit. Una tapa tradicional de Setmana Santa que es gaudix tot l’any.",
+   "stats": [
+    [
+     "4",
+     "INGREDIENTS"
+    ],
+    [
+     "Bacallà",
+     "PROTAGONISTA"
+    ],
+    [
+     "Tot l’any",
+     "TEMPORADA"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-lo",
+     "Bars de tapes del Carme i del Mercat Central"
+    ]
+   ],
+   "keywords": [
+    "esgarraet",
+    "bacallà",
+    "pebrot",
+    "tapa"
+   ]
+  },
+  "arroz-senyoret": {
+   "subcategory": "Arrossos",
+   "eyebrow": "Gastronomia",
+   "title": "Arròs del senyoret",
+   "area": "Gastronomia · arròs de marisc",
+   "summary": "L’arròs dels senyorets.",
+   "description": "Tot el marisc pelat: sense closques i sense embrutar-se. Gambes, calamars, sípia i rap nets sobre un fumet de morralla i salmorreta, on la comoditat és el luxe.",
+   "stats": [
+    [
+     "Marisc",
+     "PELAT"
+    ],
+    [
+     "Fumet",
+     "BASE"
+    ],
+    [
+     "Costa",
+     "ORIGEN"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-lo",
+     "Restaurants de la Malva-rosa i La Marina"
+    ]
+   ],
+   "keywords": [
+    "senyoret",
+    "senyorets",
+    "marisc",
+    "arròs"
+   ]
+  },
+  "bunyol": {
+   "subcategory": "Dolços i begudes",
+   "eyebrow": "Gastronomia",
+   "title": "Bunyols de carabassa",
+   "area": "Gastronomia · postres faller",
+   "summary": "Les postres més falleres de València.",
+   "description": "L’olor que defineix les Falles de València. Esponjosos per dins, cruixents per fora, arrebossats en sucre i acompanyats de xocolate calent: el dolç més valencià.",
+   "stats": [
+    [
+     "Carabassa",
+     "INGREDIENT"
+    ],
+    [
+     "Falles",
+     "TEMPORADA"
+    ],
+    [
+     "Xocolate",
+     "ACOMPANYAMENT"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-los",
+     "Parades al carrer al març i bunyoleries del centre"
+    ]
+   ],
+   "keywords": [
+    "bunyol",
+    "bunyols",
+    "carabassa",
+    "falles",
+    "postres"
+   ]
+  },
+  "horchata": {
+   "subcategory": "Dolços i begudes",
+   "eyebrow": "Gastronomia",
+   "title": "Orxata i fartons",
+   "area": "Gastronomia · beguda típica",
+   "summary": "La beguda més valenciana del món.",
+   "description": "Blanca, freda, cremosa i dolça. L’orxata de xufa d’Alboraia és l’or líquid de València: sense lactosa, sense gluten i amb Denominació d’Origen. Es pren amb fartons per a mullar.",
+   "stats": [
+    [
+     "Xufa",
+     "INGREDIENT"
+    ],
+    [
+     "D.O.",
+     "ORIGEN PROTEGIT"
+    ],
+    [
+     "Alboraia",
+     "BRESSOL"
+    ]
+   ],
+   "info": [
+    [
+     "On provar-la",
+     "Orxateries d’Alboraia i del centre"
+    ]
+   ],
+   "keywords": [
+    "orxata",
+    "horchata",
+    "xufa",
+    "fartons",
+    "orxateria",
+    "beguda"
+   ]
+  },
+  "fallas": {
+   "subcategory": "Festes",
+   "eyebrow": "Esdeveniment",
+   "title": "Falles 2027",
+   "detailTitle": "Les Falles de València",
+   "detailEyebrow": "Esdeveniments · UNESCO 2016 · 1–19 de març",
+   "area": "Centre",
+   "summary": "19 dies de pólvora, art efímer, flors i foc.",
+   "description": "19 dies de pólvora, art efímer, flors i foc. La festa més gran de València combina sàtira, tradició i l’espectacle pirotècnic més impressionant d’Europa.",
+   "dateLabel": "15–19 març",
+   "featureLabel": "Esdeveniment destacat · 15–19 març",
+   "featureSubtitle": "Centre històric · Patrimoni UNESCO",
+   "stats": [
+    [
+     "+400",
+     "MONUMENTS"
+    ],
+    [
+     "19",
+     "DIES DE FESTA"
+    ],
+    [
+     "+1M",
+     "VISITANTS"
+    ]
+   ],
+   "info": [
+    [
+     "Quan",
+     "1–19 de març · Patrimoni Cultural Immaterial UNESCO 2016"
+    ],
+    [
+     "On",
+     "Plaça de l’Ajuntament i tots els barris de València"
+    ]
+   ],
+   "acts": [
+    [
+     "Mascletà",
+     "1–19 març · 14:00"
+    ],
+    [
+     "Plantà",
+     "15 març · nit"
+    ],
+    [
+     "Ofrena",
+     "17–18 març"
+    ],
+    [
+     "Cremà",
+     "19 març · mitjanit"
+    ]
+   ],
+   "keywords": [
+    "falles",
+    "fallas",
+    "mascletà",
+    "mascleta",
+    "plantà",
+    "ofrena",
+    "cremà",
+    "festa",
+    "pólvora"
+   ]
+  },
+  "corpus-christi": {
+   "subcategory": "Festes",
+   "eyebrow": "Esdeveniment · La Festa Grossa",
+   "title": "Corpus Christi",
+   "area": "Centre històric",
+   "summary": "La Festa Grossa de València des del segle XIV.",
+   "description": "Processó històrica, danses medievals, les onze Roques arrossegades per cavalls i la lluita entre la Virtut i els Set Pecats Capitals. Se celebra 60 dies després de Pasqua.",
+   "dateLabel": "60 dies després de Pasqua",
+   "stats": [
+    [
+     "S. XIV",
+     "ORIGEN"
+    ],
+    [
+     "11",
+     "ROQUES"
+    ],
+    [
+     "60",
+     "DIES DESPRÉS DE PASQUA"
+    ]
+   ],
+   "info": [
+    [
+     "Quan",
+     "Diumenge següent al dijous de Corpus"
+    ]
+   ],
+   "keywords": [
+    "corpus",
+    "processó",
+    "roques",
+    "festa grossa"
+   ]
+  },
+  "gran-feria": {
+   "subcategory": "Festivals",
+   "eyebrow": "Esdeveniment · Des de 1871",
+   "title": "Gran Fira de Juliol",
+   "area": "Vivers i centre",
+   "summary": "Un mes sencer de festa en ple estiu.",
+   "description": "Concerts davall les estreles als Vivers, focs artificials cada dissabte, el Festival de Jazz, el Certamen de Bandes i la Batalla de Flors. Tot el mes de juliol, des de 1871.",
+   "dateLabel": "Tot juliol",
+   "stats": [
+    [
+     "1871",
+     "DES DE"
+    ],
+    [
+     "31",
+     "DIES"
+    ],
+    [
+     "Dissabtes",
+     "FOCS ARTIFICIALS"
+    ]
+   ],
+   "info": [
+    [
+     "Quan",
+     "Tot el mes de juliol"
+    ]
+   ],
+   "keywords": [
+    "fira",
+    "juliol",
+    "vivers",
+    "jazz",
+    "batalla de flors"
+   ]
+  },
+  "festivales-verano": {
+   "subcategory": "Festivals",
+   "eyebrow": "Esdeveniment · Temporada de festivals",
+   "title": "Festivals d’estiu",
+   "area": "Comunitat Valenciana",
+   "summary": "Nou festivals d’abril a setembre de 2026.",
+   "description": "Nou festivals que convertixen la Comunitat Valenciana en l’epicentre musical de la Mediterrània cada estiu. De l’indie urbà al reggae, de la platja al CAC, del techno als grans noms internacionals.",
+   "dateLabel": "Abril–setembre",
+   "stats": [
+    [
+     "9",
+     "FESTIVALS"
+    ],
+    [
+     "6",
+     "MESOS"
+    ],
+    [
+     "2026",
+     "TEMPORADA"
+    ]
+   ],
+   "info": [
+    [
+     "Quan",
+     "Abril–setembre de 2026"
+    ]
+   ],
+   "keywords": [
+    "festival",
+    "música",
+    "estiu",
+    "concerts"
+   ]
+  },
+  "festivos": {
+   "subcategory": "Festes",
+   "eyebrow": "Calendari · 2026",
+   "title": "Calendari de festius",
+   "area": "Ciutat de València",
+   "summary": "14 dies festius entre nacionals, autonòmics i locals.",
+   "description": "El calendari complet de dies no laborables a la ciutat de València per a 2026, amb les tradicions i celebracions de cada data.",
+   "dateLabel": "Tot 2026",
+   "stats": [
+    [
+     "14",
+     "DIES FESTIUS"
+    ],
+    [
+     "2026",
+     "CALENDARI"
+    ],
+    [
+     "Local",
+     "ÀMBIT"
+    ]
+   ],
+   "info": [
+    [
+     "Consell",
+     "Molts museus i mercats tanquen en festiu: comprova l’horari"
+    ]
+   ],
+   "keywords": [
+    "festius",
+    "calendari",
+    "festiu",
+    "dies no laborables"
+   ]
+  },
+  "deportes": {
+   "subcategory": "Esports",
+   "eyebrow": "Esport · 365 dies",
+   "title": "Esports",
+   "area": "Tota la ciutat",
+   "summary": "València, ciutat del running, del ciclisme i de la mar.",
+   "description": "El clima mediterrani, 9 quilòmetres de parc lineal, 20 km de platja i 160 km de carril bici fan de València el destí ideal per a practicar esport durant tot l’any. Marató, carreres populars, vela i molt més.",
+   "dateLabel": "Tot l’any",
+   "stats": [
+    [
+     "9 km",
+     "JARDÍ DEL TÚRIA"
+    ],
+    [
+     "20 km",
+     "DE PLATJA"
+    ],
+    [
+     "160 km",
+     "CARRIL BICI"
+    ]
+   ],
+   "info": [
+    [
+     "Quan",
+     "Tot l’any · la Marató de València és el 6 de desembre"
+    ],
+    [
+     "Consell",
+     "Reserva amb molta antelació la inscripció de la Marató: s’esgota en hores"
+    ]
+   ],
+   "keywords": [
+    "esport",
+    "running",
+    "marató",
+    "ciclisme",
+    "bici",
+    "vela",
+    "carrera"
+   ]
+  },
+  "aloj-centro": {
+   "subcategory": "Centre",
+   "eyebrow": "Zona · Centre històric",
+   "title": "Centre històric",
+   "area": "Plaça de l’Ajuntament",
+   "ratingCount": "3,4 k",
+   "summary": "Quatre opcions per a tots els pressupostos.",
+   "description": "Quatre opcions per a tots els pressupostos en el cor de la ciutat, a pocs passos de la Catedral, el Mercat Central i la Llotja de la Seda.",
+   "stats": [
+    [
+     "4",
+     "OPCIONS"
+    ],
+    [
+     "5 min",
+     "A LA CATEDRAL"
+    ],
+    [
+     "L3 · L5",
+     "METRO"
+    ]
+   ],
+   "info": [
+    [
+     "Zona",
+     "Plaça de l’Ajuntament · Ciutat Vella"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "allotjament",
+    "centre",
+    "dormir",
+    "ajuntament"
+   ]
+  },
+  "aloj-gran-via": {
+   "subcategory": "Centre",
+   "eyebrow": "Zona · L’Eixample",
+   "title": "Barri de la Gran Via",
+   "area": "L’Eixample",
+   "ratingCount": "1,9 k",
+   "summary": "L’Eixample elegant de València.",
+   "description": "Grans avingudes amb edificis modernistes, el Jardí del Túria a la porta i la millor zona gastronòmica de la ciutat a un pas.",
+   "stats": [
+    [
+     "Modernista",
+     "ARQUITECTURA"
+    ],
+    [
+     "Túria",
+     "A LA PORTA"
+    ],
+    [
+     "Gastro",
+     "ZONA"
+    ]
+   ],
+   "info": [
+    [
+     "Zona",
+     "Gran Via Marqués del Túria · L’Eixample"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "gran via",
+    "eixample",
+    "allotjament"
+   ]
+  },
+  "aloj-ruzafa": {
+   "subcategory": "Barris",
+   "eyebrow": "Zona · Russafa",
+   "title": "Barri de Russafa",
+   "area": "Eixample",
+   "ratingCount": "2,2 k",
+   "summary": "El SoHo de València.",
+   "description": "El barri més creatiu i cosmopolita de València: galeries d’art, bars de disseny, cuina del món i l’energia d’un veïnat que no para. A 10 minuts a peu de tot.",
+   "stats": [
+    [
+     "10 min",
+     "A PEU DEL CENTRE"
+    ],
+    [
+     "Art",
+     "GALERIES"
+    ],
+    [
+     "Nit",
+     "AMBIENT"
+    ]
+   ],
+   "info": [
+    [
+     "Zona",
+     "C/ de Cadis i voltants · Eixample"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "russafa",
+    "ruzafa",
+    "allotjament",
+    "soho"
+   ]
+  },
+  "aloj-cac": {
+   "subcategory": "Platja i mar",
+   "eyebrow": "Zona · Ciutat de les Arts",
+   "title": "Ciutat de les Arts i les Ciències",
+   "area": "Av. de França",
+   "ratingCount": "1,1 k",
+   "summary": "Quatre hotels davant de l’obra més icònica de València.",
+   "description": "L’Oceanogràfic, el Palau de les Arts i el Museu de les Ciències a la teua porta, amb el Jardí del Túria com a passeig fins al centre.",
+   "stats": [
+    [
+     "4",
+     "HOTELS"
+    ],
+    [
+     "0 min",
+     "A L’OCEANOGRÀFIC"
+    ],
+    [
+     "30 min",
+     "A PEU AL CENTRE"
+    ]
+   ],
+   "info": [
+    [
+     "Zona",
+     "Av. de França · Ciutat de les Arts i les Ciències"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "ciutat de les arts",
+    "calatrava",
+    "allotjament"
+   ]
+  },
+  "aloj-playa": {
+   "subcategory": "Platja i mar",
+   "eyebrow": "Zona · Platja de les Arenes",
+   "title": "Zona de platja i passeig marítim",
+   "area": "Passeig de Neptú",
+   "ratingCount": "1,6 k",
+   "summary": "Tres hotels en primera línia de platja.",
+   "description": "Des del gran resort de luxe històric fins al boutique amb la llum de Sorolla i el clàssic familiar amb història des de 1916.",
+   "stats": [
+    [
+     "3",
+     "HOTELS"
+    ],
+    [
+     "1916",
+     "CLÀSSIC FAMILIAR"
+    ],
+    [
+     "1a línia",
+     "DE PLATJA"
+    ]
+   ],
+   "info": [
+    [
+     "Zona",
+     "Passeig de Neptú · Platja de les Arenes"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "platja",
+    "passeig marítim",
+    "allotjament",
+    "resort"
+   ]
+  },
+  "aloj-barato-exclusivo": {
+   "subcategory": "Centre",
+   "eyebrow": "Selecció · Preu",
+   "title": "Del luxe al preu ajustat",
+   "area": "Tota la ciutat",
+   "ratingCount": "980",
+   "summary": "Hotels exclusius i econòmics, tots ben ubicats.",
+   "description": "Des del luxe històric enfront de la mar fins a les millors opcions amb preu ajustat. Hotels exclusius i econòmics, tots ben ubicats.",
+   "stats": [
+    [
+     "5★",
+     "GRAN LUXE"
+    ],
+    [
+     "€",
+     "PREU AJUSTAT"
+    ],
+    [
+     "Tots",
+     "BEN UBICATS"
+    ]
+   ],
+   "info": [
+    [
+     "Consell",
+     "Reserva amb antelació en Falles i a l’estiu"
+    ]
+   ],
+   "keywords": [
+    "hotel",
+    "barat",
+    "econòmic",
+    "luxe",
+    "allotjament"
+   ]
+  },
+  "albufera-barca": {
+   "eyebrow": "Sostenible",
+   "title": "L’Albufera en barca",
+   "area": "El Palmar",
+   "ratingCount": "1,1 k",
+   "summary": "Passeig en barca elèctrica pel llac.",
+   "description": "El passeig en barca és l’experiència més completa per a conéixer l’Albufera: barques elèctriques, guies bilingües i la millor llum del dia a la posta de sol, entre arrossars i aus migratòries.",
+   "stats": [
+    [
+     "1 h",
+     "DE PASSEIG"
+    ],
+    [
+     "Elèctriques",
+     "BARQUES"
+    ],
+    [
+     "ES · EN",
+     "GUIES"
+    ]
+   ],
+   "info": [
+    [
+     "Horari",
+     "Tots els dies fins a la posta de sol"
+    ],
+    [
+     "Embarcador",
+     "El Palmar · a 11 km del centre"
+    ],
+    [
+     "Com arribar",
+     "Bus 24 des de la Plaça de l’Ajuntament"
+    ]
+   ],
+   "keywords": [
+    "albufera",
+    "barca",
+    "passeig",
+    "palmar",
+    "eco",
+    "posta de sol"
+   ]
+  },
+  "ecoturismo": {
+   "eyebrow": "València · Ecoturisme · Turisme responsable",
+   "title": "Ecoturisme",
+   "detailTitle": "Ecoturisme a València",
+   "area": "Rutes naturals i espais protegits",
+   "summary": "Rutes naturals i espais protegits",
+   "description": "València és molt més que ciutat i platja: 21.000 hectàrees d’Albufera, més de 300 espècies d’aus i quatre parcs naturals a un pas del centre. Rutes senyalitzades i planes, observatoris i centres d’interpretació.",
+   "stats": [
+    [
+     "21.000",
+     "HECTÀREES ALBUFERA"
+    ],
+    [
+     "300+",
+     "ESPÈCIES D’AUS"
+    ],
+    [
+     "4",
+     "PARCS NATURALS"
+    ]
+   ],
+   "info": [
+    [
+     "Consell",
+     "La tardor, amb els arrossars madurs, és el millor moment per a les aus"
+    ]
+   ],
+   "keywords": [
+    "ecoturisme",
+    "natura",
+    "aus",
+    "rutes",
+    "parc natural"
+   ]
+  },
+  "muevete": {
+   "eyebrow": "València · Mobilitat · Transport",
+   "title": "Mou-te per València",
+   "area": "Transport públic, Valenbisi i zones peatonals",
+   "summary": "Transport públic, Valenbisi i zones peatonals",
+   "description": "Quasi 200 km de carril bici, terreny pla, metro i tramvia fins a la platja i el Jardí del Túria lliure de cotxes. La ciutat es recorre millor a peu, en bici o en transport públic.",
+   "stats": [
+    [
+     "200 km",
+     "CARRIL BICI"
+    ],
+    [
+     "9 km",
+     "JARDÍ DEL TÚRIA"
+    ],
+    [
+     "Metro",
+     "I TRAMVIA A LA PLATJA"
+    ]
+   ],
+   "info": [
+    [
+     "Consell",
+     "Valenbisi: abonament setmanal per a visitants en qualsevol estació"
+    ]
+   ],
+   "keywords": [
+    "mobilitat",
+    "bici",
+    "valenbisi",
+    "metro",
+    "transport públic"
+   ]
+  },
+  "viaje-responsable": {
+   "eyebrow": "València · Turisme responsable",
+   "title": "Viatge responsable",
+   "area": "Impacte positiu en la comunitat local",
+   "summary": "Impacte positiu en la comunitat local",
+   "description": "Ser un turista responsable a València no requerix esforç: són xicotetes decisions quotidianes que sumen. Estos són els compromisos que pots adoptar durant la teua estada.",
+   "stats": [
+    [
+     "Local",
+     "CONSUM"
+    ],
+    [
+     "0",
+     "PLÀSTICS"
+    ],
+    [
+     "A peu",
+     "DESPLAÇAMENTS"
+    ]
+   ],
+   "info": [
+    [
+     "Compromís",
+     "Tria comerços i restaurants de proximitat"
+    ]
+   ],
+   "keywords": [
+    "responsable",
+    "compromisos",
+    "comunitat local"
+   ]
+  },
+  "comercio-local": {
+   "eyebrow": "València · Compra sostenible",
+   "title": "Comerç local",
+   "area": "Mercats de barri i xicotet comerç",
+   "summary": "Mercats de barri i xicotet comerç",
+   "description": "Mercats de barri, botigues de tota la vida i xicotet comerç de proximitat: comprar ací és la manera més directa que el turisme deixe valor a la ciutat.",
+   "stats": [
+    [
+     "Mercats",
+     "DE BARRI"
+    ],
+    [
+     "Km 0",
+     "PRODUCTE"
+    ],
+    [
+     "Familiar",
+     "COMERÇ"
+    ]
+   ],
+   "info": [
+    [
+     "Consell",
+     "Els mercats obrin pel matí: ves-hi prompte"
+    ]
+   ],
+   "keywords": [
+    "comerç",
+    "mercats",
+    "botigues",
+    "compra sostenible"
+   ]
+  },
+  "consejos": {
+   "eyebrow": "València · Viatge responsable · Guia pràctica",
+   "title": "Consells per a viatjar millor",
+   "area": "Guia pràctica per al viatger",
+   "summary": "Guia pràctica per al viatger",
+   "description": "Una guia pràctica amb consells per a reduir la teua empremta durant el viatge: aigua, energia, residus i respecte als espais naturals.",
+   "stats": [
+    [
+     "Aigua",
+     "ESTALVI"
+    ],
+    [
+     "Residus",
+     "RECICLATGE"
+    ],
+    [
+     "Respecte",
+     "ESPAIS NATURALS"
+    ]
+   ],
+   "info": [
+    [
+     "Consell",
+     "Porta una botella reutilitzable: hi ha fonts per tota la ciutat"
+    ]
+   ],
+   "keywords": [
+    "consells",
+    "empremta",
+    "guia pràctica"
+   ]
+  },
+  "viaje-sostenible": {
+   "eyebrow": "València · Turisme intel·ligent",
+   "title": "Ciutat sostenible i intel·ligent",
+   "area": "Capital Verda Europea 2024",
+   "summary": "Capital Verda Europea 2024",
+   "description": "València no només és sostenible: és intel·ligent. Capital Verda Europea 2024 i Capital del Turisme Intel·ligent 2022, la ciutat combina tecnologia, natura i cultura per a viatjar millor.",
+   "stats": [
+    [
+     "2024",
+     "CAPITAL VERDA"
+    ],
+    [
+     "2022",
+     "TURISME INTEL·LIGENT"
+    ],
+    [
+     "Verda",
+     "CIUTAT"
+    ]
+   ],
+   "info": [
+    [
+     "Dada",
+     "Capital Verda Europea 2024 i Capital del Turisme Intel·ligent 2022"
+    ]
+   ],
+   "keywords": [
+    "capital verda",
+    "intel·ligent",
+    "ciutat sostenible"
+   ]
+  }
+ },
+ "offers": {
+  "albufera-barca": {
+   "tag": "Excursió",
+   "title": "Passeig en barca per l’Albufera",
+   "duration": "1 h",
+   "place": "El Palmar",
+   "extra": "castellà/anglés",
+   "description": "Recorre el llac en una barca elèctrica amb guia bilingüe, entre arrossars i aus migratòries."
+  },
+  "taller-paella": {
+   "tag": "Gastronòmica",
+   "title": "Taller de paella valenciana",
+   "duration": "3 h",
+   "place": "Mercat Central",
+   "extra": "inclou menjar",
+   "description": "Aprén a cuinar l’autèntica paella valenciana amb un xef local. Inclou ingredients i degustació."
+  },
+  "kayak-albufera": {
+   "tag": "Excursió",
+   "title": "Caiac per l’Albufera",
+   "duration": "2 h",
+   "place": "El Palmar",
+   "extra": "guia i armilla incloses",
+   "description": "Ruta en caiac pels canals del Parc Natural a l’alba. Inclou guia, caiac i armilla."
+  },
+  "excursion-albufera-paella": {
+   "tag": "Excursió",
+   "title": "Excursió a l’Albufera amb paella",
+   "duration": "5 h",
+   "place": "L’Albufera",
+   "extra": "inclou dinar",
+   "description": "Visita al Parc Natural amb passeig en barca i dinar de paella tradicional inclòs."
+  },
+  "paddle-surf": {
+   "tag": "Nàutica",
+   "title": "Paddle surf a Les Arenes",
+   "duration": "1,5 h",
+   "place": "Platja de les Arenes",
+   "extra": "material inclòs",
+   "description": "Classe de paddle surf per a principiants a la Mediterrània amb monitor titulat. Material inclòs."
+  },
+  "taller-horchata": {
+   "tag": "Gastronòmica",
+   "title": "Taller d’orxata i fartons",
+   "duration": "2 h",
+   "place": "Mercat Central",
+   "extra": "inclou degustació",
+   "description": "Aprén a preparar orxata de xufa artesanal i fartons en este taller únic a València."
+  },
+  "tour-ruzafa": {
+   "tag": "Gastronòmica",
+   "title": "Tour Russafa: art i gastronomia",
+   "duration": "3 h",
+   "place": "Russafa",
+   "extra": "degustacions incloses",
+   "description": "Descobrix el barri més trendy de València amb degustacions en els seus millors bars i visita a galeries d’art."
+  },
+  "ruta-ciutat-vella": {
+   "tag": "Tour",
+   "title": "Ruta guiada Ciutat Vella",
+   "duration": "2 h",
+   "place": "Centre històric",
+   "extra": "castellà/anglés",
+   "description": "Passeig guiat pel Carme, la Llotja, el Mercat Central i la Plaça de l’Ajuntament amb guia oficial."
+  },
+  "visita-catedral": {
+   "tag": "Tour",
+   "title": "Visita guiada a la Catedral",
+   "duration": "1,5 h",
+   "place": "Catedral de València",
+   "extra": "castellà/anglés",
+   "description": "Descobrix els secrets de la Catedral: el Sant Calze, la capella gòtica i les vistes des del Micalet."
+  },
+  "tour-lonja-catedral": {
+   "tag": "Tour",
+   "title": "Llotja de la Seda i Catedral",
+   "duration": "2 h",
+   "place": "Centre històric",
+   "extra": "guia bilingüe",
+   "description": "Visita combinada als dos grans monuments del centre històric amb guia bilingüe."
+  },
+  "tour-ciudad-artes": {
+   "tag": "Tour",
+   "title": "Tour Ciutat de les Arts i les Ciències",
+   "duration": "2,5 h",
+   "place": "Ciutat de les Arts i les Ciències",
+   "extra": "entrades incloses",
+   "description": "Visita guiada al complex de Calatrava amb entrada al Museu de les Ciències i L’Hemisfèric inclosos."
+  },
+  "ruta-bici": {
+   "tag": "Tour",
+   "title": "Ruta en bicicleta per València",
+   "duration": "2 h",
+   "place": "Jardí del Túria",
+   "extra": "bicicleta inclosa",
+   "description": "Pedala pel Jardí del Túria, les platges i la Ciutat de les Arts. Bicicleta inclosa."
+  },
+  "tour-carmen-nocturno": {
+   "tag": "Tour",
+   "title": "Tour nocturn pel Carme",
+   "duration": "2 h",
+   "place": "Barri del Carme",
+   "extra": "art urbà i llegendes",
+   "description": "Passeig nocturn pel barri més bohemi de València: art urbà, bars històrics i llegendes medievals."
+  },
+  "tourist-card-72": {
+   "tag": "Entrades",
+   "title": "Valencia Tourist Card 72 h",
+   "duration": "72 h",
+   "place": "Tota la ciutat",
+   "extra": "transport i museus",
+   "description": "La targeta que t’obri València sencera: transport gratis, 14 museus inclosos, tapa de regal i descomptes de fins al 50 % en més de 130 serveis turístics."
+  },
+  "bus-turistico": {
+   "tag": "Entrades",
+   "title": "Bus Turístic de València",
+   "duration": "24–48 h",
+   "place": "17 parades",
+   "extra": "100 % elèctric",
+   "description": "L’autobús turístic de dos pisos, 100 % elèctric, recorre els 17 punts clau de València. Puja i baixa quan vulgues durant 24 o 48 hores."
+  },
+  "entrada-oceanografic": {
+   "tag": "Entrades",
+   "title": "Entrada a l’Oceanogràfic",
+   "duration": "Dia complet",
+   "place": "Ciutat de les Arts i les Ciències",
+   "extra": "delfinari inclòs",
+   "description": "Entrada al major aquari d’Europa amb l’espectacle del delfinari inclòs. Evita cues comprant en línia."
+  }
+ },
+ "pages": {
+  "BaratoExclusivo": {
+   "title": "On dormir a València",
+   "eyebrow": "Allotjaments · València"
+  },
+  "BarrioGranVia": {
+   "title": "Dormir a la Gran Via",
+   "eyebrow": "Allotjaments · Barri Gran Via · L’Eixample valencià"
+  },
+  "BarrioRuzada": {
+   "title": "Dormir a Russafa",
+   "eyebrow": "Allotjaments · Barri de Russafa · El SoHo de València"
+  },
+  "Centro": {
+   "title": "Dormir al Centre de València",
+   "eyebrow": "Allotjaments · Centre històric · Plaça de l’Ajuntament"
+  },
+  "CiudadArtesCienciasAloj": {
+   "title": "Dormir junt a la Ciutat de Calatrava",
+   "eyebrow": "Allotjaments · Ciutat de les Arts i les Ciències · Av. de França"
+  },
+  "ZonaPlayaPaseoMaritimo": {
+   "title": "Dormir enfront de la Mediterrània",
+   "eyebrow": "Allotjaments · Zona Platja · Passeig Marítim · Platja de les Arenes"
+  },
+  "BusTuristico": {
+   "title": "L’autobús roig de València",
+   "eyebrow": "Entrades · The Red Bus · València Bus Turístic · Des de 1999"
+  },
+  "ValenciaCard": {
+   "title": "Valencia Tourist Card",
+   "eyebrow": "Entrades · Targeta turística oficial de València"
+  },
+  "Bioparc": {
+   "title": "BIOPARC València",
+   "eyebrow": "València · Parc de Capçalera · Obert 365 dies"
+  },
+  "CAC": {
+   "title": "Ciutat de les Arts i les Ciències",
+   "eyebrow": "València · Arquitectura · Calatrava · Candela"
+  },
+  "CiudadAmurallada": {
+   "title": "La ciutat emmurallada",
+   "eyebrow": "València medieval · Segles XIV–XV"
+  },
+  "MonumentosMuseos": {
+   "title": "Monuments i museus",
+   "eyebrow": "València · Cultura · Més de 60 espais"
+  },
+  "Navidad": {
+   "title": "El Nadal més lluminós",
+   "eyebrow": "Nadal · València · Desembre 2025"
+  },
+  "PatrimonioHumanidad": {
+   "title": "Patrimoni de la Humanitat",
+   "eyebrow": "València · UNESCO · Patrimoni de la Humanitat"
+  },
+  "ValenciaTresDias": {
+   "title": "València en 3 dies",
+   "eyebrow": "València · Itinerari · 3 dies"
+  },
+  "VisitasImprescindibles": {
+   "title": "10 visites imprescindibles",
+   "eyebrow": "València · Guia de viatge · Imprescindibles"
+  },
+  "CorpusChristi": {
+   "title": "Corpus Christi de València",
+   "eyebrow": "Esdeveniments · La Festa Grossa · 60 dies després de Pasqua"
+  },
+  "Fallas": {
+   "title": "Les Falles de València",
+   "eyebrow": "Esdeveniments · Patrimoni Cultural Immaterial UNESCO 2016 · 1–19 de març"
+  },
+  "FestivalesVerano": {
+   "title": "Festivals de Música a València",
+   "eyebrow": "Esdeveniments · Temporada de festivals · Abril–setembre 2026"
+  },
+  "Festivos": {
+   "title": "Festius a València 2026",
+   "eyebrow": "Esdeveniments · Calendari de festius 2026"
+  },
+  "GranFeria": {
+   "title": "Gran Fira de València",
+   "eyebrow": "Esdeveniments · Des de 1871 · Tot el mes de juliol"
+  },
+  "ActividadesGastronomicas": {
+   "title": "Gastronomia i experiències a València",
+   "eyebrow": "Experiències gastronòmiques · Visit València · Sabors mediterranis"
+  },
+  "Excursiones": {
+   "title": "Excursions des de València",
+   "eyebrow": "Experiències · Excursions des de València · Província i voltants"
+  },
+  "Nauticas": {
+   "title": "Activitats nàutiques a València",
+   "eyebrow": "Experiències nàutiques · Marina de València · Mediterrània"
+  },
+  "AllPebre": {
+   "title": "All i Pebre d’Anguila",
+   "eyebrow": "Gastronomia · All i Pebre · El plat dels pescadors de l’Albufera"
+  },
+  "ArrozHorno": {
+   "title": "Arròs al Forn",
+   "eyebrow": "Gastronomia · Arròs al Forn · El gran desconegut de la cuina valenciana"
+  },
+  "ArrozNegro": {
+   "title": "Arròs Negre Valencià",
+   "eyebrow": "Gastronomia · Arròs Negre · L’arròs més misteriós de València"
+  },
+  "ArrozSenyoret": {
+   "title": "Arròs del Senyoret",
+   "eyebrow": "Gastronomia · Arròs del Senyoret · L’arròs dels senyorets que va conquistar la costa"
+  },
+  "Buenuelo": {
+   "title": "Bunyols de Carabassa",
+   "eyebrow": "Gastronomia · Bunyol de Carabassa · Les postres més falleres de València"
+  },
+  "Esgarraet": {
+   "title": "L’Esgarraet Valencià",
+   "eyebrow": "Gastronomia · Tapa tradicional valenciana · Setmana Santa i tot l’any"
+  },
+  "Fideua": {
+   "title": "La Fideuà Valenciana",
+   "eyebrow": "Gastronomia · Originària de Gandia · El plat mariner per excel·lència"
+  },
+  "Horchata": {
+   "title": "L’Orxata de València",
+   "eyebrow": "Gastronomia · Orxata de Xufa · La beguda més valenciana del món"
+  },
+  "Paella": {
+   "title": "La Paella Valenciana",
+   "eyebrow": "Gastronomia · La joia de la cuina valenciana"
+  },
+  "AvisoLegal": {
+   "title": "Avís Legal",
+   "eyebrow": "Turismo Valencia · Informació legal"
+  },
+  "PoliticaPrivacidad": {
+   "title": "Política de Privadesa",
+   "eyebrow": "Turismo Valencia · Informació legal"
+  },
+  "Deportes": {
+   "title": "Esport a València",
+   "eyebrow": "València · Esport · 365 dies sense excuses"
+  },
+  "Espectaculo": {
+   "title": "Teatres i espectacles",
+   "eyebrow": "València · Cultura viva · Espectacles i oci"
+  },
+  "Exposicion": {
+   "title": "Exposicions a València",
+   "eyebrow": "València · Art i cultura · Museus i galeries"
+  },
+  "Familia": {
+   "title": "València amb xiquets",
+   "eyebrow": "València · En família · Plans per a xiquets"
+  },
+  "FiestasTradicionales": {
+   "title": "Festes i tradicions",
+   "eyebrow": "València · Tradició · Tot l’any"
+  },
+  "Naturaleza": {
+   "title": "Natura a València",
+   "eyebrow": "València · Natura · Quilòmetres d’aire pur"
+  },
+  "Albufera": {
+   "title": "L’Albufera de València",
+   "eyebrow": "Parc Natural · Zona Ramsar · 10 km al sud de València"
+  },
+  "BarrioCarmen": {
+   "title": "Barri del Carme",
+   "eyebrow": "Ciutat Vella · Centre històric · Més de 1.000 anys d’història"
+  },
+  "CatedralCaliz": {
+   "title": "La Capella del Sant Calze",
+   "eyebrow": "Catedral de València · Centre històric · Any Jubilar 2025–2026"
+  },
+  "IglesiaSanNicolas": {
+   "title": "Església de Sant Nicolau",
+   "eyebrow": "Barri del Carme · Centre històric · C/ dels Cavallers, 35"
+  },
+  "JardinTuria": {
+   "title": "Jardí del Túria",
+   "eyebrow": "València · Capital Verda Europea 2024 · El parc urbà més gran d’Espanya"
+  },
+  "LaMarina": {
+   "title": "La Marina de València",
+   "eyebrow": "Poblats Marítims · Enfront de la Mediterrània · Marina Reial Joan Carles I"
+  },
+  "LonjaSeda": {
+   "title": "La Llotja de la Seda",
+   "eyebrow": "Centre històric · Patrimoni UNESCO · Segle XV"
+  },
+  "MercadoCentral": {
+   "title": "Mercat Central de València",
+   "eyebrow": "Centre històric · Bé d’Interés Cultural · Dl–Ds 7:30–15:00 h"
+  },
+  "Mestalla": {
+   "title": "Camp de Mestalla",
+   "eyebrow": "València Club de Futbol · Inaugurat 1923 · L’estadi més antic de LaLiga"
+  },
+  "MuseoBellasArtes": {
+   "title": "Museu de Belles Arts",
+   "eyebrow": "C/ de Sant Pius V · Junt al Jardí del Túria · Entrada gratuïta · Dm–Dg 10:00–20:00 h"
+  },
+  "Oceanografic": {
+   "title": "Oceanogràfic de València",
+   "eyebrow": "Ciutat de les Arts i les Ciències · L’aquari més gran d’Europa"
+  },
+  "Playes": {
+   "title": "Platges de València",
+   "eyebrow": "Mediterrània · 19,5 km d’arena daurada · 8 Banderes Blaves"
+  },
+  "Ruzafa": {
+   "title": "Russafa",
+   "eyebrow": "Districte de l’Eixample · De l’àrab Ruṣāfa, «jardí» · Barri de l’Eixample"
+  },
+  "ComercioLocal": {
+   "title": "Compra en comerç local",
+   "eyebrow": "València · Compra sostenible · Comerç de proximitat"
+  },
+  "Consejos": {
+   "title": "Consells per a visitar València",
+   "eyebrow": "València · Viatge responsable · Guia pràctica"
+  },
+  "Ecoturismo": {
+   "title": "Ecoturisme a València",
+   "eyebrow": "València · Ecoturisme · Turisme responsable"
+  },
+  "MueveteValencia": {
+   "title": "Mou-te per València",
+   "eyebrow": "València · Mobilitat · Transport i desplaçaments"
+  },
+  "ViajeResponsable": {
+   "title": "Viatge responsable",
+   "eyebrow": "València · Turisme responsable · Compromisos del viatger"
+  },
+  "ViajeSostenible": {
+   "title": "Fes el teu viatge a València més Smart",
+   "eyebrow": "València · Turisme intel·ligent · Ciutat sostenible"
+  },
+  "Bici": {
+   "title": "València en bicicleta",
+   "eyebrow": "Tours en Bicicleta · Visites guiades sobre rodes · València Bike-Friendly"
+  },
+  "CentroHistorico": {
+   "title": "Tours pel Centre Històric",
+   "eyebrow": "Tours Guiats · Centre Històric de València · Visites a peu"
+  },
+  "CienciasArtes": {
+   "title": "Visites guiades a la Ciutat de les Arts",
+   "eyebrow": "Tours Guiats · Ciutat de les Arts i les Ciències · cac.es"
+  },
+  "PaseoMaritimo": {
+   "title": "El Passeig Marítim de València",
+   "eyebrow": "Platges urbanes · Passeig Marítim · Passeig de Neptú · València"
+  },
+  "PrivadoGrupo": {
+   "title": "La teua València a mida",
+   "eyebrow": "Tours Privats i Grups · Guies Oficials · Visit València"
+  }
+ },
+ "tiles": {
+  "Navidad": "Nadal",
+  "VisitasImprescindibles": "10 visites imprescindibles",
+  "ValenciaTresDias": "València en 3 dies",
+  "CiudadAmurallada": "València, la ciutat emmurallada",
+  "PatrimonioHumanidad": "Patrimoni de la humanitat",
+  "MonumentosMuseos": "Monuments i Museus",
+  "CAC": "Ciutat de les Arts i les Ciències",
+  "Entradas": "Visites i tours",
+  "Bioparc": "Bioparc",
+  "Espectaculo": "Espectacle",
+  "Familia": "En família",
+  "Naturaleza": "Natura",
+  "FiestasTradicionales": "Festes Tradicionals",
+  "Deportes": "Esports",
+  "Exposicion": "Exposició",
+  "MueveteValencia": "Mou-te per València",
+  "Ecoturismo": "Practica l’ecoturisme",
+  "ComercioLocal": "Compra en comerç local",
+  "Consejos": "Consells per a anar a la teua bola",
+  "ViajeSostenible": "Fes el teu viatge més sostenible",
+  "ViajeResponsable": "Fes un viatge responsable"
+ },
+ "sections": {
+  "quever": {
+   "title": "Espais únics",
+   "subtitle": "Estos són els llocs essencials per a visitar a València"
+  },
+  "eventos": {
+   "title": "Esdeveniments destacats",
+   "subtitle": "Estos són els esdeveniments valencians que omplen el cor"
+  },
+  "gastronomia": {
+   "title": "Tradició culinària",
+   "subtitle": "Una experiència gastronòmica per a tots els sentits"
+  },
+  "alojamientos": {
+   "title": "Opcions d’allotjament",
+   "subtitle": "Et proposem allotjaments recomanats per a tots els gustos"
+  }
+ }
+}

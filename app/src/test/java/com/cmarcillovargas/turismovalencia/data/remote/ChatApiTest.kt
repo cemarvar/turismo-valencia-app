@@ -1,5 +1,6 @@
 package com.cmarcillovargas.turismovalencia.data.remote
 
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -58,6 +59,15 @@ class ChatApiTest {
         assertEquals("user", turns.getJSONObject(0).getString("role"))
         assertEquals("Hola", turns.getJSONObject(0).getString("text"))
         assertEquals("assistant", turns.getJSONObject(1).getString("role"))
+        // Sin idioma pedido, el de la app por defecto (español).
+        assertEquals("es", body.getString("lang"))
+    }
+
+    @Test
+    fun `manda el idioma de la app para que el servidor conteste en el`() {
+        server.enqueue(MockResponse().setBody("""{"reply":"Hello!"}"""))
+        runBlocking { api.ask("hello", emptyList(), LanguageCode.VA) }
+        assertEquals("ca-ES-valencia", JSONObject(server.takeRequest().body.readUtf8()).getString("lang"))
     }
 
     @Test

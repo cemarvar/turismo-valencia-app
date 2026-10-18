@@ -1,5 +1,6 @@
 package com.cmarcillovargas.turismovalencia.data.remote
 
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.util.WebBaseUrl
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -29,22 +30,24 @@ class ChatException(message: String, cause: Throwable? = null) : Exception(messa
 
 /** Asistente en línea de ValBot. */
 interface ChatService {
-    /** Devuelve la respuesta del asistente o lanza [ChatException]. */
-    suspend fun ask(message: String, history: List<ChatTurn>): String
+    /** Devuelve la respuesta del asistente (en [language], el idioma de la app) o lanza [ChatException]. */
+    suspend fun ask(message: String, history: List<ChatTurn>, language: LanguageCode = LanguageCode.ES): String
 }
 
 /**
  * Función `chat` de la web (`POST /api/chat`, Gemini detrás). La clave vive solo en el servidor: la app envía
- * `{ message, history: [{ role: "user" | "assistant", text }] }` y recibe `{ reply }` o `{ error }`.
+ * `{ message, history: [{ role: "user" | "assistant", text }], lang }` y recibe `{ reply }` o `{ error }`. `lang` es la etiqueta
+ * BCP 47 del idioma de la app (`es`, `ca-ES-valencia`, `en`, `fr`): la función de la web todavía no la lee (contesta en el idioma de
+ * la pregunta) y es el dato que le hace falta para contestar siempre en el idioma elegido.
  */
 class ChatApi(
     private val client: OkHttpClient = defaultClient(),
     private val url: String = "$WebBaseUrl/api/chat",
 ) : ChatService {
 
-    override suspend fun ask(message: String, history: List<ChatTurn>): String = withContext(Dispatchers.IO) {
+    override suspend fun ask(message: String, history: List<ChatTurn>, language: LanguageCode): String = withContext(Dispatchers.IO) {
         try {
-            val response = client.newCall(request(message, history)).await()
+            val response = client.newCall(request(message, history, language)).await()
             response.use { parse(it) }
         } catch (e: CancellationException) {
             throw e
@@ -56,10 +59,10 @@ class ChatApi(
         }
     }
 
-    private fun request(message: String, history: List<ChatTurn>): Request {
+    private fun request(message: String, history: List<ChatTurn>, language: LanguageCode): Request {
         val turns = JSONArray()
         history.forEach { turns.put(JSONObject().put("role", if (it.fromUser) "user" else "assistant").put("text", it.text)) }
-        val body = JSONObject().put("message", message).put("history", turns).toString()
+        val body = JSONObject().put("message", message).put("history", turns).put("lang", language.tag).toString()
         return Request.Builder().url(url).post(body.toRequestBody(JsonType)).build()
     }
 
@@ -111,11 +114,17 @@ private suspend fun Call.await(): Response = suspendCancellableCoroutine { conti
  * para ver cómo se pintan las respuestas en línea sin depender del servidor.
  */
 class CannedChatService : ChatService {
-    override suspend fun ask(message: String, history: List<ChatTurn>): String {
+    override suspend fun ask(message: String, history: List<ChatTurn>, language: LanguageCode): String {
         delay(900)
         return "¡Claro! Para empezar en Valencia te recomiendo:\n\n" +
             "* **Mercado Central**: uno de los mercados más bonitos de Europa, ideal para probar producto local.\n" +
             "* **Lonja de la Seda**: joya del gótico civil y Patrimonio de la Humanidad.\n\n" +
             "Si te apetece algo típico, prueba la *paella valenciana* y, de postre, horchata con fartons."
     }
+}
+
+/** Solo para depuración (`--ez chatDown true`): el asistente en línea no responde, así que ValBot contesta con las reglas de la app. */
+class DownChatService : ChatService {
+    override suspend fun ask(message: String, history: List<ChatTurn>, language: LanguageCode): String =
+        throw ChatException("ValBot en línea desactivado (depuración)")
 }

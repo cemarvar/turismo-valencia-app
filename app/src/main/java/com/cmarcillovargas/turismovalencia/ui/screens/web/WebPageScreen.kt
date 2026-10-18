@@ -27,8 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmarcillovargas.turismovalencia.R
+import com.cmarcillovargas.turismovalencia.data.appLanguage
 import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.model.Category
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.WebFamily
 import com.cmarcillovargas.turismovalencia.data.model.WebPage
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
@@ -36,6 +38,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.AppButtonStyle
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.ContactSummaryCard
 import com.cmarcillovargas.turismovalencia.ui.components.DetailHero
+import com.cmarcillovargas.turismovalencia.ui.components.InfoNotice
 import com.cmarcillovargas.turismovalencia.ui.components.webBlocks
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
@@ -108,6 +111,7 @@ private fun PageContent(
     onOpenWeb: () -> Unit,
 ) {
     val extraBlocks = if (page.id == PrivacyPageId) appPrivacyBlocks() else emptyList()
+    val spanishOnly = LocalContext.current.appLanguage() != LanguageCode.ES
     LazyColumn(Modifier.fillMaxSize(), state = rememberLazyListState(), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
         if (hero) {
             item(key = "hero") {
@@ -124,6 +128,10 @@ private fun PageContent(
                     assetPath = page.hero,
                 )
             }
+        }
+        // Los textos de las páginas de la web solo están en español: se avisa si la app está en otro idioma.
+        if (spanishOnly) {
+            item(key = "spanish-only") { InfoNotice(stringResource(R.string.web_only_spanish), Modifier.padding(horizontal = Spacing.m).padding(top = if (hero) 0.dp else Spacing.m)) }
         }
         if (page.lead.isNotEmpty()) {
             item(key = "lead") {

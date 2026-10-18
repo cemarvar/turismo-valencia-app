@@ -1,11 +1,15 @@
 <resources>
-    <string name="app_name">Turismo Valencia</string>
+    <string name="app_name" translatable="false">Turismo Valencia</string>
+
+    <!-- Idioma de estos recursos (ES, VA, EN o FR): cada values-xx lo traduce a su propio código. La app lo lee para saber qué idioma ha
+         resuelto Android, que elige los recursos con la lista entera de idiomas del usuario (ver LanguageCode). -->
+    <string name="locale_code">ES</string>
 
     <!-- A1 · Splash -->
     <string name="splash_logo_descripcion">Logotipo de Turismo Valencia</string>
     <string name="splash_titulo">Valencia</string>
     <string name="splash_lema">Mejor esta vida</string>
-    <string name="splash_version">Turismo Valencia · v%1$s</string>
+    <string name="splash_version" translatable="false">Turismo Valencia · v%1$s</string>
 
     <!-- A2–A4 · Onboarding -->
     <string name="onboarding_saltar">Saltar</string>
@@ -37,13 +41,13 @@
     <string name="idioma_titulo">Idioma de la app</string>
     <string name="idioma_subtitulo">ValBot también te responderá en este idioma.</string>
     <string name="idioma_aplicar">Aplicar</string>
-    <string name="idioma_es_nombre">Español</string>
+    <string name="idioma_es_nombre" translatable="false">Español</string>
     <string name="idioma_es_detalle">Castellano</string>
-    <string name="idioma_va_nombre">Valencià</string>
+    <string name="idioma_va_nombre" translatable="false">Valencià</string>
     <string name="idioma_va_detalle">Valenciano</string>
-    <string name="idioma_en_nombre">English</string>
+    <string name="idioma_en_nombre" translatable="false">English</string>
     <string name="idioma_en_detalle">Inglés</string>
-    <string name="idioma_fr_nombre">Français</string>
+    <string name="idioma_fr_nombre" translatable="false">Français</string>
     <string name="idioma_fr_detalle">Francés</string>
 
     <string name="common_back">Atrás</string>
@@ -143,7 +147,7 @@
     <string name="map_zoom_out">Alejar</string>
     <string name="map_details">Ver detalles</string>
     <string name="route_your_location">Tu ubicación</string>
-    <string name="route_minutes">%1$d min</string>
+    <string name="route_minutes" translatable="false">%1$d min</string>
     <string name="route_mode_metro">Metro</string>
     <string name="route_summary">%1$s · llegada %2$s</string>
     <string name="route_saved">Ruta guardada</string>
@@ -183,7 +187,7 @@
     <string name="valbot_send">Enviar</string>
 
     <string name="common_cancel">Cancelar</string>
-    <string name="profile_initials">LG</string>
+    <string name="profile_initials" translatable="false">LG</string>
     <string name="fav_none_saved">Sin lugares guardados</string>
     <plurals name="fav_saved_count">
         <item quantity="one">%1$d lugar guardado</item>
@@ -238,7 +242,10 @@
     <string name="res_later">Próximamente</string>
     <string name="res_completed">Completadas</string>
     <string name="res_empty">No tienes reservas todavía. Reserva una actividad desde Tickets &amp; Tours.</string>
-    <string name="res_people_price">%1$d pers. · %2$s</string>
+    <plurals name="res_people_price">
+        <item quantity="one">%1$d pers. · %2$s</item>
+        <item quantity="other">%1$d pers. · %2$s</item>
+    </plurals>
     <string name="res_status_confirmed">Confirmada</string>
     <string name="res_status_pending">Pendiente</string>
     <string name="res_status_completed">Completada</string>
@@ -295,8 +302,8 @@
     </plurals>
 
     <string name="profile_title">Perfil y ajustes</string>
-    <string name="profile_name">Laura García</string>
-    <string name="profile_email_city">laura.garcia@email.com · Madrid</string>
+    <string name="profile_name" translatable="false">Laura García</string>
+    <string name="profile_email_city" translatable="false">laura.garcia@email.com · Madrid</string>
     <string name="profile_offline_mb">%1$d MB offline</string>
     <plurals name="profile_reservations">
         <item quantity="one">%1$d reserva</item>
@@ -333,7 +340,7 @@
 
     <string name="web_more_info">Más información</string>
     <string name="web_view_on_web">Ver en la web</string>
-    <string name="web_share_text">%1$s · %2$s</string>
+    <string name="web_share_text" translatable="false">%1$s · %2$s</string>
     <string name="home_esencial_title">Lo esencial para ver en Valencia</string>
     <string name="home_esencial_text">Experiencias que te conectan con el auténtico estilo de vida valenciano</string>
     <string name="home_planes_title">Planes que alimentan el alma</string>
@@ -348,18 +355,18 @@
     <string name="contact_office">Oficina de Turismo del Ayuntamiento de Valencia</string>
     <string name="contact_open_map">Abrir mapa</string>
     <string name="contact_hours">Lun - Vie: 9:00 - 18:00</string>
-    <string name="contact_phone">+34 963 000 000</string>
-    <string name="contact_email">info@valencia.com</string>
+    <string name="contact_phone" translatable="false">+34 963 000 000</string>
+    <string name="contact_email" translatable="false">info@valencia.com</string>
     <string name="contact_location">Valencia, España</string>
     <string name="contact_follow">Síguenos</string>
-    <string name="contact_linkedin">LinkedIn</string>
-    <string name="contact_facebook">Facebook</string>
-    <string name="contact_instagram">Instagram</string>
-    <string name="contact_x">X</string>
-    <string name="contact_linkedin_url">https://es.linkedin.com/company/turismo-valencia</string>
-    <string name="contact_facebook_url">https://www.facebook.com/visitvalenciaSpain</string>
-    <string name="contact_instagram_url">https://www.instagram.com/visit_valencia</string>
-    <string name="contact_x_url">https://x.com/valenciaturismo</string>
+    <string name="contact_linkedin" translatable="false">LinkedIn</string>
+    <string name="contact_facebook" translatable="false">Facebook</string>
+    <string name="contact_instagram" translatable="false">Instagram</string>
+    <string name="contact_x" translatable="false">X</string>
+    <string name="contact_linkedin_url" translatable="false">https://es.linkedin.com/company/turismo-valencia</string>
+    <string name="contact_facebook_url" translatable="false">https://www.facebook.com/visitvalenciaSpain</string>
+    <string name="contact_instagram_url" translatable="false">https://www.instagram.com/visit_valencia</string>
+    <string name="contact_x_url" translatable="false">https://x.com/valenciaturismo</string>
     <string name="contact_legal">Información legal</string>
     <string name="legal_privacy">Política de privacidad</string>
     <string name="legal_notice">Aviso legal</string>
@@ -393,4 +400,69 @@
     <string name="privacy_app_none_body">La app no tiene cuentas, publicidad, analítica ni rastreadores, y no comparte tus datos con terceros más allá de los servicios que se nombran arriba.</string>
     <string name="privacy_app_rights_title">Tus derechos</string>
     <string name="privacy_app_rights_body">Para ejercer tus derechos sobre los datos de la app (por ejemplo, pedir que borremos tus reservas), escribe al correo de privacidad del punto 1 indicando el correo con el que reservaste y el localizador de la reserva. Más información en el punto 7.</string>
+
+    <!-- Buscador: sugerencias que arma ContentRepository -->
+    <string name="search_offer_subtitle">Experiencia · desde %1$s</string>
+    <string name="search_map_dish">Restaurantes de %1$s cerca</string>
+    <string name="search_map_query">Ver «%1$s» en el mapa</string>
+    <plurals name="search_map_count">
+        <item quantity="one">Mapa · %1$d resultado</item>
+        <item quantity="other">Mapa · %1$d resultados</item>
+    </plurals>
+    <string name="search_family_esencial">Lo esencial de Valencia</string>
+    <string name="search_family_planes">Planes</string>
+    <string name="search_family_legal">Información legal</string>
+    <string name="search_family_guide">Guía</string>
+
+    <!-- ValBot: respuestas de las reglas de la app (sin conexión o sin respuesta del servidor) -->
+    <string name="valbot_greeting">¡Hola! Soy ValBot, tu asistente de turismo en Valencia. ¿En qué puedo ayudarte?</string>
+    <string-array name="valbot_suggestions">
+        <item>¿Qué ver hoy gratis en Valencia?</item>
+        <item>Restaurantes de paella cerca</item>
+        <item>¿Cómo llego al Jardín del Turia?</item>
+        <item>¿Qué hago con niños?</item>
+        <item>Planes si llueve</item>
+        <item>Valencia en 3 días</item>
+    </string-array>
+    <string name="valbot_reply_hello">¡Hola! Pregúntame por lugares, eventos, gastronomía o cómo llegar a cualquier sitio.</string>
+    <string name="valbot_reply_free">Hoy tienes buenas opciones sin gastar nada. Las más cercanas a ti:</string>
+    <string name="valbot_reply_eat">Para una buena paella, la cuna es La Albufera (El Palmar) y la Malvarrosa. En el centro, reserva con antelación y pide leña. Mira estas opciones:</string>
+    <string name="valbot_reply_christmas">En Navidad, Valencia se llena de luces, mercados y belenes. Aquí tienes la guía completa:</string>
+    <string name="valbot_reply_itinerary">Para organizarte, estas guías te sirven de base:</string>
+    <string name="valbot_reply_heritage">La Valencia monumental está en estas guías:</string>
+    <string name="valbot_reply_tours">Para tickets y tours, mira estas guías y reserva desde Tickets &amp; Tours:</string>
+    <string name="valbot_reply_sports">Valencia es ciudad de deporte: carreras, bici, playa y mucho más.</string>
+    <string name="valbot_reply_art">Para exposiciones y arte, empieza por aquí:</string>
+    <string name="valbot_reply_contact">Puedes contactar con la oficina de turismo de lunes a viernes de 9:00 a 18:00 en el +34 963 000 000 o en info@valencia.com.</string>
+    <string name="valbot_reply_fallas">Las Fallas se celebran del 1 al 19 de marzo. La mascletà es cada día a las 14:00 en la Plaza del Ayuntamiento; llega 30 minutos antes.</string>
+    <string name="valbot_reply_beach">Valencia tiene 19,5 km de arena y 8 Banderas Azules. Desde el centro, la L4 te deja en Les Arenes.</string>
+    <string name="valbot_reply_kids">Con niños funcionan muy bien el Oceanogràfic y el Jardín del Turia (9 km sin coches, con juegos y bicis).</string>
+    <string name="valbot_reply_rain">Si llueve, apunta a los museos: el de Bellas Artes es gratuito y el Oceanogràfic tiene zonas cubiertas.</string>
+    <string name="valbot_reply_lodging">Para dormir, el centro histórico es lo más cómodo; Ruzafa tiene más ambiente y la zona playa, primera línea de mar.</string>
+    <string name="valbot_reply_eco">Valencia fue Capital Verde Europea 2024. Un buen plan sostenible: Jardín del Turia en bici y paseo en barca eléctrica por la Albufera.</string>
+    <string name="valbot_reply_found">Esto es lo que he encontrado:</string>
+    <string name="valbot_reply_unknown">No tengo claro eso todavía. Prueba a preguntarme por lugares, eventos, gastronomía, alojamientos o cómo llegar a un sitio. Para dudas concretas, contacta con la oficina de turismo de Valencia.</string>
+    <string name="valbot_reply_route">%1$s está a %2$s, unos %3$d min a pie desde tu ubicación. Abre la ficha y pulsa «Cómo llegar» para ver la ruta:</string>
+    <string name="valbot_reply_route_ask">¿A qué lugar quieres ir? Dime el nombre y te digo cuánto se tarda andando.</string>
+
+    <!-- Horario de las entradas que valen todo el día (el servidor lo manda como «Cualquier hora») -->
+    <string name="book_any_time">Cualquier hora</string>
+
+    <!-- Las guías de la web solo están en español -->
+    <string name="web_only_spanish">Este contenido de la web solo está disponible en español.</string>
+
+    <!-- Notificaciones de demostración (Room las guarda en español; la lista las enseña en el idioma de la app) -->
+    <string name="notif_demo_2_title">Reserva confirmada</string>
+    <string name="notif_demo_2_body">Paseo en barca por la Albufera · sáb 12 oct, 18:30.</string>
+    <string name="notif_demo_3_title">Fichas actualizadas</string>
+    <string name="notif_demo_3_body">4 lugares guardados se han actualizado para usarlos sin conexión.</string>
+    <string name="notif_demo_4_title">Ruta sostenible recomendada</string>
+    <string name="notif_demo_4_body">Recorre el Jardín del Turia en Valenbisi: 9 km sin coches.</string>
+    <string name="notif_demo_5_title">ValBot tiene novedades</string>
+    <string name="notif_demo_5_body">Ahora te entiende y responde en español, valenciano, inglés y francés.</string>
+    <string name="notif_when_10min">Hace 10 min</string>
+    <string name="notif_when_1h">Hace 1 h</string>
+    <string name="notif_when_yesterday">Ayer</string>
+    <string name="notif_when_monday">Lunes</string>
+    <string name="notif_when_sunday">Domingo</string>
 </resources>

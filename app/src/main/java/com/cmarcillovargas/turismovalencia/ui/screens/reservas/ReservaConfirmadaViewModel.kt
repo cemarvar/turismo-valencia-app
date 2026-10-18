@@ -18,6 +18,7 @@ data class ReservaConfirmadaUiState(
 class ReservaConfirmadaViewModel(private val container: AppContainer, private val id: String) : ViewModel() {
     val uiState: StateFlow<ReservaConfirmadaUiState> = container.reservations.items.map { list ->
         val reservation = list.firstOrNull { it.id == id }
-        ReservaConfirmadaUiState(reservation, reservation?.let { container.content.offer(it.offerId) })
+        val offer = reservation?.let { container.content.offer(it.offerId) }
+        ReservaConfirmadaUiState(reservation?.shownAs(offer), offer)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReservaConfirmadaUiState(container.reservations.get(id)))
 }

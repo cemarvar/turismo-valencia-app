@@ -4,6 +4,7 @@ import android.content.Context
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.CategoryIndex
 import com.cmarcillovargas.turismovalencia.data.model.HomeTile
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.WebBlock
 import com.cmarcillovargas.turismovalencia.data.model.WebFamily
 import com.cmarcillovargas.turismovalencia.data.model.WebFilter
@@ -22,21 +23,66 @@ import org.json.JSONObject
 /**
  * Contenido de las páginas de la web (Que_Ver, Eventos, Gastronomia, Alojamientos, Entradas y la portada),
  * convertido a JSON y guardado en `assets/web/`. Las fotos van en `assets/img/` con la misma ruta que en la web.
+ *
+ * Solo está en español. Los títulos y las etiquetas de las páginas, las tarjetas de la portada y los títulos de las secciones salen
+ * en el idioma de la app ([translations]); los textos de las páginas no (la pantalla lo avisa).
  */
 // TODO(api): servir este contenido desde el backend (tabla Actividad y páginas) con caché en Room (TODO(room)).
 class WebContentRepository(context: Context) {
-    private val assets = context.applicationContext.assets
+    /** El contexto de la aplicación (lo usan quienes crean textos por idioma con él). */
+    val appContext: Context = context.applicationContext
+    private val assets = appContext.assets
     private val cache = ConcurrentHashMap<String, WebPage>()
 
-    val index: WebIndex by lazy { parseIndex(JSONObject(read("web/index.json"))) }
+    /** Traducciones del contenido propio de la app y de los títulos de la web (ver [ContentTranslations]). */
+    val translations = ContentTranslations { path -> runCatching { read(path) }.getOrNull() }
+
+    private val baseIndex: WebIndex by lazy { parseIndex(JSONObject(read("web/index.json"))) }
+
+    @Volatile
+    private var localizedIndex: Pair<LanguageCode, WebIndex>? = null
+
+    /** Índice de la web con los títulos en el idioma de la app. */
+    val index: WebIndex
+        get() {
+            val language = translations.language
+            localizedIndex?.let { (lang, cached) -> if (lang == language) return cached }
+            return translate(baseIndex).also { localizedIndex = language to it }
+        }
+
+    /** Cambia el idioma de los títulos (el contenido de las páginas sigue en español). */
+    fun setLanguage(language: LanguageCode) {
+        translations.setLanguage(language)
+        localizedIndex = null
+    }
+
+    private fun translate(base: WebIndex): WebIndex {
+        if (translations.language == LanguageCode.ES) return base
+        fun tiles(list: List<HomeTile>) = list.map { tile -> translations.tile(tile.route)?.let { tile.copy(title = it) } ?: tile }
+        return WebIndex(
+            pages = base.pages.mapValues { (id, meta) ->
+                translations.page(id)?.let { meta.copy(title = it.title ?: meta.title, eyebrow = it.eyebrow ?: meta.eyebrow) } ?: meta
+            },
+            esencial = tiles(base.esencial),
+            planes = tiles(base.planes),
+            sostenible = tiles(base.sostenible),
+            categories = base.categories.mapValues { (family, section) ->
+                translations.section(family.key)?.let { section.copy(title = it.title, subtitle = it.subtitle) } ?: section
+            },
+        )
+    }
 
     fun meta(pageId: String): WebPageMeta? = index.pages[pageId]
 
     fun pagesOf(vararg families: WebFamily): List<WebPageMeta> = index.pages.values.filter { it.family in families }
 
-    /** Página completa; se lee del JSON la primera vez y se guarda en memoria. */
-    suspend fun page(id: String): WebPage? = cache[id] ?: withContext(Dispatchers.IO) {
-        runCatching { parsePage(id, JSONObject(read("web/pages/$id.json"))) }.getOrNull()?.also { cache[id] = it }
+    /** Página completa; se lee del JSON la primera vez y se guarda en memoria. Solo el título y la etiqueta salen traducidos. */
+    suspend fun page(id: String): WebPage? {
+        val page = cache[id] ?: withContext(Dispatchers.IO) {
+            runCatching { parsePage(id, JSONObject(read("web/pages/$id.json"))) }.getOrNull()?.also { cache[id] = it }
+        } ?: return null
+        val text = translations.page(id) ?: return page
+        return page.copy(title = text.title ?: page.title, eyebrow = text.eyebrow ?: page.eyebrow)
     }
 
     /** Página de la web que corresponde a una ficha de la app, si la hay. */

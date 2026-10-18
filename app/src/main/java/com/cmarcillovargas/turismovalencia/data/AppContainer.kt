@@ -13,6 +13,7 @@ import com.cmarcillovargas.turismovalencia.data.fake.FakeOfertas
 import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.DemoData
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.notify.NotificationAccess
 import com.cmarcillovargas.turismovalencia.data.notify.ReminderScheduler
 import com.cmarcillovargas.turismovalencia.data.remote.ChatApi
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import java.util.Locale
 
 /**
  * Dependencias de la app, creadas una vez en `TurismoApp`: el contenido (assets), el catálogo de ofertas y las reservas, que
@@ -62,11 +64,12 @@ import okhttp3.OkHttpClient
  * red ni WorkManager.
  */
 class AppContainer(
-    application: Application,
+    private val application: Application,
     private val database: AppDatabase = AppDatabase.create(application),
     offersService: OffersService? = null,
     reservationsService: ReservationsService? = null,
     refreshScheduler: RefreshScheduler = WorkRefreshScheduler(application),
+    languageApplier: LanguageApplier = AppCompatLanguageApplier(),
 ) {
     /**
      * Ámbito de las escrituras y de los estados que siguen a Room: vive tanto como la app. La paralelización limitada a 1
@@ -80,12 +83,15 @@ class AppContainer(
     private val http = OkHttpClient()
     val web = WebContentRepository(application)
 
+    /** Textos en el idioma de la app para quien no tiene una pantalla detrás (ValBot, buscador, avisos). */
+    val strings = AppStrings(application)
+
     /** La API propia (ofertas y reservas); solo se crea si alguno de los dos servicios no viene dado. */
     private val api by lazy { TurismoApiClient.create(BuildConfig.API_BASE_URL, TurismoApiClient.defaultClient(http)) }
 
     /** Catálogo de ofertas: el del servidor, guardado en Room (el incluido en la app mientras no haya llegado ninguno). */
     val offers = OffersRepository(database.offers(), offersService ?: RetrofitOffersService(api), FakeOfertas, web::offerImage, scope)
-    val content = ContentRepository(web, offers.offers)
+    val content = ContentRepository(web, offers.offers, strings)
     private val demo = DemoData(content)
 
     init {
@@ -104,7 +110,7 @@ class AppContainer(
         reservationsService ?: RetrofitReservationsService(api),
         scope,
     )
-    val settings = SettingsRepository(settingsStore)
+    val settings = SettingsRepository(settingsStore, languageApplier)
     val location = LocationRepository(application, settings, scope)
 
     /** Si el sistema deja mostrar notificaciones; `MainActivity` lo vuelve a mirar al volver a la app. */
@@ -144,7 +150,7 @@ class AppContainer(
         }
     }
 
-    val valbot = ValBotRepository(ChatApi(ChatApi.defaultClient(http)), ValBotEngine(content, web))
+    val valbot = ValBotRepository(ChatApi(ChatApi.defaultClient(http)), ValBotEngine(content, web, strings), language = { strings.language })
     val routes: RouteService = OsrmApi(OsrmApi.defaultClient(http))
 
     /** Lo que ejecuta el trabajo nocturno de WorkManager (`TurismoApp` lo pasa a su `WorkerFactory`). */
@@ -189,12 +195,30 @@ class AppContainer(
         }
     }
 
+    init {
+        // Hasta que arranque una actividad (que sabe con qué idioma ha resuelto Android los recursos), vale el último que se guardó: es
+        // el que necesitan, por ejemplo, la alarma de un aviso con la app cerrada.
+        applyLanguage(settings.language.value)
+    }
+
+    /**
+     * Cambia el idioma de todo lo que no son recursos de pantalla: los textos de [strings], el contenido traducido y el formato de
+     * fechas y números. `MainActivity` lo llama al crearse con el idioma que dieron los recursos, y eso también lo anota en Room.
+     */
+    fun applyLanguage(language: LanguageCode) {
+        Locale.setDefault(language.locale)
+        strings.language = language
+        content.setLanguage(language)
+        AppLanguagePrefs.write(application, language)
+        settings.syncLanguage(language)
+    }
+
     /**
      * Solo depuración (`--ez resetData true`): vuelve a los datos de demostración, como en el primer arranque. Sin catálogo de
      * ofertas guardado, así que se vuelve a pedir al servidor si hay conexión (el arranque ya lo hizo antes de borrarlo).
      */
     fun resetToDemo() {
-        runBlocking { demo.populate(database) }
+        runBlocking { demo.populate(database, language = strings.language) }
         if (network.isOnline.value) scope.launch { refreshOffers() }
     }
 
