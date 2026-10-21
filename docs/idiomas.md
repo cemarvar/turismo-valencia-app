@@ -17,7 +17,7 @@ números.
 | Fechas, días de la semana, precios («18 €», «€18», «18 €» con espacio fino en francés), distancias («1,1 km», «1.1 km») | `util/Format.kt` (tablas propias, no dependen del ICU del móvil) | Traducido |
 | **Textos de las páginas de la web** (las guías: «Guía completa», Lo esencial, Planes, textos legales de la web…) | `assets/web/pages/*.json`, importados de la web | **Solo en español**; la pantalla avisa con «Este contenido de la web solo está disponible en español» (`InfoNotice`) |
 | Ofertas que el servidor añada y que la app no conozca | Servidor | Se ven con el texto del servidor (en español) |
-| ValBot en línea (Gemini) | Función `chat` de la web | La app manda el idioma (`lang`); hoy contesta en el idioma de la pregunta |
+| ValBot en línea (Gemini) | Función `chat` de la web | Traducido: la función usa el `lang` que manda la app y contesta en ese idioma aunque la pregunta sea en otro |
 | Nombres propios y de platos (Oceanogràfic, paella, fideuà…), la marca «Turismo Valencia», direcciones, teléfonos y enlaces | — | No se traducen |
 
 ## Cómo funciona
@@ -125,5 +125,4 @@ SettingsRepository.setLanguage(código)           el sistema ya tiene el idioma 
 - Traducir el texto de las páginas de la web: hoy solo se traducen sus títulos. Haría falta traducirlas en la web (`cemarvar/TurismoValencia`)
   y reimportarlas, o añadir un segundo juego de JSON por idioma en `assets/i18n/<idioma>/pages/` y que `WebContentRepository.page` los lea.
 - Que el servidor devuelva las ofertas ya traducidas (`Accept-Language` o un campo por idioma): hoy se traducen en la app por su `id`.
-- Que la función `chat` de la web use el campo `lang` que manda la app, para que Gemini conteste siempre en el idioma elegido.
 - Una revisión por hablantes nativos (valenciano y francés sobre todo) y de los textos legales antes de publicar.
