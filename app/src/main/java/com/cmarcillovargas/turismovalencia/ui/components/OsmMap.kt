@@ -2,6 +2,8 @@ package com.cmarcillovargas.turismovalencia.ui.components
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
@@ -49,6 +51,7 @@ import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.appColors
+import com.cmarcillovargas.turismovalencia.ui.theme.isDark
 import com.cmarcillovargas.turismovalencia.util.ValenciaCenter
 import com.cmarcillovargas.turismovalencia.util.openUrl
 import org.osmdroid.config.Configuration
@@ -190,6 +193,7 @@ fun OsmMap(
         PinRenderer(density, measurer, PinStyle(labelStyle, scheme.onSurface, scheme.surface, colors.location))
     }
     val routeColor = colors.brand.toArgb()
+    val dark = MaterialTheme.isDark
     val currentOnMarkerClick by rememberUpdatedState(onMarkerClick)
 
     DisposableEffect(lifecycle, camera) {
@@ -209,7 +213,7 @@ fun OsmMap(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
                 OsmSetup.ensure(ctx) // antes de crear el primer mapa
-                MapView(ctx).also { configure(it, camera) }
+                MapView(ctx).also { configure(it, camera, dark) }
             },
             update = { view ->
                 view.setOnTouchListener(if (interactive) null else BlockTouches)
@@ -265,8 +269,46 @@ private fun Int.toDp(density: Float) = (this / density).dp
 
 private val BlockTouches = View.OnTouchListener { _, _ -> true }
 
-private fun configure(view: MapView, camera: MapCamera) {
+/**
+ * Teselas de OpenStreetMap en oscuro: invierte la luminosidad (el fondo beige pasa a oscuro y las calles blancas a casi negras con su
+ * borde claro), gira el tono 180° para que el agua siga siendo azulada y los parques verdosos (es el truco `invert() hue-rotate(180deg)`
+ * de CSS) y por último lo enfría y lo oscurece hacia el azul del tema oscuro (rojo ×0,55, verde ×0,80, azul ×1,05), que es el tono del mapa
+ * de las imágenes de diseño con las calles aún legibles. La atribución de OpenStreetMap se mantiene.
+ */
+private val DarkTilesFilter: ColorMatrixColorFilter by lazy {
+    val invert = ColorMatrix(
+        floatArrayOf(
+            -1f, 0f, 0f, 0f, 255f,
+            0f, -1f, 0f, 0f, 255f,
+            0f, 0f, -1f, 0f, 255f,
+            0f, 0f, 0f, 1f, 0f,
+        ),
+    )
+    val hue = ColorMatrix(
+        floatArrayOf(
+            -0.574f, 1.430f, 0.144f, 0f, 0f,
+            0.426f, 0.430f, 0.144f, 0f, 0f,
+            0.426f, 1.430f, -0.856f, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f,
+        ),
+    )
+    val cool = ColorMatrix(
+        floatArrayOf(
+            0.55f, 0f, 0f, 0f, 0f,
+            0f, 0.80f, 0f, 0f, 0f,
+            0f, 0f, 1.05f, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f,
+        ),
+    )
+    invert.postConcat(hue)
+    invert.postConcat(cool)
+    ColorMatrixColorFilter(invert)
+}
+
+private fun configure(view: MapView, camera: MapCamera, dark: Boolean) {
     view.setTileSource(TileSourceFactory.MAPNIK)
+    // El tema oscuro cambia las teselas con un filtro de color (el servidor de OpenStreetMap solo sirve su estilo estándar, claro).
+    if (dark) view.overlayManager.tilesOverlay.setColorFilter(DarkTilesFilter)
     view.setMultiTouchControls(true)
     view.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
     view.minZoomLevel = MinZoom
@@ -411,12 +453,15 @@ fun MapAttribution(modifier: Modifier = Modifier) {
 
 @Composable
 private fun Category.pinColor(): Color = when (this) {
-    Category.QueVer -> MaterialTheme.colorScheme.secondary
+    Category.QueVer -> MaterialTheme.appColors.navy
     Category.Gastronomia, Category.Eventos -> MaterialTheme.appColors.brand
     Category.Alojamientos -> MaterialTheme.appColors.lodging
-    Category.Sostenible -> MaterialTheme.colorScheme.tertiary
+    Category.Sostenible -> MaterialTheme.appColors.eco
 }
 
-/** Color de la categoría en los puntos de los chips del mapa. */
+/**
+ * Color de la categoría en los puntos de los chips del mapa. «Qué ver» usa la pizarra de primer plano (`secondary`, igual que el
+ * relleno del marcador en claro): en oscuro, la del marcador (`navy`) casi no se distinguiría sobre el chip.
+ */
 @Composable
-fun Category.dotColor(): Color = pinColor()
+fun Category.dotColor(): Color = if (this == Category.QueVer) MaterialTheme.colorScheme.secondary else pinColor()

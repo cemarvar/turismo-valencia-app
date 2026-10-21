@@ -37,7 +37,7 @@ Las 27 pantallas del [diseño de Figma](docs/Figma) están implementadas y compa
 - **Navigation Compose** (barra inferior solo en las rutas que la llevan en el diseño)
 - Tipografía **Source Sans 3** empaquetada, para que la app funcione sin conexión
 - **osmdroid** (mapa de OpenStreetMap), **Room** (base de datos local con lo del usuario), **OkHttp** (ValBot y rutas), **Retrofit** y **kotlinx.serialization** (la API propia del backend), **WorkManager** (el refresco nocturno en segundo plano), **ZXing** (código QR real), **AlarmManager** y notificaciones locales (avisos de eventos), **SplashScreen API** y `desugar_jdk_libs` (`java.time` desde Android 7)
-- Android: `minSdk 24`, `targetSdk 37`, solo tema claro
+- Android: `minSdk 24`, `targetSdk 37`, tema claro y oscuro (sigue el modo del móvil)
 
 Datos: el contenido de la web como JSON en `assets/web/` (con 479 fotos en `assets/img/`) y lo del usuario (favoritos, descargas,
 reservas, ajustes…) en una base de datos Room que sigue ahí al cerrar la app. Usa Internet para ValBot, el catálogo de ofertas y las reservas
@@ -59,7 +59,7 @@ O abre la carpeta en Android Studio, espera a que sincronice Gradle y pulsa **Ru
 |---|---|
 | `./gradlew assembleDebug` | Compilar el APK de depuración |
 | `./gradlew lint` | Análisis estático |
-| `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room, cliente de la API propia con sus ejemplos del contrato, calendario del refresco nocturno, y los idiomas: formatos, todas las traducciones de textos y de contenido y las reglas de ValBot en los cuatro idiomas) |
+| `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room, cliente de la API propia con sus ejemplos del contrato, calendario del refresco nocturno, y los idiomas: formatos, todas las traducciones de textos y de contenido y las reglas de ValBot en los cuatro idiomas) y el contraste AA de cada pareja de color en los temas claro y oscuro |
 | `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos), el catálogo de ofertas con su caché, las reservas con un servidor falso (idempotencia, errores), el refresco nocturno con el WorkManager de pruebas, avisos (alarmas y notificaciones reales, también en cada idioma) y los idiomas (recursos, contenido traducido, buscador) |
 | `./gradlew assembleReleaseCheck` | APK de publicación (R8) firmado con la clave de depuración y apuntando al backend local, para `tools/verify/verify_release.py` |
 
@@ -141,6 +141,7 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - **Refresco nocturno (emulador):** el trabajo de WorkManager se programa con los ajustes de Descargas (red sin tarifa con «Solo Wi-Fi», a partir de las 3:00), se cancela al apagar «Actualizar automáticamente» y, con la app cerrada y el reloj pasadas las 3:00, el sistema lo ejecuta y deja programado el de la noche siguiente (`verify_ui.py refresco`).
 - **Privacidad (emulador):** la política de privacidad de la web lleva debajo lo que añade la app (`verify_ui.py privacidad`).
 - **Publicación (emulador + backend local):** la versión minificada con R8 arranca, guarda en Room, pide el catálogo, programa y ejecuta el refresco nocturno (WorkManager) y reserva con Retrofit y lee el error «Ya no quedan plazas» (`verify_release.py`).
+- **Modo oscuro (emulador):** fondo, barras, iconos de la barra de estado, QR siempre claro y legible, mapa oscuro con su atribución, pantalla de arranque y cambiar el modo con la app abierta (`verify_ui.py oscuro`, con `adb shell cmd uimode night yes`).
 - **Idiomas (emulador):** cambiar desde la hoja de idioma y desde los ajustes del móvil, y ver Inicio, fichas, reservas, notificaciones, Tickets & Tours, buscador y ValBot en español, valenciano, inglés y francés; que persiste; y el primer arranque con el móvil en inglés y en alemán (`verify_ui.py idiomas`).
 - **Fotos:** tras cambiar de sección, cada tarjeta muestra su propia foto.
 - **Backend (local):** `cd backend && npm test` prueba la API por HTTP (ofertas, reservas, idempotencia, aforo con peticiones simultáneas, límites y base de datos cerrada).
@@ -160,7 +161,7 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - [x] **Icono de la app** y **pantalla de arranque del sistema** (SplashScreen API)
 - [x] **Idiomas** ES · VA · EN · FR: interfaz, contenido propio (fichas y ofertas), títulos de la web, ValBot sin conexión, avisos y formatos; elegir desde la app o desde los ajustes del móvil ([`docs/idiomas.md`](docs/idiomas.md))
 - [ ] Traducir el texto de las páginas de la web (hoy solo en español; se traducen sus títulos)
-- [ ] Modo oscuro (el diseño de Figma solo define el tema claro)
+- [x] **Modo oscuro**: la app sigue el modo del móvil, con la paleta de las imágenes de diseño, mapa oscuro y QR siempre legible ([`docs/modo-oscuro.md`](docs/modo-oscuro.md)). Opcional: un selector Claro / Oscuro / Sistema en Perfil
 
 ## Créditos
 

@@ -48,10 +48,16 @@ fun ThemeShowcase(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(name = "Theme", showBackground = true, widthDp = 390, heightDp = 1700)
+@Preview(name = "Theme", showBackground = true, widthDp = 390, heightDp = 1800)
 @Composable
 private fun ThemePreview() {
-    TurismoValenciaTheme { ThemeShowcase() }
+    TurismoValenciaTheme(darkTheme = false) { ThemeShowcase() }
+}
+
+@Preview(name = "Theme · oscuro", showBackground = true, backgroundColor = 0xFF0A0E11, widthDp = 390, heightDp = 1800)
+@Composable
+private fun ThemeDarkPreview() {
+    TurismoValenciaTheme(darkTheme = true) { ThemeShowcase() }
 }
 
 @Composable
@@ -72,9 +78,11 @@ private fun PaletteSection() {
     val app = MaterialTheme.appColors
     val swatches = listOf(
         "brand (iconos)" to app.brand,
-        "primary (texto, botón)" to c.primary,
+        "primary (texto, gráfico)" to c.primary,
+        "action (botón, chip)" to app.action,
         "primaryContainer" to c.primaryContainer,
-        "secondary (navy)" to c.secondary,
+        "secondary (navy, iconos)" to c.secondary,
+        "navy (avatar, aviso)" to app.navy,
         "tertiary (eco)" to c.tertiary,
         "tertiaryContainer" to c.tertiaryContainer,
         "onTertiaryContainer" to c.onTertiaryContainer,

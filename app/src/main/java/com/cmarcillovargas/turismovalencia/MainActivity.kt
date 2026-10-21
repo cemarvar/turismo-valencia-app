@@ -39,11 +39,11 @@ class MainActivity : AppCompatActivity() {
         language = appLanguage()
         if (savedInstanceState != null && savedInstanceState.getString(StateLanguage) != language.code) viewModelStore.clear()
         app.container.applyLanguage(language)
-        // Tema solo claro: iconos oscuros en las barras del sistema aunque el móvil esté en modo oscuro.
-        // Las pantallas con fondo oscuro los cambian con SystemBarIcons.
+        // Iconos de las barras del sistema oscuros en el modo claro y claros en el oscuro (`auto` sigue el modo del móvil, y AppCompat
+        // recrea la actividad cuando cambia). Las pantallas con fondo de color o foto los cambian con SystemBarIcons.
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
         )
         // Solo en builds de depuración: `adb shell am start -n …/.MainActivity --es route detalle/mercado-central`
         // abre una pantalla concreta, `--ez offline true` simula que no hay conexión y

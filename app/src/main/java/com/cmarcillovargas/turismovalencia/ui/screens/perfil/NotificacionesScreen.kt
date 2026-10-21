@@ -175,7 +175,7 @@ private fun NotificationKind.style(): KindStyle {
         NotificationKind.Booking -> KindStyle(Icons.Outlined.EventAvailable, colors.tertiaryContainer, colors.onTertiaryContainer)
         NotificationKind.Download -> KindStyle(Icons.Outlined.CloudDownload, app.slateContainer, colors.secondary)
         NotificationKind.Eco -> KindStyle(Icons.Outlined.Eco, app.ecoContainer, colors.tertiary)
-        NotificationKind.Bot -> KindStyle(Icons.Outlined.SmartToy, app.botContainer, app.bot)
+        NotificationKind.Bot -> KindStyle(Icons.Outlined.SmartToy, app.botContainer, app.botAccent)
     }
 }
 

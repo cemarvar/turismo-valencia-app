@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Modo oscuro: los mismos valores que `DarkAction` y `DarkBackground` de `ui/theme/Color.kt`. -->
+    <color name="splash_background">#AF3C02</color>
+    <color name="window_background">#0A0E11</color>
+</resources>

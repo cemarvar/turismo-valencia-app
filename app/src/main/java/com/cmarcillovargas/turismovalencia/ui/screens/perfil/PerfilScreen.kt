@@ -250,8 +250,8 @@ private fun ProfileHeader(uiState: PerfilUiState) {
         modifier = Modifier.fillMaxWidth().background(MaterialTheme.appColors.brandSoft).padding(Spacing.m),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(Modifier.size(AvatarSize).clip(CircleShape).background(MaterialTheme.colorScheme.secondary), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.profile_initials), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSecondary)
+        Box(Modifier.size(AvatarSize).clip(CircleShape).background(MaterialTheme.appColors.navy), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.profile_initials), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.appColors.onNavy)
         }
         Spacer(Modifier.height(Spacing.s))
         Text(stringResource(R.string.profile_name), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)

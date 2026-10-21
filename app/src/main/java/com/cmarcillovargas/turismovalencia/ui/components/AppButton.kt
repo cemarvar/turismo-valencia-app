@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.dp
 import com.cmarcillovargas.turismovalencia.ui.theme.MinTouchTarget
 import com.cmarcillovargas.turismovalencia.ui.theme.PillShape
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
+import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 
 enum class AppButtonStyle {
-    /** Relleno primary con resplandor naranja: acción principal («Siguiente», «Aplicar»). */
+    /** Relleno `action` (naranja, con texto blanco) y resplandor: acción principal («Siguiente», «Aplicar»). */
     Primary,
 
     /** Relleno primaryContainer con texto onPrimaryContainer: acción secundaria destacada. */
@@ -60,6 +61,7 @@ fun AppButton(
     compact: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
+    val app = MaterialTheme.appColors
     val sized = modifier.height(if (compact) CompactHeight else MinTouchTarget)
     val padding = if (compact) PaddingValues(horizontal = Spacing.m) else ButtonDefaults.ContentPadding
     // Los botones rellenos van en 15sp y el resto (tonal, texto y con borde) en 16sp, como en el diseño.
@@ -82,12 +84,13 @@ fun AppButton(
     }
     when (style) {
         AppButtonStyle.Primary -> {
-            val glow = colors.primary.copy(alpha = GlowAlpha)
+            val glow = app.action.copy(alpha = GlowAlpha)
             Button(
                 onClick = onClick,
                 modifier = sized.shadow(Spacing.xxs, PillShape, ambientColor = glow, spotColor = glow),
                 enabled = enabled,
                 shape = PillShape,
+                colors = ButtonDefaults.buttonColors(containerColor = app.action, contentColor = app.onAction),
                 contentPadding = padding,
                 content = content,
             )

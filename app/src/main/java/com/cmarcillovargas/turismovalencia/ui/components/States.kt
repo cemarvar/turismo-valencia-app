@@ -118,7 +118,7 @@ fun AppSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Mo
             null
         },
         colors = SwitchDefaults.colors(
-            checkedThumbColor = MaterialTheme.colorScheme.surface,
+            checkedThumbColor = MaterialTheme.appColors.switchThumb,
             checkedTrackColor = brand,
             checkedBorderColor = brand,
             checkedIconColor = brand,

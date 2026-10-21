@@ -320,11 +320,11 @@ fun UserAvatar(initials: String, onClick: (() -> Unit)?, modifier: Modifier = Mo
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(MaterialTheme.appColors.navy)
             .let { if (onClick != null) it.clickable(role = Role.Button, onClick = onClick) else it },
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = initials, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSecondary)
+        Text(text = initials, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.appColors.onNavy)
     }
 }
 

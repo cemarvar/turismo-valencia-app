@@ -414,6 +414,7 @@ private fun InputArea(
     onMic: () -> Unit,
 ) {
     val bot = MaterialTheme.appColors.bot
+    val accent = MaterialTheme.appColors.botAccent
     val enabled = uiState.online
     Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = Spacing.xxs) {
         Column(Modifier.padding(vertical = Spacing.s)) {
@@ -422,13 +423,13 @@ private fun InputArea(
                     Surface(
                         shape = PillShape,
                         color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, bot),
+                        border = BorderStroke(1.dp, accent),
                         modifier = Modifier.alpha(if (enabled) 1f else 0.6f).clip(PillShape).clickable(enabled = enabled, role = Role.Button) { onSuggestion(suggestion) },
                     ) {
                         Row(Modifier.padding(horizontal = Spacing.m).height(Spacing.xxl - Spacing.xs), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Outlined.AutoAwesome, null, tint = bot, modifier = Modifier.size(Spacing.l - Spacing.xxs))
+                            Icon(Icons.Outlined.AutoAwesome, null, tint = accent, modifier = Modifier.size(Spacing.l - Spacing.xxs))
                             Spacer(Modifier.width(Spacing.xs))
-                            Text(suggestion, style = MaterialTheme.typography.labelLarge, color = bot)
+                            Text(suggestion, style = MaterialTheme.typography.labelLarge, color = accent)
                         }
                     }
                 }
@@ -451,7 +452,7 @@ private fun InputArea(
                         enabled = enabled,
                         singleLine = true,
                         textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                        cursorBrush = SolidColor(bot),
+                        cursorBrush = SolidColor(accent),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                         keyboardActions = KeyboardActions(onSend = { onSend() }),
                         modifier = Modifier.weight(1f),

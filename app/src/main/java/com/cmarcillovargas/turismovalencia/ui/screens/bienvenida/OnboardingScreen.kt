@@ -46,6 +46,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.SystemBarIcons
 import com.cmarcillovargas.turismovalencia.ui.theme.PillShape
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
+import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 
 // Medidas del diseño (A2–A4): la foto ocupa 470 de 844dp.
 private const val PhotoFraction = 470f / 844f
@@ -159,7 +160,7 @@ private fun SkipButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Text(
         text = stringResource(R.string.onboarding_saltar),
         style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onPrimary,
+        color = MaterialTheme.appColors.onAction,
         modifier = modifier
             .clip(PillShape)
             .background(MaterialTheme.colorScheme.scrim.copy(alpha = SkipAlpha))

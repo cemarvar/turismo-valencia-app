@@ -60,15 +60,16 @@ fun AppFilterChip(
     textStyle: TextStyle = MaterialTheme.typography.titleSmall,
 ) {
     val colors = MaterialTheme.colorScheme
+    val app = MaterialTheme.appColors
     val container = when {
         !selected -> colors.surface
-        style == ChipStyle.Navy -> colors.secondary
-        else -> colors.primary
+        style == ChipStyle.Navy -> app.navy
+        else -> app.action
     }
     val content = when {
         !selected -> colors.secondary
-        style == ChipStyle.Navy -> colors.onSecondary
-        else -> colors.onPrimary
+        style == ChipStyle.Navy -> app.onNavy
+        else -> app.onAction
     }
     Surface(
         modifier = modifier.height(height),
@@ -116,7 +117,7 @@ fun StatusChip(
         StatusTone.Success -> colors.tertiaryContainer to colors.onTertiaryContainer
         StatusTone.Neutral -> colors.surfaceContainerHighest to colors.onSurfaceVariant
         StatusTone.Warning -> app.warningContainer to app.warning
-        StatusTone.Brand -> colors.primary to colors.onPrimary
+        StatusTone.Brand -> app.action to app.onAction
         StatusTone.Eco -> colors.tertiary to colors.onTertiary
         StatusTone.Danger -> colors.errorContainer to colors.onErrorContainer
     }

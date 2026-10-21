@@ -181,7 +181,7 @@ private fun Ticket(reservation: Reservation, offer: Offer?) {
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Row(Modifier.padding(Spacing.m), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(QrSize).clip(QrShape).border(1.dp, MaterialTheme.colorScheme.outlineVariant, QrShape).padding(Spacing.s)) {
+                Box(Modifier.size(QrSize).clip(QrShape).background(MaterialTheme.appColors.paper).border(1.dp, MaterialTheme.colorScheme.outlineVariant, QrShape).padding(Spacing.s)) {
                     QrCode(content = reservation.locator)
                 }
                 Spacer(Modifier.width(Spacing.m))

@@ -226,13 +226,13 @@ private fun WeekRow(uiState: ReservarUiState, onSelectDate: (LocalDate) -> Unit)
                     .weight(1f)
                     .alpha(if (past) 0.45f else 1f)
                     .clip(DayShape)
-                    .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+                    .background(if (selected) MaterialTheme.appColors.action else MaterialTheme.colorScheme.surface)
                     .then(if (selected || past) Modifier else Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, DayShape))
                     .selectable(selected = selected, enabled = !past, role = Role.Tab, onClick = { onSelectDate(day) })
                     .padding(vertical = Spacing.s),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val content = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                val content = if (selected) MaterialTheme.appColors.onAction else MaterialTheme.colorScheme.onSurface
                 Text(
                     formatWeekdayNarrow(day.dayOfWeek).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
@@ -293,9 +293,9 @@ private fun CounterRow(title: String, subtitle: String, value: Int, onMinus: () 
             }
         }
         Text(value.toString(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(Spacing.xxl), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-        Box(Modifier.size(CounterSize).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(CounterSize).clip(CircleShape).background(MaterialTheme.appColors.action), contentAlignment = Alignment.Center) {
             IconButton(onClick = onPlus, modifier = Modifier.fillMaxSize()) {
-                Icon(Icons.Outlined.Add, stringResource(R.string.book_more), tint = MaterialTheme.colorScheme.onPrimary)
+                Icon(Icons.Outlined.Add, stringResource(R.string.book_more), tint = MaterialTheme.appColors.onAction)
             }
         }
     }

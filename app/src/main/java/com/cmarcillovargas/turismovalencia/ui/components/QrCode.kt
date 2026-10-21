@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -26,7 +27,7 @@ fun QrCode(content: String, modifier: Modifier = Modifier) {
             mapOf(EncodeHintType.MARGIN to 0, EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M),
         )
     }
-    val ink = MaterialTheme.colorScheme.onSurface
+    val ink = MaterialTheme.appColors.onPaper
     Canvas(modifier.aspectRatio(1f).clearAndSetSemantics {}) {
         val cell = size.width / matrix.width
         for (x in 0 until matrix.width) {

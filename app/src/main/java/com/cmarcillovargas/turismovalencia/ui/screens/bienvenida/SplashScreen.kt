@@ -33,6 +33,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.PageIndicator
 import com.cmarcillovargas.turismovalencia.ui.components.SystemBarIcons
 import com.cmarcillovargas.turismovalencia.ui.theme.Spacing
 import com.cmarcillovargas.turismovalencia.ui.theme.TurismoValenciaTheme
+import com.cmarcillovargas.turismovalencia.ui.theme.appColors
 
 // Medidas del diseño (A1).
 private val LogoCircleSize = 112.dp
@@ -49,14 +50,15 @@ fun SplashRoute(viewModel: SplashViewModel = viewModel()) {
 fun SplashScreen(uiState: SplashUiState, modifier: Modifier = Modifier) {
     SystemBarIcons(lightStatusBarIcons = true, lightNavigationBarIcons = true)
     val colors = MaterialTheme.colorScheme
-    Column(modifier.fillMaxSize().background(colors.primary)) {
+    val app = MaterialTheme.appColors
+    Column(modifier.fillMaxSize().background(app.action)) {
         Column(
             // El grupo del diseño queda algo por debajo del centro del hueco libre.
             modifier = Modifier.weight(1f).fillMaxWidth().padding(top = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Surface(shape = CircleShape, color = colors.surface, shadowElevation = Spacing.m) {
+            Surface(shape = CircleShape, color = app.paper, shadowElevation = Spacing.m) {
                 Image(
                     painter = painterResource(R.drawable.logo_turismo_valencia),
                     contentDescription = stringResource(R.string.splash_logo_descripcion),
@@ -67,12 +69,12 @@ fun SplashScreen(uiState: SplashUiState, modifier: Modifier = Modifier) {
             Text(
                 text = stringResource(R.string.splash_titulo),
                 style = MaterialTheme.typography.headlineLarge,
-                color = colors.onPrimary,
+                color = app.onAction,
             )
             Text(
                 text = stringResource(R.string.splash_lema),
                 style = MaterialTheme.typography.titleMedium,
-                color = colors.onPrimary,
+                color = app.onAction,
             )
         }
         // El diseño deja 48dp bajo la versión; el indicador de gestos cae dentro de ese hueco.
@@ -87,15 +89,15 @@ fun SplashScreen(uiState: SplashUiState, modifier: Modifier = Modifier) {
             PageIndicator(
                 pageCount = IndicatorPages,
                 currentPage = 0,
-                activeColor = colors.onPrimary,
-                inactiveColor = colors.onPrimary,
+                activeColor = app.onAction,
+                inactiveColor = app.onAction,
                 stretchActive = false,
                 fadeInactive = true,
             )
             Text(
                 text = stringResource(R.string.splash_version, uiState.appVersion),
                 style = MaterialTheme.typography.labelSmall,
-                color = colors.onPrimary,
+                color = app.onAction,
             )
         }
     }

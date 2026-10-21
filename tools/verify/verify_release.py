@@ -1,7 +1,7 @@
 """Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, catálogo de ofertas del servidor
 y reservas (Retrofit + kotlinx.serialization: GET, POST con cabeceras y cuerpo, y el cuerpo de los errores), el refresco nocturno
 (WorkManager con su `WorkerFactory`: se programa y, al lanzarlo adelantando el reloj, el trabajo pone todo al día), ValBot (OkHttp),
-mapa, ruta, aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones) y el cambio de idioma (AppCompat).
+mapa, ruta, aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones), el cambio de idioma (AppCompat) y el modo oscuro (tema DayNight, esquema oscuro y filtro del mapa).
 Una versión minificada puede romperse sin que la de depuración lo note (p. ej. al añadir una librería de Kotlin fuera de
 `packageScope`), así que conviene pasarla tras tocar dependencias o `app/build.gradle.kts`.
 
@@ -191,6 +191,26 @@ def main():
     v.check("Idiomas: desde los ajustes del móvil, valenciano (ca-ES-valencia → values-ca)", wait_for("Cerca a València…", 8) and v.find("Què veure") is not None)
     v.set_app_locale("es")
     v.check("Idiomas: de vuelta al español", wait_for("Buscar en Valencia…", 8) and v.find("Qué ver") is not None)
+
+    # Modo oscuro: el tema DayNight de AppCompat, el esquema oscuro de Compose y el filtro de color del mapa bajo R8. El resto de la prueba
+    # es en modo claro; aquí se enciende el oscuro del sistema (`cmd uimode night yes`) y se vuelve al claro al terminar.
+    try:
+        v.set_night(True)
+        restart()
+        tab("inicio")
+        v.check("Oscuro: Inicio se repinta oscuro bajo R8", wait_for("Buscar en Valencia…", 8) and v.region_luma(v.shot(), (0, 900, 24, 1500)) < 30, "%.0f" % v.region_luma(v.shot(), (0, 900, 24, 1500)))
+        tab("mapa")
+        v.check("Oscuro: el mapa conserva la atribución y oscurece sus teselas bajo R8", wait_for("© Colaboradores de OpenStreetMap", 10))
+        time.sleep(4)
+        mean = v.region_luma(v.shot(), (0, 560, 780, 1000))
+        v.check("Oscuro: las teselas del mapa son oscuras y con detalle", mean < 85 and v.map_detail() > 14, "media %.0f, detalle %.1f" % (mean, v.map_detail()))
+        tab("reservas")
+        v.check("Oscuro: Mis reservas sigue funcionando", wait_for("reservas · ", 6, exact=False))
+    finally:
+        v.set_night(False)
+    restart()
+    tab("inicio")
+    v.check("Claro: de vuelta al modo claro", wait_for("Buscar en Valencia…", 8) and v.region_luma(v.shot(), (0, 900, 24, 1500)) > 230)
 
     log = v.adb("shell", "logcat", "-d", "-t", "3000")
     bad = [l for l in log.split("\n") if ("FATAL EXCEPTION" in l or "IllegalAccessError" in l or "NoSuchMethodError" in l or "ClassNotFoundException" in l) and v.PKG in log]

@@ -69,7 +69,7 @@ fun DetailHero(
 ) {
     Box(modifier.fillMaxWidth().height(height)) {
         if (image == null && rememberAssetImage(assetPath) == null) {
-            Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondary))
+            Box(Modifier.fillMaxSize().background(MaterialTheme.appColors.navy))
         } else {
             PlaceImage(image, category, Modifier.fillMaxSize(), imageDescription, assetPath = assetPath)
         }

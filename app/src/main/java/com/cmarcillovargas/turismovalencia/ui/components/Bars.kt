@@ -180,16 +180,16 @@ fun OfflineBanner(modifier: Modifier = Modifier, text: String = stringResource(R
         modifier = modifier
             .fillMaxWidth()
             .height(BannerHeight)
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(MaterialTheme.appColors.navy)
             .padding(horizontal = Spacing.m),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Outlined.WifiOff, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondary, modifier = Modifier.size(Spacing.m))
+        Icon(Icons.Outlined.WifiOff, contentDescription = null, tint = MaterialTheme.appColors.onNavy, modifier = Modifier.size(Spacing.m))
         Spacer(Modifier.width(Spacing.s))
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSecondary,
+            color = MaterialTheme.appColors.onNavy,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

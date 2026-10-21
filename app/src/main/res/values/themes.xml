@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Tema AppCompat (lo exige AppCompatActivity, que da el idioma por app en Android 12 o menos). Solo claro y sin barra de acción:
-         la interfaz es de Compose. -->
-    <style name="Theme.TurismoValencia" parent="Theme.AppCompat.Light.NoActionBar" />
+    <!-- Tema AppCompat (lo exige AppCompatActivity, que da el idioma por app en Android 12 o menos), claro u oscuro según el modo del móvil
+         (DayNight) y sin barra de acción: la interfaz es de Compose. Solo pone el fondo de la ventana, que se ve antes de que Compose pinte
+         (sin él, en modo oscuro saldría un destello blanco al abrir una pantalla). -->
+    <style name="Theme.TurismoValencia" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
 
     <!-- Tema de arranque de MainActivity: la pantalla de arranque del sistema (Android 12 o más) y su versión para móviles
          anteriores. Pinta el logotipo sobre el color de marca, como el A1 del diseño, y al terminar pasa a Theme.TurismoValencia. -->

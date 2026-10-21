@@ -1530,11 +1530,117 @@ def g_idiomas():
     start(None)  # deja la app como un primer arranque
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas}
+# ---------------------------------------------------------------------------------------------------------------------------------
+# Modo oscuro: la app sigue el modo del sistema (`cmd uimode night yes|no`). Se comprueba con píxeles (la luminosidad de las zonas que
+# se sabe que son fondo, tarjeta o texto en la pantalla de 780x1688) porque los textos no cambian y uiautomator no ve colores.
+# ---------------------------------------------------------------------------------------------------------------------------------
+def set_night(on):
+    adb("shell", "cmd", "uimode", "night", "yes" if on else "no")
+    time.sleep(2.0)
+
+
+def luma(p):
+    return 0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2]
+
+
+def region_luma(img, box):
+    """Luminosidad media (0-255) de una zona de la captura."""
+    return luma(ImageStat.Stat(img.crop(box)).mean)
+
+
+def region_extremes(img, box):
+    """Luminosidad del píxel más oscuro y del más claro de una zona."""
+    return img.crop(box).convert("L").getextrema()
+
+
+def g_oscuro():
+    print("\n## Modo oscuro: la app sigue el modo del sistema (fondos, texto, QR, mapa, barras y cambio en caliente)")
+    try:
+        # ---- Inicio en oscuro
+        set_night(True)
+        start("inicio")
+        img = shot()
+        check("Inicio en oscuro: el fondo de la pantalla es casi negro", region_luma(img, (0, 900, 24, 1500)) < 30, "%.0f" % region_luma(img, (0, 900, 24, 1500)))
+        check("…y la barra superior, una superficie oscura", region_luma(img, (0, 100, 30, 190)) < 45, "%.0f" % region_luma(img, (0, 100, 30, 190)))
+        lo, hi = region_extremes(img, (20, 30, 130, 66))
+        check("…con los iconos de la barra de estado claros (la hora se lee en blanco)", hi > 200, "%.0f" % hi)
+        chip = img.getpixel((62, 770))
+        check("…y el chip seleccionado en naranja de relleno (AF3C02, con texto blanco)", abs(chip[0] - 0xAF) < 22 and abs(chip[1] - 0x3C) < 22 and chip[2] < 30, str(chip))
+        check("«Cerca de ti» y el resto de textos están en la pantalla", find("Cerca de ti") is not None and find("Qué ver") is not None)
+
+        # ---- El mismo Inicio en claro
+        set_night(False)
+        start("inicio")
+        img = shot()
+        check("Inicio en claro: el fondo vuelve a ser claro", region_luma(img, (0, 900, 24, 1500)) > 230, "%.0f" % region_luma(img, (0, 900, 24, 1500)))
+        lo, hi = region_extremes(img, (20, 30, 130, 66))
+        check("…y la hora de la barra de estado, oscura", lo < 90, "%.0f" % lo)
+        chip = img.getpixel((62, 770))
+        check("…y el chip seleccionado, en C44D00 como siempre", abs(chip[0] - 0xC4) < 22 and abs(chip[1] - 0x4D) < 22 and chip[2] < 30, str(chip))
+
+        # ---- Reserva confirmada: el QR es tinta oscura sobre papel blanco también en oscuro
+        set_night(True)
+        start("reserva/seed-1")
+        img = shot()
+        paper = region_luma(img, (70, 1190, 78, 1360))
+        lo, hi = region_extremes(img, (100, 1190, 260, 1360))
+        check("Reserva confirmada en oscuro: el papel del QR es blanco", paper > 235, "%.0f" % paper)
+        check("…y su tinta, oscura (el lector del acceso lo lee igual que en claro)", lo < 40 and hi > 235, "%.0f–%.0f" % (lo, hi))
+
+        # ---- Perfil en oscuro: texto claro sobre superficies oscuras
+        start("perfil")
+        img = shot()
+        title_lo, title_hi = region_extremes(img, (200, 120, 500, 175))
+        check("Perfil en oscuro: el título es claro sobre la barra oscura", title_hi > 200 and region_luma(img, (560, 100, 760, 190)) < 45, "%.0f" % title_hi)
+
+        # ---- Mapa: las teselas de OpenStreetMap se oscurecen con un filtro y conservan la atribución
+        start("mapa")
+        time.sleep(5.0)
+        img = shot()
+        mean = region_luma(img, (0, 560, 780, 1000))
+        check("Mapa en oscuro: las teselas se ven oscuras (luminosidad media baja)", mean < 85, "%.0f" % mean)
+        check("…pero con detalle (calles y nombres), no un rectángulo negro", map_detail() > 14, "%.1f" % map_detail())
+        check("…y con la atribución de OpenStreetMap", wait_for("© Colaboradores de OpenStreetMap", 6))
+        set_night(False)
+        start("mapa")
+        time.sleep(5.0)
+        mean = region_luma(shot(), (0, 560, 780, 1000))
+        check("Mapa en claro: las teselas son las de siempre, claras", mean > 140, "%.0f" % mean)
+
+        # ---- Bienvenida: la pantalla de arranque (A1) en el naranja de relleno de cada modo
+        for night, target, label in ((True, (0xAF, 0x3C, 0x02), "AF3C02"), (False, (0xC4, 0x4D, 0x00), "C44D00")):
+            set_night(night)
+            adb("shell", "am", "force-stop", PKG)
+            adb("shell", "pm", "clear", PKG)
+            adb("shell", "cmd", "locale", "set-app-locales", PKG, "--locales", "es")
+            adb("shell", "am", "start", "-n", PKG + "/.MainActivity")
+            time.sleep(2.2)
+            px = shot().getpixel((60, 260))
+            check("Bienvenida en %s: la pantalla de arranque es del naranja de relleno (%s)" % ("oscuro" if night else "claro", label), all(abs(px[i] - target[i]) < 24 for i in range(3)), str(px))
+
+        # ---- Cambiar el modo con la app abierta: AppCompat recrea la actividad y la app sigue viva
+        set_night(False)
+        start("favoritos")
+        pid_before = adb("shell", "pidof", PKG).strip()
+        set_night(True)
+        time.sleep(2.5)
+        img = shot()
+        check("Cambio en caliente a oscuro: la pantalla se repinta oscura sin cerrar la app", region_luma(img, (0, 900, 24, 1500)) < 30 and adb("shell", "pidof", PKG).strip() == pid_before, "%.0f" % region_luma(img, (0, 900, 24, 1500)))
+        check("…y sigue en la misma pantalla (Favoritos)", find("Favoritos") is not None)
+        set_night(False)
+        time.sleep(2.5)
+        check("Cambio en caliente a claro: vuelve a pintarse clara", region_luma(shot(), (0, 900, 24, 1500)) > 230)
+    finally:
+        set_night(False)
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas, "oscuro": g_oscuro}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     # El emulador está en inglés y la app sigue el idioma del móvil: los grupos esperan el español.
     adb("shell", "cmd", "locale", "set-app-locales", PKG, "--locales", "es")
+    set_night(False)  # los grupos esperan el modo claro; `oscuro` cambia el modo y lo deja otra vez en claro
     chosen = sys.argv[1:] or list(GROUPS)
     for g in chosen:
         GROUPS[g]()
