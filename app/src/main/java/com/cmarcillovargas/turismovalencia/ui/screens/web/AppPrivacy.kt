@@ -11,8 +11,8 @@ import com.cmarcillovargas.turismovalencia.data.model.WebItem
 internal const val PrivacyPageId = "PoliticaPrivacidad"
 
 /**
- * Lo que añade la app a la política de privacidad de la web: qué datos salen del móvil (reservas, identificador, ValBot, mapa y rutas,
- * actualización automática), adónde van y cómo ejercer los derechos. El texto de la web se importa y se regenera con
+ * Lo que añade la app a la política de privacidad de la web: qué datos salen del móvil (reservas, cancelarlas y recuperarlas,
+ * identificador, ValBot, mapa y rutas, actualización automática), adónde van y cómo ejercer los derechos. El texto de la web se importa y se regenera con
  * `tools/web-import`, así que esto vive aparte, en `strings.xml`, y se pinta debajo con los mismos bloques de texto legal. Si la app
  * empieza a mandar otro dato fuera del móvil, hay que añadirlo aquí. Los textos remiten a los puntos 1, 2, 4, 6 y 7 de la política de
  * la web (responsable, datos, base jurídica, destinatarios y derechos): si la web cambia esa numeración, hay que revisarlos.
@@ -30,6 +30,7 @@ internal fun appPrivacyBlocks(): List<WebBlock> = listOf(
                 bullets = stringArrayResource(R.array.privacy_app_bookings_bullets).toList(),
             ),
             WebItem(body = stringResource(R.string.privacy_app_bookings_use)),
+            WebItem(title = stringResource(R.string.privacy_app_cancel_title), body = stringResource(R.string.privacy_app_cancel_body)),
             WebItem(title = stringResource(R.string.privacy_app_device_title), body = stringResource(R.string.privacy_app_device_body)),
             WebItem(title = stringResource(R.string.privacy_app_valbot_title), body = stringResource(R.string.privacy_app_valbot_body)),
             WebItem(title = stringResource(R.string.privacy_app_map_title), body = stringResource(R.string.privacy_app_map_body)),

@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "reservation_past",
+    "message": "Esa reserva ya no se puede cancelar: la actividad ya empezó o pasó."
+  }
+}

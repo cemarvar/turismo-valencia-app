@@ -119,7 +119,7 @@ class BackgroundRefreshTest {
         val memory = Room.inMemoryDatabaseBuilder(app, AppDatabase::class.java).build()
         val plans = CopyOnWriteArrayList<RefreshPlan>()
         try {
-            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, RefreshScheduler { plans += it }, NoLanguageApplier)
+            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, RefreshScheduler { plans += it }, NoLanguageApplier, NoThemeApplier)
             // La demostración trae los dos interruptores activados.
             awaitPlans(plans, RefreshPlan(enabled = true, unmeteredOnly = true))
 

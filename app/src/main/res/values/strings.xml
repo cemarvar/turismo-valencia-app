@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Turismo Valencia</string>
 
     <!-- Idioma de estos recursos (ES, VA, EN o FR): cada values-xx lo traduce a su propio código. La app lo lee para saber qué idioma ha
@@ -251,6 +251,8 @@
     <string name="res_status_completed">Completada</string>
     <string name="res_status_cancelled">Cancelada</string>
     <string name="res_cancelled">Canceladas</string>
+    <string name="res_recover_title">¿Reservaste desde otro móvil?</string>
+    <string name="res_recover_text">Recupera tu reserva con su localizador y el correo con el que la hiciste.</string>
     <string name="book_title">Reservar</string>
     <string name="book_step">Paso 1 de 2 · Fecha y personas</string>
     <string name="book_per_person">%1$s · %2$s por persona</string>
@@ -291,6 +293,31 @@
     <string name="booking_total">Total</string>
     <string name="booking_show_code">Muestra este código en el embarcadero. Disponible sin conexión.</string>
     <string name="booking_share_text">Reserva %1$s: %2$s · %3$s a las %4$s</string>
+    <string name="booking_cancelled">Reserva cancelada</string>
+    <string name="booking_cancelled_text">Hemos liberado tus plazas. No tienes que hacer nada más.</string>
+    <string name="booking_cancelled_code">Esta reserva está cancelada: el código ya no vale.</string>
+    <string name="booking_cancel">Cancelar reserva</string>
+    <string name="booking_cancelling">Cancelando…</string>
+    <string name="booking_cancel_needs_connection">Para cancelar la reserva necesitas conexión a Internet.</string>
+    <string name="booking_cancel_title">¿Cancelar esta reserva?</string>
+    <string name="booking_cancel_text">Se liberarán tus plazas de «%1$s» (%2$s). No se puede deshacer.</string>
+    <string name="booking_cancel_confirm">Sí, cancelar</string>
+    <string name="booking_cancel_keep">No, mantenerla</string>
+    <string name="booking_book_again">Reservar de nuevo</string>
+    <string name="booking_cancel_error_unreachable">No hemos podido conectar con el servidor y no sabemos si se ha cancelado. Comprueba tu conexión y vuelve a intentarlo; repetirlo es seguro.</string>
+    <string name="booking_cancel_error_too_late">Ya no se puede cancelar: la actividad ya ha empezado o ha pasado.</string>
+    <string name="booking_cancel_error_not_found">El servidor no encuentra esta reserva, así que no se puede cancelar desde la app.</string>
+    <string name="booking_cancel_error_other">No se ha podido cancelar la reserva. Inténtalo de nuevo más tarde.</string>
+    <string name="recover_title">Recuperar una reserva</string>
+    <string name="recover_locator_example" translatable="false" tools:ignore="TypographyDashes">TV-2027-1100</string>
+    <string name="recover_text">Escribe el localizador (por ejemplo, %1$s) y el correo con el que reservaste.</string>
+    <string name="recover_email_label">Correo con el que reservaste</string>
+    <string name="recover_confirm">Recuperar</string>
+    <string name="recover_working">Buscando…</string>
+    <string name="recover_needs_connection">Recuperar una reserva necesita conexión a Internet.</string>
+    <string name="recover_privacy">El localizador y el correo se envían a nuestro servidor solo para buscar la reserva.</string>
+    <string name="recover_error_not_found">No hay ninguna reserva con ese localizador y ese correo. Revisa los dos datos.</string>
+    <string name="recover_error_other">No se ha podido recuperar la reserva. Inténtalo de nuevo más tarde.</string>
 
     <plurals name="booking_adults">
         <item quantity="one">%1$d adulto</item>
@@ -319,6 +346,10 @@
     <string name="profile_text_small">Pequeño</string>
     <string name="profile_text_large">Grande</string>
     <string name="profile_text_xlarge">Muy grande</string>
+    <string name="profile_theme">Tema</string>
+    <string name="profile_theme_system">Sigue al del sistema</string>
+    <string name="profile_theme_light">Claro</string>
+    <string name="profile_theme_dark">Oscuro</string>
     <string name="profile_account">Cuenta</string>
     <string name="profile_privacy">Privacidad y datos</string>
     <string name="profile_privacy_text">Tus favoritos, reservas y descargas se guardan en tu móvil. Usamos tu ubicación solo mientras usas la app para ordenar lugares por cercanía y calcular rutas. El mapa y las rutas los sirve OpenStreetMap: para dibujarlos le llegan la zona que miras y el punto de salida y de llegada de la ruta. Puedes cambiarlo cuando quieras.</string>
@@ -388,8 +419,10 @@
         <item>Un identificador aleatorio de tu móvil (ver más abajo), para mostrarte tus reservas sin que tengas que crear una cuenta.</item>
     </string-array>
     <string name="privacy_app_bookings_use">Lo usamos solo para gestionar la reserva (ejecución del contrato, como se indica en el punto 4): confirmarla, controlar las plazas y devolverte su localizador. No pedimos datos de pago: el pago de esta versión está simulado. Conservamos los datos mientras sean necesarios para gestionar la reserva y puedes pedir que los borremos cuando quieras.</string>
+    <string name="privacy_app_cancel_title">Cancelar y recuperar reservas</string>
+    <string name="privacy_app_cancel_body">Al cancelar una reserva, la app envía a nuestro servidor su localizador, el correo con el que se hizo y el identificador del móvil; el servidor la marca como cancelada y libera las plazas, pero conserva el registro. Para recuperar una reserva en otro móvil o tras borrar los datos de la app, escribes su localizador y el correo con el que se hizo: la app los envía al servidor para buscarla y, si coinciden, la guarda en tu móvil. Quien tenga el localizador y el correo de una reserva puede verla y cancelarla, así que no los compartas.</string>
     <string name="privacy_app_device_title">Identificador del móvil</string>
-    <string name="privacy_app_device_body">La primera vez que reservas, la app crea un número aleatorio y lo guarda en tu móvil. No contiene datos tuyos ni del aparato. Se manda con cada reserva y cada vez que la app consulta tus reservas. Si borras los datos de la app, el móvil lo pierde y deja de ver sus reservas en la app (si usas la copia de seguridad de Android, al reinstalarla puede volver con el resto de tus datos); en nuestro servidor siguen hasta que pidas borrarlas.</string>
+    <string name="privacy_app_device_body">La primera vez que reservas o cancelas una reserva, la app crea un número aleatorio y lo guarda en tu móvil. No contiene datos tuyos ni del aparato. Se manda con cada reserva, con cada cancelación y cada vez que la app consulta tus reservas. Si borras los datos de la app, el móvil lo pierde y deja de ver sus reservas en la app (puedes recuperarlas con su localizador y su correo; si usas la copia de seguridad de Android, al reinstalarla puede volver con el resto de tus datos); en nuestro servidor siguen hasta que pidas borrarlas.</string>
     <string name="privacy_app_valbot_title">Asistente ValBot</string>
     <string name="privacy_app_valbot_body">Lo que escribes a ValBot se envía al servidor de la web, que lo procesa con el servicio de inteligencia artificial Gemini de Google para contestarte (puntos 2 y 6). No escribas datos personales en el chat. Si no hay conexión, o el servidor no puede contestar, la app responde con respuestas básicas desde tu móvil (sin conexión no se envía nada).</string>
     <string name="privacy_app_map_title">Mapa, rutas y ubicación</string>

@@ -13,7 +13,7 @@ solo la dirección.
   sería una función nueva (`api-v2`) desplegada a la vez, para que las apps ya instaladas sigan funcionando.
 - **Sin cuentas:** cada móvil genera un UUID aleatorio la primera vez (lo guarda en la app, no en el código) y lo manda en
   `X-Device-Id`; con él se listan sus reservas. Es el «secreto» del móvil: quien lo conozca puede ver esas reservas. Para recuperar
-  una reserva en otro móvil sirve el localizador junto con el correo.
+  o cancelar una reserva en otro móvil sirve el localizador junto con el correo.
 - **Ejemplos reales:** `backend/contract/examples/*.json`. Los usan las pruebas del servidor y las de la app; si la forma de la API
   cambia, las pruebas fallan hasta que se actualicen.
 
@@ -29,10 +29,11 @@ Todos tienen la misma forma. La app decide qué texto enseñar según `code`; `m
 |---|---|---|
 | 400 | `invalid_request` | Falta una cabecera, el cuerpo no es JSON o un campo tiene un tipo o formato incorrecto (el mensaje dice cuáles) |
 | 404 | `offer_not_found` | La oferta no existe o ya no está disponible |
-| 404 | `reservation_not_found` | No hay ninguna reserva con ese localizador y ese correo (igual si el localizador existe con otro correo) |
+| 404 | `reservation_not_found` | No hay ninguna reserva con ese localizador y ese correo (igual si el localizador existe con otro correo); al cancelar, que no existe o no es de ese dispositivo ni de ese correo |
 | 404 / 405 | `not_found` / `method_not_allowed` | Ruta o método que no existen (con `Allow`) |
 | 409 | `sold_out` | No quedan plazas para ese día y horario |
 | 409 | `idempotency_key_reused` | La clave de idempotencia ya se usó con otros datos |
+| 409 | `reservation_past` | Al cancelar: la actividad ya empezó o pasó |
 | 413 | `payload_too_large` | El cuerpo pasa de 4 KB |
 | 422 | `invalid_slot` | La oferta no tiene ese horario |
 | 422 | `invalid_date` | Fecha pasada o a más de un año; o, si es hoy, un horario que ya pasó |
@@ -103,7 +104,26 @@ Las reservas del dispositivo (`X-Device-Id`), las más recientes primero, hasta 
 ### `GET /reservations/{locator}?email=…`
 
 Recupera una reserva con su localizador y el correo con el que se hizo (sin distinguir mayúsculas). Si el correo no coincide,
-responde como si no existiera, para que nadie pueda averiguar qué localizadores hay.
+responde como si no existiera, para que nadie pueda averiguar qué localizadores hay. No lleva `X-Device-Id`.
+
+### `POST /reservations/{locator}/cancel`
+
+Cancela una reserva. Cabecera obligatoria: `X-Device-Id` (UUID del móvil). Cuerpo opcional con el correo (ejemplo:
+`backend/contract/examples/cancel-request.json`):
+
+```json
+{ "email": "laura.garcia@email.com" }
+```
+
+La puede cancelar **el dispositivo que la hizo** o **quien tenga su localizador y el correo con el que se hizo** (la recuperó en otro
+móvil; sin distinguir mayúsculas). Si no es ninguna de las dos cosas, responde 404 `reservation_not_found`, igual que si no existiera.
+
+- **200** con la reserva ya cancelada (`status: "cancelled"`; ejemplo: `reservation-cancelled.json`). Cancelar una que ya lo estaba
+  también es **200** con la misma reserva: reintentar tras un corte de red es seguro.
+- **409 `reservation_past`** si la actividad ya empezó o pasó, contado en la hora de Valencia: si su día es hoy, hasta la hora del
+  horario; un horario `Cualquier hora` vale todo el día.
+- No borra nada: la reserva queda guardada con `status: "cancelled"`. Las plazas se liberan solas, porque el aforo solo cuenta las
+  reservas confirmadas (otra persona puede reservarlas enseguida).
 
 ## Límites
 
@@ -115,6 +135,8 @@ responde como si no existiera, para que nadie pueda averiguar qué localizadores
 | Crear reservas, por correo | 10 | 1 día |
 | Listar reservas, por dispositivo | 120 | 1 hora |
 | Recuperar por localizador, por IP | 20 | 1 hora |
+| Cancelar reservas, por IP | 30 | 1 hora |
+| Cancelar reservas, por dispositivo | 20 | 1 hora |
 
 Al pasarse, **429** con `Retry-After`. Los contadores no guardan IPs ni correos, solo un resumen con sal.
 
@@ -126,6 +148,8 @@ Al pasarse, **429** con `Retry-After`. Los contadores no guardan IPs ni correos,
 3. Reservar exige conexión (el servidor confirma y asigna el localizador); ver las reservas ya guardadas, no (**hecho**).
 4. Cachear el catálogo con el `ETag` y usar el catálogo incluido en la app como respaldo si no hay red (**hecho**, ver abajo).
 5. Enseñar los mensajes según `code`, no según `message` (**hecho**).
+6. Cancelar con `POST /reservations/{localizador}/cancel` y recuperar con `GET /reservations/{localizador}?email=` (**hecho**, ver
+   «Reservas»).
 
 ### Catálogo de ofertas: lo que hace hoy la app
 
@@ -151,7 +175,8 @@ El cliente es el mismo (`TurismoApi`) y `ReservationsRepository` (`data/repo`) e
 
 - **Dispositivo.** El UUID se genera la primera vez que se reserva y se guarda en Room (`settings.deviceId`, de forma atómica: nunca
   hay dos). Un móvil que nunca ha reservado no tiene identificador: poner las reservas al día no lo crea ni manda nada al servidor. Va en `X-Device-Id`. Si el usuario borra los datos de la app o la
-  desinstala, el móvil pierde el UUID y deja de poder listar sus reservas (siguen existiendo en el servidor, con su localizador).
+  desinstala, el móvil pierde el UUID y deja de poder listar sus reservas (siguen existiendo en el servidor y se recuperan con su
+  localizador y su correo, ver «Recuperar»). El UUID también se crea la primera vez que se cancela una reserva recuperada.
 - **Reservar exige conexión.** Sin red, la pantalla muestra «Reservar necesita conexión a Internet» y el botón queda desactivado;
   ver las reservas guardadas no necesita red. Pulsar «Confirmar reserva» manda `POST /reservations` y el botón dice «Reservando…»
   (un segundo toque mientras tanto no hace nada). El total que se enseña es una vista previa: el que vale es el del servidor.
@@ -174,8 +199,22 @@ El cliente es el mismo (`TurismoApi`) y `ReservationsRepository` (`data/repo`) e
   `rate_limited` (con `Retry-After`: «Vuelve a probar en N min»), cualquier 5xx «El servicio de reservas no está disponible ahora»,
   sin red o respuesta ilegible «No hemos podido conectar con el servidor» y cualquier otro rechazo (`invalid_request`,
   `idempotency_key_reused`, `payload_too_large`…) «No se ha podido completar la reserva». El aviso desaparece al cambiar un dato.
-- **Todavía no.** La app no usa `GET /reservations/{localizador}?email=` (recuperar una reserva en otro móvil) ni cancela reservas
-  (la API tampoco: `cancelled` solo lo pone quien administra la base de datos).
+- **Cancelar.** La confirmación de la reserva ofrece «Cancelar reserva» mientras no esté cancelada ni completada y la actividad no
+  haya empezado (la misma regla que aplica el servidor, en la hora de Valencia: `Reservation.canCancel`; quien decide es el
+  servidor). Pide confirmación («¿Cancelar esta reserva?»), manda `POST /reservations/{localizador}/cancel` con el UUID del móvil y el
+  correo de la reserva, guarda lo que contesta y enseña «Reserva cancelada»: sin código QR (ya no vale), en «Canceladas» de Mis
+  reservas y con «Reservar de nuevo». Exige conexión (sin red el botón está desactivado y dice por qué); las tres de demostración
+  (`seed-*`) solo existen en el móvil y se cancelan aquí, sin servidor ni UUID. La hace el repositorio, no la pantalla: si el usuario
+  sale mientras tanto, la cancelación acaba igualmente. Un corte de red no la pierde (si el servidor la cancela y la respuesta se
+  pierde, repetir es seguro). Mensajes por `code`: `reservation_past` «Ya no se puede cancelar: la actividad ya ha empezado o ha
+  pasado» (y el botón desaparece), `reservation_not_found` «El servidor no encuentra esta reserva», sin red «No hemos podido
+  conectar… no sabemos si se ha cancelado… repetirlo es seguro», 429 y 5xx como al reservar y cualquier otro rechazo «No se ha
+  podido cancelar la reserva».
+- **Recuperar.** «¿Reservaste desde otro móvil?», al final de Mis reservas, abre un diálogo con el localizador y el correo y manda
+  `GET /reservations/{localizador}?email=` (sin identificador de móvil). Si coinciden, la reserva se guarda en Room y se abre; si no,
+  «No hay ninguna reserva con ese localizador y ese correo. Revisa los dos datos.» (el servidor no dice cuál falla). Exige conexión.
+  Se puede cancelar desde ese móvil con su correo. **Límite conocido:** `GET /reservations` solo trae las reservas que hizo este
+  móvil, así que una reserva recuperada no se actualiza sola: si se cancela desde otro móvil, hay que recuperarla otra vez para verlo.
 
 ## Datos personales
 

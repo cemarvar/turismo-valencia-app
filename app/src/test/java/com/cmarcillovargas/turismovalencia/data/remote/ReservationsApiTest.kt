@@ -163,6 +163,106 @@ class ReservationsApiTest {
     }
 
     @Test
+    fun `cancela la reserva con el movil en la cabecera y el correo en el cuerpo del contrato`() {
+        server.enqueue(MockResponse().setBody(contractExample("reservation-cancelled.json")))
+
+        val cancelled = runBlocking { service.cancel(device, "TV-2027-1100", "laura.garcia@email.com") }
+
+        val sent = server.takeRequest()
+        assertEquals("POST", sent.method)
+        assertEquals("/reservations/TV-2027-1100/cancel", sent.path)
+        assertEquals(device, sent.getHeader("X-Device-Id"))
+        assertTrue(sent.getHeader("Content-Type").orEmpty().startsWith("application/json"))
+        assertEquals(Json.parseToJsonElement(contractExample("cancel-request.json")) as JsonObject, Json.parseToJsonElement(sent.body.readUtf8()) as JsonObject)
+        assertEquals("cancelled", cancelled.status)
+        assertEquals("TV-2027-1100", cancelled.locator)
+    }
+
+    @Test
+    fun `un localizador raro no se cuela en la ruta`() {
+        server.enqueue(MockResponse().setBody(contractExample("reservation-cancelled.json")))
+
+        runBlocking { service.cancel(device, "a/b c", "x@example.com") }
+
+        assertEquals("/reservations/a%2Fb%20c/cancel", server.takeRequest().path)
+    }
+
+    @Test
+    fun `cancelar una reserva que no es del movil ni del correo es un 404 con su codigo`() {
+        server.enqueue(MockResponse().setResponseCode(404).setBody(contractExample("error-reservation-not-found.json")))
+
+        val error = failure { service.cancel(device, "TV-2027-1100", "otro@example.com") }
+
+        assertEquals(404, error.status)
+        assertEquals("reservation_not_found", error.code)
+    }
+
+    @Test
+    fun `cancelar una actividad que ya empezo es un 409 con su codigo`() {
+        server.enqueue(MockResponse().setResponseCode(409).setBody(contractExample("error-reservation-past.json")))
+
+        val error = failure { service.cancel(device, "TV-2027-1100", "laura.garcia@email.com") }
+
+        assertEquals(409, error.status)
+        assertEquals("reservation_past", error.code)
+    }
+
+    @Test
+    fun `demasiadas cancelaciones trae el tiempo de espera`() {
+        server.enqueue(MockResponse().setResponseCode(429).setHeader("Retry-After", "300").setBody(contractExample("error-rate-limited.json")))
+
+        val error = failure { service.cancel(device, "TV-2027-1100", "laura.garcia@email.com") }
+
+        assertEquals(429, error.status)
+        assertEquals(300, error.retryAfterSeconds)
+    }
+
+    @Test
+    fun `recupera una reserva con el localizador en la ruta y el correo en la consulta`() {
+        server.enqueue(MockResponse().setBody(contractExample("reservation.json")))
+
+        val found = runBlocking { service.find("TV-2027-1100", "laura.garcia@email.com") }
+
+        val sent = server.takeRequest()
+        assertEquals("GET", sent.method)
+        assertEquals(listOf("reservations", "TV-2027-1100"), sent.requestUrl!!.pathSegments)
+        assertEquals("laura.garcia@email.com", sent.requestUrl!!.queryParameter("email"))
+        assertNull("recuperar no manda el identificador del móvil", sent.getHeader("X-Device-Id"))
+        assertEquals("TV-2027-1100", found.locator)
+        assertEquals("confirmed", found.status)
+    }
+
+    @Test
+    fun `un correo con un mas se manda codificado para que el servidor no lo lea como un espacio`() {
+        server.enqueue(MockResponse().setBody(contractExample("reservation.json")))
+
+        runBlocking { service.find("TV-2027-1100", "ana+valencia@example.com") }
+
+        val sent = server.takeRequest()
+        assertTrue(sent.path.orEmpty(), sent.path.orEmpty().contains("ana%2Bvalencia%40example.com"))
+        assertEquals("ana+valencia@example.com", sent.requestUrl!!.queryParameter("email"))
+    }
+
+    @Test
+    fun `recuperar con un localizador y un correo que no coinciden es un 404 con su codigo`() {
+        server.enqueue(MockResponse().setResponseCode(404).setBody(contractExample("error-reservation-not-found.json")))
+
+        val error = failure { service.find("TV-2027-1100", "otro@example.com") }
+
+        assertEquals(404, error.status)
+        assertEquals("reservation_not_found", error.code)
+    }
+
+    @Test
+    fun `sin servidor no se puede cancelar ni recuperar`() {
+        val address = server.url("/").toString()
+        server.shutdown()
+
+        assertNull(failure { serviceFor(address).cancel(device, "TV-2027-1100", "x@example.com") }.status)
+        assertNull(failure { serviceFor(address).find("TV-2027-1100", "x@example.com") }.status)
+    }
+
+    @Test
     fun `ignora los campos que no conoce de la reserva`() {
         server.enqueue(
             MockResponse().setResponseCode(201).setBody(

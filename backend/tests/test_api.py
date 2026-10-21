@@ -12,6 +12,7 @@ import json
 import os
 import random
 import re
+import subprocess
 import threading
 import unittest
 import urllib.error
@@ -50,6 +51,22 @@ def call(method, path, *, headers=None, body=None, raw=None, ip=None, base=None)
     return status, lowered, parsed
 
 
+def local_sql(sql):
+    """Ejecuta SQL en la base de datos del backend local (contenedor de Docker `supabase_db_<project_id>`) y devuelve lo que imprime;
+    None si no se puede (despliegue en la nube, Docker parado o backend sin arrancar). Sirve para fabricar lo que la API no deja crear,
+    como una reserva de un día que ya pasó."""
+    if not LOCAL:
+        return None
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "supabase", "config.toml"), encoding="utf-8") as file:
+            config = file.read()
+        container = "supabase_db_" + re.search(r'^project_id\s*=\s*"([^"]+)"', config, re.M).group(1)
+        result = subprocess.run(["docker", "exec", container, "psql", "-U", "postgres", "-t", "-A", "-c", sql], capture_output=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired, AttributeError):
+        return None
+    return result.stdout.decode("utf-8", "replace").strip() if result.returncode == 0 else None
+
+
 def random_ip():
     return "10.%d.%d.%d" % (random.randint(1, 254), random.randint(0, 254), random.randint(1, 254))
 
@@ -84,6 +101,11 @@ def reserve(*, offer="albufera-barca", day=None, time="18:30", adults=2, childre
     }
     headers = {"X-Device-Id": device or str(uuid.uuid4()), "Idempotency-Key": key or str(uuid.uuid4())}
     return call("POST", "/reservations", headers=headers, body=payload, ip=ip or random_ip())
+
+
+def cancel(locator, *, device, email=None, raw=None, ip=None):
+    """`POST /reservations/<localizador>/cancel` desde `device`, con el correo en el cuerpo si se pasa (o un cuerpo en bruto)."""
+    return call("POST", "/reservations/%s/cancel" % locator, headers={"X-Device-Id": device}, body={"email": email} if email is not None else None, raw=raw, ip=ip or random_ip())
 
 
 class Catalogo(unittest.TestCase):
@@ -282,6 +304,103 @@ class Reservas(unittest.TestCase):
         self.assertEqual(reserve(offer="prueba-aforo", day=today, time="23:59")[0], 201)
 
 
+@unittest.skipUnless(WRITES, "crea reservas de verdad (API_WRITES=1)")
+class Cancelar(unittest.TestCase):
+    def test_cancelar_con_el_mismo_dispositivo(self):
+        device = str(uuid.uuid4())
+        created = reserve(device=device)[2]
+        status, headers, cancelled = cancel(created["locator"], device=device)
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["cache-control"], "no-store")
+        self.assertEqual(cancelled, dict(created, status="cancelled"))  # es la misma reserva, ya cancelada
+        # el listado del móvil y la recuperación con localizador y correo la ven cancelada
+        self.assertEqual(call("GET", "/reservations", headers={"X-Device-Id": device})[2]["reservations"][0]["status"], "cancelled")
+        status, _, found = call("GET", "/reservations/%s?email=%s" % (created["locator"], urllib.request.quote(created["email"])), ip=random_ip())
+        self.assertEqual((status, found["status"]), (200, "cancelled"))
+
+    def test_cancelar_dos_veces_no_es_un_error(self):
+        device = str(uuid.uuid4())
+        created = reserve(device=device)[2]
+        first = cancel(created["locator"], device=device)
+        second = cancel(created["locator"], device=device)
+        self.assertEqual((first[0], second[0]), (200, 200))
+        self.assertEqual(first[2], second[2])
+
+    def test_cancelar_con_localizador_y_correo_desde_otro_movil(self):
+        email = "Otro-%s@Example.com" % uuid.uuid4().hex[:8]
+        created = reserve(email=email)[2]
+        # el móvil nuevo no es el que reservó: vale el localizador (sin distinguir mayúsculas) y el correo (idem)
+        status, _, cancelled = cancel(created["locator"].lower(), device=str(uuid.uuid4()), email=email.upper())
+        self.assertEqual((status, cancelled["status"], cancelled["id"]), (200, "cancelled", created["id"]))
+
+    def test_no_cancela_quien_no_es_el_dueno(self):
+        owner = str(uuid.uuid4())
+        created = reserve(device=owner)[2]
+        stranger = str(uuid.uuid4())
+        for name, kwargs in {
+            "otro móvil sin correo": dict(device=stranger),
+            "otro móvil con otro correo": dict(device=stranger, email="otra@example.com"),
+            "otro móvil con el correo vacío": dict(device=stranger, email="  "),
+        }.items():
+            with self.subTest(name):
+                status, _, body = cancel(created["locator"], **kwargs)
+                self.assertEqual((status, body["error"]["code"]), (404, "reservation_not_found"))  # igual que si no existiera
+        for name, locator in {"localizador que no existe": "TV-2099-9999", "localizador mal formado": "XX-1"}.items():
+            with self.subTest(name):
+                status, _, body = cancel(locator, device=owner)
+                self.assertEqual((status, body["error"]["code"]), (404, "reservation_not_found"))
+        # y sigue confirmada
+        self.assertEqual(call("GET", "/reservations", headers={"X-Device-Id": owner})[2]["reservations"][0]["status"], "confirmed")
+
+    def test_datos_con_forma_incorrecta(self):
+        device = str(uuid.uuid4())
+        created = reserve(device=device)[2]
+        path = "/reservations/%s/cancel" % created["locator"]
+        self.assertEqual(call("POST", path, ip=random_ip())[0], 400)  # sin X-Device-Id
+        self.assertEqual(call("POST", path, headers={"X-Device-Id": "no-es-un-uuid"}, ip=random_ip())[0], 400)
+        for name, raw in {"no es JSON": b"esto no es json", "es una lista": b"[1, 2]", "correo que no es texto": b'{"email": 5}', "correo demasiado largo": json.dumps({"email": "a" * 255}).encode()}.items():
+            with self.subTest(name):
+                status, _, body = cancel(created["locator"], device=device, raw=raw)
+                self.assertEqual((status, body["error"]["code"]), (400, "invalid_request"))
+        status, _, body = call("POST", path, headers={"X-Device-Id": device, "Content-Type": "application/json"}, raw=b"x" * 5000, ip=random_ip())
+        self.assertIn(status, (400, 413))
+        self.assertEqual(call("GET", "/reservations", headers={"X-Device-Id": device})[2]["reservations"][0]["status"], "confirmed")  # nada de esto la canceló
+        self.assertEqual(call("GET", path, headers={"X-Device-Id": device}, ip=random_ip())[0], 405)  # solo POST
+
+    def test_cancelar_hoy_hasta_que_empieza_la_actividad(self):
+        today = madrid_today()
+        # «Cualquier hora» vale todo el día
+        device = str(uuid.uuid4())
+        anytime = reserve(offer="tourist-card-72", day=today, time="Cualquier hora", device=device)[2]
+        self.assertEqual(cancel(anytime["locator"], device=device)[0], 200)
+
+    @unittest.skipUnless(FULL, "usa la oferta de pruebas, que solo existe en local")
+    def test_horarios_de_hoy(self):
+        device = str(uuid.uuid4())
+        later = reserve(offer="prueba-aforo", day=madrid_today(), time="23:59", device=device)[2]
+        self.assertEqual(cancel(later["locator"], device=device)[0], 200)  # un horario de hoy que no ha empezado se cancela
+
+    @unittest.skipUnless(local_sql("select 1") == "1", "necesita Docker para fabricar una reserva de un día que ya pasó")
+    @unittest.skipUnless(FULL, "usa la oferta de pruebas, que solo existe en local")
+    def test_una_actividad_que_ya_empezo_no_se_cancela(self):
+        device = str(uuid.uuid4())
+        yesterday = reserve(offer="prueba-aforo", time="12:00", device=device)[2]
+        local_sql("update app.reservations set activity_date = (now() at time zone 'Europe/Madrid')::date - 1 where locator = '%s'" % yesterday["locator"])
+        started = reserve(offer="prueba-aforo", time="12:00", device=device)[2]
+        local_sql("update app.reservations set activity_date = (now() at time zone 'Europe/Madrid')::date, slot = '00:01' where locator = '%s'" % started["locator"])
+        for name, created in {"ayer": yesterday, "hoy, con el horario ya empezado": started}.items():
+            with self.subTest(name):
+                status, _, body = cancel(created["locator"], device=device)
+                self.assertEqual((status, body["error"]["code"]), (409, "reservation_past"))
+                with open(os.path.join(EXAMPLES, "error-reservation-past.json"), encoding="utf-8") as file:
+                    example = json.load(file)
+                self.assertEqual(sorted(example["error"]), sorted(body["error"]))
+        self.assertEqual(local_sql("select status from app.reservations where locator = '%s'" % yesterday["locator"]), "confirmed")
+
+
+EXAMPLES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "contract", "examples")
+
+
 @unittest.skipUnless(FULL and WRITES, "usa la oferta de pruebas, que solo existe en local")
 class Aforo(unittest.TestCase):
     OFFER = "prueba-aforo"
@@ -295,6 +414,15 @@ class Aforo(unittest.TestCase):
         self.assertEqual(reserve(offer=self.OFFER, day=day, time="10:00", adults=1)[0], 409)  # completo
         self.assertEqual(reserve(offer=self.OFFER, day=day, time="12:00", adults=3)[0], 201)  # otro horario, libre
         self.assertEqual(reserve(offer=self.OFFER, day=day + timedelta(days=1), time="10:00", adults=3)[0], 201)  # otro día, libre
+
+    def test_cancelar_libera_las_plazas(self):
+        day, device = random_day(), str(uuid.uuid4())
+        first = reserve(offer=self.OFFER, day=day, time="10:00", adults=3, device=device)[2]  # 3 de 3
+        self.assertEqual(reserve(offer=self.OFFER, day=day, time="10:00", adults=1)[0], 409)  # completo
+        self.assertEqual(cancel(first["locator"], device=device)[0], 200)
+        self.assertEqual(reserve(offer=self.OFFER, day=day, time="10:00", adults=3)[0], 201)  # las plazas vuelven a estar libres
+        self.assertEqual(cancel(first["locator"], device=device)[0], 200)  # y cancelar otra vez la misma no libera nada más
+        self.assertEqual(reserve(offer=self.OFFER, day=day, time="10:00", adults=1)[0], 409)
 
     def test_peticiones_simultaneas_no_se_pasan_del_aforo(self):
         day, statuses = random_day(), []
@@ -332,6 +460,11 @@ class Limites(unittest.TestCase):
         self.assertEqual((status, body["error"]["code"]), (429, "rate_limited"))
         self.assertTrue(1 <= int(headers["retry-after"]) <= 60)
 
+    def test_limite_de_cancelaciones_por_dispositivo(self):
+        device = str(uuid.uuid4())
+        statuses = [cancel("TV-2099-9999", device=device)[0] for _ in range(22)]  # IP distinta cada vez: solo cuenta el dispositivo
+        self.assertEqual(statuses, [404] * 20 + [429] * 2)  # 20 cancelaciones por dispositivo y hora
+
     @unittest.skipUnless(WRITES, "crea reservas de verdad (API_WRITES=1)")
     def test_limite_por_correo_y_por_dispositivo(self):
         email = "limite-%s@example.com" % uuid.uuid4().hex[:8]
@@ -342,9 +475,6 @@ class Limites(unittest.TestCase):
         device = str(uuid.uuid4())
         statuses = [reserve(day=future(base + i), device=device)[0] for i in range(22)]
         self.assertEqual(statuses, [201] * 20 + [429] * 2)  # 20 reservas por dispositivo y hora
-
-
-EXAMPLES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "contract", "examples")
 
 
 class Contrato(unittest.TestCase):
@@ -377,6 +507,8 @@ class Contrato(unittest.TestCase):
 
     def test_errores(self):
         self.same_shape(self.example("error-offer-not-found.json"), call("GET", "/offers/no-existe")[2])
+        self.same_shape(self.example("error-reservation-not-found.json"), cancel("TV-2099-9999", device=str(uuid.uuid4()))[2])
+        self.assertEqual(sorted(self.example("error-reservation-past.json")["error"]), ["code", "message"])
 
     @unittest.skipUnless(WRITES, "crea reservas de verdad (API_WRITES=1)")
     def test_reservas(self):
@@ -387,6 +519,10 @@ class Contrato(unittest.TestCase):
         self.assertEqual(status, 201)
         self.same_shape(self.example("reservation.json"), created)
         self.same_shape(self.example("reservations-list.json"), call("GET", "/reservations", headers={"X-Device-Id": device})[2])
+        self.assertEqual(sorted(self.example("cancel-request.json")), ["email"])
+        status, _, cancelled = cancel(created["locator"], device=device, email=self.example("cancel-request.json")["email"])
+        self.assertEqual((status, cancelled["status"]), (200, "cancelled"))
+        self.same_shape(self.example("reservation-cancelled.json"), cancelled)
         status, _, error = reserve(adults=0)
         self.assertEqual(status, 400)
         self.same_shape(self.example("error-invalid-request.json"), error)

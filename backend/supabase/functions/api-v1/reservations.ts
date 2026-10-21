@@ -1,7 +1,7 @@
 import { ApiError, fromDatabaseError, json } from "../_shared/http.ts";
 import { enforce } from "../_shared/limits.ts";
 import type { Ctx } from "./context.ts";
-import { LOCATOR, parseReservation, readJsonBody, requireUuidHeader } from "./validate.ts";
+import { LOCATOR, parseReservation, readJsonBody, readOptionalJsonBody, requireUuidHeader } from "./validate.ts";
 
 // Las reservas no se guardan en ninguna caché.
 const NO_STORE = { "cache-control": "no-store" };
@@ -57,4 +57,35 @@ export async function findReservation({ params, url, sql, ip }: Ctx): Promise<Re
   const [{ body }] = await sql`select app.find_reservation(${locator}, ${email}) as body`;
   if (body === null) throw new ApiError(404, "reservation_not_found", "No hay ninguna reserva con ese localizador y ese correo.");
   return json(200, body, NO_STORE);
+}
+
+/**
+ * POST /reservations/:locator/cancel — cancela la reserva. Cabecera `X-Device-Id` (UUID del móvil) y, opcional, un cuerpo
+ * `{ "email": "…" }`: puede cancelarla el móvil que la hizo o quien tenga el localizador y el correo (la recuperó en otro móvil).
+ * 200 con la reserva ya cancelada; cancelar una que ya lo estaba también es 200 con la misma. 404 `reservation_not_found` si no existe
+ * o no es de quien lo pide (igual que si no existiera) y 409 `reservation_past` si la actividad ya empezó o pasó.
+ */
+export async function cancelReservation({ req, params, sql, ip }: Ctx): Promise<Response> {
+  await enforce(sql, "ip-cancel", ip, 30, 3600);
+  const device = requireUuidHeader(req, "x-device-id");
+  const body = await readOptionalJsonBody(req);
+  if (body !== null && (typeof body !== "object" || Array.isArray(body))) {
+    throw new ApiError(400, "invalid_request", "El cuerpo tiene que ser un objeto JSON.");
+  }
+  const rawEmail = (body as Record<string, unknown> | null)?.email;
+  if (rawEmail !== undefined && rawEmail !== null && (typeof rawEmail !== "string" || rawEmail.trim().length > 254)) {
+    throw new ApiError(400, "invalid_request", "Datos incorrectos: email (texto de hasta 254 caracteres).");
+  }
+  await enforce(sql, "device-cancel", device, 20, 3600);
+
+  const locator = params.locator.toUpperCase();
+  if (!LOCATOR.test(locator)) throw new ApiError(404, "reservation_not_found", "No hay ninguna reserva con ese localizador para este dispositivo o este correo.");
+  let result: { changed: boolean; reservation: unknown };
+  try {
+    const [row] = await sql`select app.cancel_reservation(${device}::uuid, ${locator}, ${typeof rawEmail === "string" ? rawEmail : ""}) as result`;
+    result = row.result;
+  } catch (error) {
+    throw fromDatabaseError(error);
+  }
+  return json(200, result.reservation, NO_STORE);
 }

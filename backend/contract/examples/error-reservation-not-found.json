@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "reservation_not_found",
+    "message": "No hay ninguna reserva con ese localizador para este dispositivo o este correo."
+  }
+}

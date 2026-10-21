@@ -13,6 +13,15 @@ interface ReservationsService {
 
     /** Las reservas de este móvil (`GET /reservations`), las más recientes primero. */
     suspend fun list(deviceId: String): List<ReservationDto>
+
+    /**
+     * Cancela la reserva (`POST /reservations/{locator}/cancel`) y devuelve cómo ha quedado. La hizo este móvil o se conocen su localizador y
+     * su [email]. Cancelar una que ya estaba cancelada tampoco falla. Lanza [ApiException] (`reservation_not_found`, `reservation_past`…).
+     */
+    suspend fun cancel(deviceId: String, locator: String, email: String): ReservationDto
+
+    /** Una reserva por localizador y correo (`GET /reservations/{locator}?email=`): la forma de recuperarla en otro móvil. */
+    suspend fun find(locator: String, email: String): ReservationDto
 }
 
 class RetrofitReservationsService(private val api: TurismoApi) : ReservationsService {
@@ -29,6 +38,18 @@ class RetrofitReservationsService(private val api: TurismoApi) : ReservationsSer
         if (!response.isSuccessful) throw response.toApiException()
         (response.body() ?: throw ApiException("El servidor respondió sin lista", status = response.code())).reservations
     }
+
+    override suspend fun cancel(deviceId: String, locator: String, email: String): ReservationDto = guardedApiCall("cancelar la reserva") {
+        val response = api.cancelReservation(locator, deviceId, CancelRequest(email))
+        if (!response.isSuccessful) throw response.toApiException()
+        response.body() ?: throw ApiException("El servidor respondió sin reserva", status = response.code())
+    }
+
+    override suspend fun find(locator: String, email: String): ReservationDto = guardedApiCall("buscar la reserva") {
+        val response = api.reservation(locator, email)
+        if (!response.isSuccessful) throw response.toApiException()
+        response.body() ?: throw ApiException("El servidor respondió sin reserva", status = response.code())
+    }
 }
 
 /** Sin servidor: para las pruebas que no deben tocar la red. */
@@ -37,4 +58,8 @@ object NoReservationsService : ReservationsService {
         throw ApiException("Sin conexión con el servidor")
 
     override suspend fun list(deviceId: String): List<ReservationDto> = throw ApiException("Sin conexión con el servidor")
+
+    override suspend fun cancel(deviceId: String, locator: String, email: String): ReservationDto = throw ApiException("Sin conexión con el servidor")
+
+    override suspend fun find(locator: String, email: String): ReservationDto = throw ApiException("Sin conexión con el servidor")
 }

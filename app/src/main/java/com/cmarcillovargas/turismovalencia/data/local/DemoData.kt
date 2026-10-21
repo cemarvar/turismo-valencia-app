@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.NotificationGroup
 import com.cmarcillovargas.turismovalencia.data.model.NotificationKind
+import com.cmarcillovargas.turismovalencia.data.model.Reservation
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.repo.ContentRepository
 import java.time.DayOfWeek
@@ -80,7 +81,7 @@ class DemoData(private val content: ContentRepository) {
     ): ReservationEntity {
         val offer = checkNotNull(content.offer(offerId))
         return ReservationEntity(
-            id = "seed-${index + 1}",
+            id = "${Reservation.DemoIdPrefix}${index + 1}",
             offerId = offerId,
             title = offer.title,
             place = offer.place,

@@ -2,6 +2,8 @@ package com.cmarcillovargas.turismovalencia.data.repo
 
 import com.cmarcillovargas.turismovalencia.data.LanguageApplier
 import com.cmarcillovargas.turismovalencia.data.NoLanguageApplier
+import com.cmarcillovargas.turismovalencia.data.NoThemeApplier
+import com.cmarcillovargas.turismovalencia.data.ThemeApplier
 import com.cmarcillovargas.turismovalencia.data.local.DownloadDao
 import com.cmarcillovargas.turismovalencia.data.local.FavoriteDao
 import com.cmarcillovargas.turismovalencia.data.local.NotificationDao
@@ -18,7 +20,9 @@ import com.cmarcillovargas.turismovalencia.data.model.AppNotification
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.Reservation
+import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
+import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 import com.cmarcillovargas.turismovalencia.data.notify.NotificationAccess
 import com.cmarcillovargas.turismovalencia.data.notify.ReminderScheduler
 import com.cmarcillovargas.turismovalencia.data.remote.ApiException
@@ -158,6 +162,51 @@ class ReservationsRepository(
         }.await()
 
     /**
+     * Cancela la reserva y guarda cómo queda; devuelve cuando ya aparece cancelada en [items]. Una reserva del servidor se cancela allí
+     * (la hizo este móvil o se recuperó con su localizador y su correo) y sus plazas vuelven a estar libres; las de demostración solo
+     * existen en el móvil y se cancelan aquí. Cancelar una ya cancelada no falla. Lanza [ReservationActionFailure] si no se pudo.
+     * Sigue aunque quien la pide se vaya: una cancelación que el servidor ya hizo no se pierde.
+     */
+    suspend fun cancel(id: String): Reservation =
+        scope.async {
+            val current = get(id) ?: throw ReservationActionFailure(ReservationActionFailure.Reason.NotFound)
+            val savedId = if (current.isDemo) {
+                dao.setStatus(id, ReservationStatus.Cancelled)
+                id
+            } else {
+                val updated = try {
+                    service.cancel(settings.deviceId(), current.locator, current.email)
+                } catch (e: ApiException) {
+                    throw e.toActionFailure()
+                }
+                val saved = updated.toEntity(now()) ?: throw unreadableReservation()
+                dao.upsert(saved)
+                saved.id
+            }
+            items.first { list -> list.any { it.id == savedId && it.status == ReservationStatus.Cancelled } }.first { it.id == savedId }
+        }.await()
+
+    /**
+     * Recupera una reserva con su localizador y el correo con el que se hizo (la de otro móvil, o la de antes de borrar los datos de la
+     * app) y la guarda aquí; devuelve cuando ya aparece en [items]. Lanza [ReservationActionFailure]: `NotFound` si el localizador y
+     * el correo no coinciden con ninguna (el servidor no dice cuál de los dos falla).
+     */
+    suspend fun recover(locator: String, email: String): Reservation =
+        scope.async {
+            val found = try {
+                service.find(locator.trim().uppercase(), email.trim())
+            } catch (e: ApiException) {
+                throw e.toActionFailure()
+            }
+            val saved = found.toEntity(now()) ?: throw unreadableReservation()
+            dao.upsert(saved)
+            items.first { list -> list.any { it.id == saved.id } }.first { it.id == saved.id }
+        }.await()
+
+    private fun unreadableReservation() =
+        ReservationActionFailure(ReservationActionFailure.Reason.Server, cause = ApiException("El servidor devolvió una reserva que la app no entiende"))
+
+    /**
      * Pone las reservas de este móvil al día con el servidor (por ejemplo, la que se confirmó pero cuya respuesta se perdió). Un móvil
      * que nunca ha reservado no tiene identificador y no tiene nada que pedir: no se crea uno ni se manda nada al servidor.
      */
@@ -182,9 +231,14 @@ class ReservationsRepository(
 
 /**
  * Ajustes del usuario y estado de la app (si la bienvenida ya se hizo). [languageApplier] es quien cambia de verdad el idioma de
- * los recursos al elegir uno; las pruebas le pasan [NoLanguageApplier] para no cambiar el del móvil.
+ * los recursos al elegir uno y [themeApplier] quien pone el modo claro u oscuro; las pruebas les pasan [NoLanguageApplier] y
+ * [NoThemeApplier] para no cambiar el idioma ni el modo del móvil en el que corren.
  */
-class SettingsRepository(private val store: SettingsStore, private val languageApplier: LanguageApplier = NoLanguageApplier) {
+class SettingsRepository(
+    private val store: SettingsStore,
+    private val languageApplier: LanguageApplier = NoLanguageApplier,
+    private val themeApplier: ThemeApplier = NoThemeApplier,
+) {
     /** Idioma de la app: el último que se eligió o con el que arrancó `MainActivity` (ver [syncLanguage]). */
     val language: StateFlow<LanguageCode> = store.select { it.language }
 
@@ -193,6 +247,9 @@ class SettingsRepository(private val store: SettingsStore, private val languageA
     val location: StateFlow<LocationMode> = store.select { it.location }
 
     val textScale: StateFlow<TextScale> = store.select { it.textScale }
+
+    /** El modo claro u oscuro elegido en Perfil → Tema (por defecto, el del móvil). */
+    val themeMode: StateFlow<ThemeMode> = store.select { it.themeMode }
 
     /** La bienvenida (splash, onboarding y permiso) ya se hizo: no se repite al abrir la app. */
     val onboardingDone: StateFlow<Boolean> = store.select { it.onboardingDone }
@@ -218,6 +275,12 @@ class SettingsRepository(private val store: SettingsStore, private val languageA
     fun setLocation(value: LocationMode) = store.update { it.copy(location = value) }
 
     fun setTextScale(value: TextScale) = store.update { it.copy(textScale = value) }
+
+    /** El usuario elige el modo claro, el oscuro o el del móvil: se guarda y se le pide al sistema, que recrea la actividad con él. */
+    fun setThemeMode(value: ThemeMode) {
+        store.update { it.copy(themeMode = value) }
+        themeApplier.apply(value)
+    }
 
     fun setOnboardingDone(value: Boolean) = store.update { it.copy(onboardingDone = value) }
 }

@@ -140,6 +140,7 @@ fun AppNavHost(
                 onBack = back,
                 onOpenRoute = { open(Routes.ruta(it)) },
                 onOpenMap = { onTab(Routes.Mapa) },
+                onBookAgain = { open(Routes.reservar(it)) },
             )
         }
         composable(Routes.Descargas) { DescargasRoute(onBack = back, onOpenItem = openItem) }

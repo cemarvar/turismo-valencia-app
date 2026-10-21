@@ -11,6 +11,8 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 
 /**
@@ -37,7 +39,26 @@ interface TurismoApi {
     /** Las reservas de este móvil (hasta 100, las más recientes primero). */
     @GET("reservations")
     suspend fun reservations(@Header("X-Device-Id") deviceId: String): Response<ReservationsResponse>
+
+    /** Una reserva por localizador y correo (sirve para recuperarla en otro móvil). 404 `reservation_not_found` si no coinciden. */
+    @GET("reservations/{locator}")
+    suspend fun reservation(@Path("locator") locator: String, @Query("email") email: String): Response<ReservationDto>
+
+    /**
+     * Cancela una reserva: la hizo este móvil (`X-Device-Id`) o se conocen su localizador y su correo (`request.email`). 200 con la reserva ya
+     * cancelada, también si ya lo estaba. 404 `reservation_not_found` si no es de quien lo pide y 409 `reservation_past` si la actividad ya empezó.
+     */
+    @POST("reservations/{locator}/cancel")
+    suspend fun cancelReservation(
+        @Path("locator") locator: String,
+        @Header("X-Device-Id") deviceId: String,
+        @Body request: CancelRequest,
+    ): Response<ReservationDto>
 }
+
+/** Cuerpo de `POST /reservations/{locator}/cancel` (ver `backend/contract/examples/cancel-request.json`). Sin `email` solo vale el móvil que reservó. */
+@Serializable
+data class CancelRequest(val email: String? = null)
 
 /** Cuerpo de `POST /reservations` (ver `backend/contract/examples/reservation-request.json`). `date` es `AAAA-MM-DD`; el correo, en cualquier caso. */
 @Serializable

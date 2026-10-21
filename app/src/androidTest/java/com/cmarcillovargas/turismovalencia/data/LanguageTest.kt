@@ -175,7 +175,7 @@ class LanguageTest {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         try {
             val requested = mutableListOf<LanguageCode>()
-            val settings = SettingsRepository(SettingsStore(db.settings(), scope)) { requested += it }
+            val settings = SettingsRepository(SettingsStore(db.settings(), scope), languageApplier = LanguageApplier { requested += it })
             assertEquals(LanguageCode.ES, settings.language.value)
             settings.setLanguage(LanguageCode.FR)
             assertEquals(listOf(LanguageCode.FR), requested)

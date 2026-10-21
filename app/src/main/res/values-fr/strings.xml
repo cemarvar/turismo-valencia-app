@@ -244,6 +244,8 @@
     <string name="res_status_completed">Terminée</string>
     <string name="res_status_cancelled">Annulée</string>
     <string name="res_cancelled">Annulées</string>
+    <string name="res_recover_title">Vous avez réservé depuis un autre téléphone&#160;?</string>
+    <string name="res_recover_text">Retrouvez votre réservation avec sa référence et l’e-mail utilisé.</string>
     <string name="book_title">Réserver</string>
     <string name="book_step">Étape 1 sur 2 · Date et personnes</string>
     <string name="book_per_person">%1$s · %2$s par personne</string>
@@ -284,6 +286,30 @@
     <string name="booking_total">Total</string>
     <string name="booking_show_code">Présentez ce code à l’embarcadère. Disponible hors connexion.</string>
     <string name="booking_share_text">Réservation %1$s&#160;: %2$s · %3$s à %4$s</string>
+    <string name="booking_cancelled">Réservation annulée</string>
+    <string name="booking_cancelled_text">Nous avons libéré vos places. Vous n’avez rien d’autre à faire.</string>
+    <string name="booking_cancelled_code">Cette réservation est annulée&#160;: le code n’est plus valable.</string>
+    <string name="booking_cancel">Annuler la réservation</string>
+    <string name="booking_cancelling">Annulation…</string>
+    <string name="booking_cancel_needs_connection">Vous avez besoin d’une connexion Internet pour annuler la réservation.</string>
+    <string name="booking_cancel_title">Annuler cette réservation&#160;?</string>
+    <string name="booking_cancel_text">Vos places pour «&#160;%1$s&#160;» (%2$s) seront libérées. Cette action est irréversible.</string>
+    <string name="booking_cancel_confirm">Oui, annuler</string>
+    <string name="booking_cancel_keep">Non, la conserver</string>
+    <string name="booking_book_again">Réserver à nouveau</string>
+    <string name="booking_cancel_error_unreachable">Impossible de joindre le serveur et nous ne savons pas si l’annulation a eu lieu. Vérifiez votre connexion et réessayez&#160;: il n’y a aucun risque à recommencer.</string>
+    <string name="booking_cancel_error_too_late">Elle ne peut plus être annulée&#160;: l’activité a déjà commencé ou est passée.</string>
+    <string name="booking_cancel_error_not_found">Le serveur ne trouve pas cette réservation, elle ne peut donc pas être annulée depuis l’app.</string>
+    <string name="booking_cancel_error_other">La réservation n’a pas pu être annulée. Réessayez plus tard.</string>
+    <string name="recover_title">Retrouver une réservation</string>
+    <string name="recover_text">Saisissez la référence (par exemple, %1$s) et l’e-mail utilisé pour réserver.</string>
+    <string name="recover_email_label">E-mail utilisé pour réserver</string>
+    <string name="recover_confirm">Retrouver</string>
+    <string name="recover_working">Recherche…</string>
+    <string name="recover_needs_connection">Retrouver une réservation nécessite une connexion Internet.</string>
+    <string name="recover_privacy">La référence et l’e-mail sont envoyés à notre serveur uniquement pour rechercher la réservation.</string>
+    <string name="recover_error_not_found">Aucune réservation ne correspond à cette référence et à cet e-mail. Vérifiez les deux.</string>
+    <string name="recover_error_other">La réservation n’a pas pu être retrouvée. Réessayez plus tard.</string>
 
     <plurals name="booking_adults">
         <item quantity="one">%1$d adulte</item>
@@ -313,6 +339,10 @@
     <string name="profile_text_small">Petite</string>
     <string name="profile_text_large">Grande</string>
     <string name="profile_text_xlarge">Très grande</string>
+    <string name="profile_theme">Thème</string>
+    <string name="profile_theme_system">Suit celui du système</string>
+    <string name="profile_theme_light">Clair</string>
+    <string name="profile_theme_dark">Sombre</string>
     <string name="profile_account">Compte</string>
     <string name="profile_privacy">Confidentialité et données</string>
     <string name="profile_privacy_text">Vos favoris, réservations et téléchargements sont enregistrés sur votre téléphone. Nous utilisons votre position uniquement pendant que vous utilisez l’appli, pour trier les lieux par proximité et calculer des itinéraires. La carte et les itinéraires sont fournis par OpenStreetMap&#160;: pour les afficher, il reçoit la zone que vous consultez ainsi que les points de départ et d’arrivée de l’itinéraire. Vous pouvez le modifier quand vous le souhaitez.</string>
@@ -371,8 +401,10 @@
         <item>Un identifiant aléatoire de votre téléphone (voir plus bas), pour vous montrer vos réservations sans que vous ayez à créer de compte.</item>
     </string-array>
     <string name="privacy_app_bookings_use">Nous l’utilisons uniquement pour gérer la réservation (exécution du contrat, comme indiqué au point 4)&#160;: la confirmer, contrôler les places et vous communiquer sa référence. Nous ne demandons aucune donnée de paiement&#160;: le paiement est simulé dans cette version. Nous conservons les données aussi longtemps qu’elles sont nécessaires pour gérer la réservation, et vous pouvez demander leur suppression quand vous le souhaitez.</string>
+    <string name="privacy_app_cancel_title">Annuler et retrouver des réservations</string>
+    <string name="privacy_app_cancel_body">Lorsque vous annulez une réservation, l’appli envoie à notre serveur sa référence, l’e-mail utilisé pour la faire et l’identifiant du téléphone&#160;; le serveur la marque comme annulée et libère les places, mais en conserve la trace. Pour retrouver une réservation sur un autre téléphone, ou après avoir effacé les données de l’appli, vous saisissez sa référence et l’e-mail utilisé&#160;: l’appli les envoie au serveur pour la rechercher et, s’ils correspondent, l’enregistre sur votre téléphone. Toute personne disposant de la référence et de l’e-mail d’une réservation peut la consulter et l’annuler&#160;: ne les partagez pas.</string>
     <string name="privacy_app_device_title">Identifiant du téléphone</string>
-    <string name="privacy_app_device_body">La première fois que vous réservez, l’appli crée un numéro aléatoire et l’enregistre sur votre téléphone. Il ne contient aucune donnée vous concernant ni concernant l’appareil. Il est envoyé avec chaque réservation et chaque fois que l’appli consulte vos réservations. Si vous effacez les données de l’appli, le téléphone le perd et ne voit plus ses réservations dans l’appli (si vous utilisez la sauvegarde Android, il peut revenir avec le reste de vos données lors d’une réinstallation)&#160;; sur notre serveur, elles y restent jusqu’à ce que vous demandiez leur suppression.</string>
+    <string name="privacy_app_device_body">La première fois que vous réservez ou annulez une réservation, l’appli crée un numéro aléatoire et l’enregistre sur votre téléphone. Il ne contient aucune donnée vous concernant ni concernant l’appareil. Il est envoyé avec chaque réservation, chaque annulation et chaque fois que l’appli consulte vos réservations. Si vous effacez les données de l’appli, le téléphone le perd et ne voit plus ses réservations dans l’appli (vous pouvez les retrouver avec leur référence et leur e-mail&#160;; si vous utilisez la sauvegarde Android, il peut revenir avec le reste de vos données lors d’une réinstallation)&#160;; sur notre serveur, elles y restent jusqu’à ce que vous demandiez leur suppression.</string>
     <string name="privacy_app_valbot_title">Assistant ValBot</string>
     <string name="privacy_app_valbot_body">Ce que vous écrivez à ValBot est envoyé au serveur du site web, qui le traite avec le service d’intelligence artificielle Gemini de Google pour vous répondre (points 2 et 6). N’écrivez pas de données personnelles dans la conversation. S’il n’y a pas de connexion, ou si le serveur ne peut pas répondre, l’appli répond avec des réponses basiques depuis votre téléphone (hors connexion, rien n’est envoyé).</string>
     <string name="privacy_app_map_title">Carte, itinéraires et position</string>

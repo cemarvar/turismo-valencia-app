@@ -25,17 +25,25 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.EventBusy
 import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.NearMe
+import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +68,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.AppButton
 import com.cmarcillovargas.turismovalencia.ui.components.AppButtonStyle
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.BottomActionBar
+import com.cmarcillovargas.turismovalencia.ui.components.ErrorNotice
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.slotLabel
 import com.cmarcillovargas.turismovalencia.ui.components.QrCode
@@ -86,6 +95,7 @@ fun ReservaConfirmadaRoute(
     onBack: () -> Unit,
     onOpenRoute: (String) -> Unit,
     onOpenMap: () -> Unit,
+    onBookAgain: (String) -> Unit,
     viewModel: ReservaConfirmadaViewModel = viewModel(key = "reserva-$id", factory = containerFactory { ReservaConfirmadaViewModel(it, id) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -96,6 +106,8 @@ fun ReservaConfirmadaRoute(
         onShare = { uiState.reservation?.let { share(context, it) } },
         onCalendar = { uiState.reservation?.let { addToCalendar(context, it) } },
         onHowToGet = { uiState.offer?.placeId?.let(onOpenRoute) ?: onOpenMap() },
+        onCancel = viewModel::onCancel,
+        onBookAgain = { uiState.reservation?.let { onBookAgain(it.offerId) } },
     )
 }
 
@@ -106,10 +118,14 @@ fun ReservaConfirmadaScreen(
     onShare: () -> Unit,
     onCalendar: () -> Unit,
     onHowToGet: () -> Unit,
+    onCancel: () -> Unit,
+    onBookAgain: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val reservation = uiState.reservation ?: return
     val offer = uiState.offer
+    val cancelled = reservation.status == ReservationStatus.Cancelled
+    var confirmCancel by rememberSaveable { mutableStateOf(false) }
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         AppTopBar(stringResource(R.string.booking_title), onBack = onBack) {
             IconButton(onClick = onShare) {
@@ -122,37 +138,102 @@ fun ReservaConfirmadaScreen(
         ) {
             val pending = reservation.status == ReservationStatus.Pending
             Box(
-                Modifier.padding(top = Spacing.m).size(IconCircle).clip(CircleShape).background(if (pending) MaterialTheme.appColors.warningContainer else MaterialTheme.colorScheme.tertiaryContainer),
+                Modifier.padding(top = Spacing.m).size(IconCircle).clip(CircleShape).background(
+                    when {
+                        cancelled -> MaterialTheme.colorScheme.errorContainer
+                        pending -> MaterialTheme.appColors.warningContainer
+                        else -> MaterialTheme.colorScheme.tertiaryContainer
+                    },
+                ),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    if (pending) Icons.Outlined.HourglassEmpty else Icons.Outlined.Check,
+                    when {
+                        cancelled -> Icons.Outlined.Close
+                        pending -> Icons.Outlined.HourglassEmpty
+                        else -> Icons.Outlined.Check
+                    },
                     contentDescription = null,
-                    tint = if (pending) MaterialTheme.appColors.warning else MaterialTheme.colorScheme.onTertiaryContainer,
+                    tint = when {
+                        cancelled -> MaterialTheme.colorScheme.onErrorContainer
+                        pending -> MaterialTheme.appColors.warning
+                        else -> MaterialTheme.colorScheme.onTertiaryContainer
+                    },
                     modifier = Modifier.size(Spacing.xl + Spacing.xxs),
                 )
             }
             Spacer(Modifier.height(Spacing.l))
             Text(
-                stringResource(if (pending) R.string.booking_pending else R.string.booking_confirmed),
+                stringResource(
+                    when {
+                        cancelled -> R.string.booking_cancelled
+                        pending -> R.string.booking_pending
+                        else -> R.string.booking_confirmed
+                    },
+                ),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(Spacing.xs))
             Text(
-                stringResource(R.string.booking_sent_to, reservation.email),
+                if (cancelled) stringResource(R.string.booking_cancelled_text) else stringResource(R.string.booking_sent_to, reservation.email),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(Spacing.l))
             Ticket(reservation, offer)
+            uiState.cancelFailure?.let { ErrorNotice(it.cancelMessage(), Modifier.padding(top = Spacing.l)) }
+            if (uiState.canCancel) {
+                Spacer(Modifier.height(Spacing.l))
+                AppButton(
+                    stringResource(if (uiState.cancelling) R.string.booking_cancelling else R.string.booking_cancel),
+                    { confirmCancel = true },
+                    Modifier.fillMaxWidth(),
+                    AppButtonStyle.Danger,
+                    leadingIcon = Icons.Outlined.EventBusy,
+                    enabled = uiState.canCancelNow,
+                )
+                // Cancelar una reserva del servidor exige conexión (ver la reserva y su código, no).
+                if (!uiState.online && !reservation.isDemo) {
+                    Text(
+                        stringResource(R.string.booking_cancel_needs_connection),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = Spacing.xs),
+                    )
+                }
+            }
         }
-        BottomActionBar {
-            AppButton(stringResource(R.string.detail_calendar), onCalendar, Modifier.weight(1f), AppButtonStyle.Outlined, leadingIcon = Icons.Outlined.CalendarMonth)
-            AppButton(stringResource(R.string.detail_how_to_get), onHowToGet, Modifier.weight(1.2f), leadingIcon = Icons.Outlined.NearMe)
+        if (cancelled) {
+            // Una reserva cancelada ya no tiene calendario ni cómo llegar: lo útil es volver a reservar.
+            if (offer != null) {
+                BottomActionBar {
+                    AppButton(stringResource(R.string.booking_book_again), onBookAgain, Modifier.weight(1f), leadingIcon = Icons.Outlined.Replay)
+                }
+            }
+        } else {
+            BottomActionBar {
+                AppButton(stringResource(R.string.detail_calendar), onCalendar, Modifier.weight(1f), AppButtonStyle.Outlined, leadingIcon = Icons.Outlined.CalendarMonth)
+                AppButton(stringResource(R.string.detail_how_to_get), onHowToGet, Modifier.weight(1.2f), leadingIcon = Icons.Outlined.NearMe)
+            }
         }
+    }
+    if (confirmCancel) {
+        AlertDialog(
+            onDismissRequest = { confirmCancel = false },
+            title = { Text(stringResource(R.string.booking_cancel_title)) },
+            text = { Text(stringResource(R.string.booking_cancel_text, reservation.title, "${formatShortDate(reservation.date)} · ${slotLabel(reservation.time)}")) },
+            confirmButton = {
+                TextButton(onClick = { confirmCancel = false; onCancel() }) {
+                    Text(stringResource(R.string.booking_cancel_confirm), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmCancel = false }) { Text(stringResource(R.string.booking_cancel_keep)) } },
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
     }
 }
 
@@ -180,11 +261,15 @@ private fun Ticket(reservation: Reservation, offer: Offer?) {
                 }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            val cancelled = reservation.status == ReservationStatus.Cancelled
             Row(Modifier.padding(Spacing.m), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(QrSize).clip(QrShape).background(MaterialTheme.appColors.paper).border(1.dp, MaterialTheme.colorScheme.outlineVariant, QrShape).padding(Spacing.s)) {
-                    QrCode(content = reservation.locator)
+                // El código de una reserva cancelada ya no vale: no se enseña, para que nadie lo presente por error.
+                if (!cancelled) {
+                    Box(Modifier.size(QrSize).clip(QrShape).background(MaterialTheme.appColors.paper).border(1.dp, MaterialTheme.colorScheme.outlineVariant, QrShape).padding(Spacing.s)) {
+                        QrCode(content = reservation.locator)
+                    }
+                    Spacer(Modifier.width(Spacing.m))
                 }
-                Spacer(Modifier.width(Spacing.m))
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                     StatusChip(
                         text = stringResource(reservation.status.label()),
@@ -193,7 +278,11 @@ private fun Ticket(reservation: Reservation, offer: Offer?) {
                         height = Spacing.xl,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Text(stringResource(R.string.booking_show_code), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        stringResource(if (cancelled) R.string.booking_cancelled_code else R.string.booking_show_code),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
@@ -253,7 +342,7 @@ private fun ReservaConfirmadaPreview() {
                 reservation = Reservation("r", "albufera-barca", "Paseo en barca por la Albufera", "El Palmar", LocalDate.now().plusDays(3), "18:30", 2, 0, "laura.garcia@email.com", 3600, ReservationStatus.Confirmed, "TV-2026-0412"),
                 offer = FakeOfertas.first { it.id == "albufera-barca" },
             ),
-            {}, {}, {}, {},
+            {}, {}, {}, {}, {}, {},
         )
     }
 }

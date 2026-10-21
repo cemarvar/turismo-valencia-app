@@ -1,7 +1,8 @@
 # Modo oscuro
 
-La app **sigue el modo claro u oscuro del móvil** (Ajustes → Pantalla → Tema oscuro) y cambia al instante, con la app abierta. No tiene un
-selector propio: el diseño no lo trae. El diseño de referencia son las imágenes de `docs/Figma/Modo oscuro/` (16 pantallas y 2 mosaicos).
+La app **sigue el modo claro u oscuro del móvil** (Ajustes → Pantalla → Tema oscuro) y cambia al instante, con la app abierta. **Perfil → Tema**
+deja fijar **Claro** u **Oscuro** con independencia del móvil, o volver a **«Sigue al del sistema»** (lo que hace por defecto). El diseño de
+referencia son las imágenes de `docs/Figma/Modo oscuro/` (16 pantallas y 2 mosaicos); la fila de «Tema» no está en ellas.
 
 ## Cómo funciona
 
@@ -14,6 +15,13 @@ selector propio: el diseño no lo trae. El diseño de referencia son las imágen
 - **La pantalla de arranque del sistema** (`splash_background`) pasa de `#C44D00` a `#AF3C02` en oscuro, el mismo relleno que el A1 de Compose.
 - **Las barras del sistema**: `enableEdgeToEdge(SystemBarStyle.auto(…))` pone los iconos claros u oscuros según el modo. Las pantallas con foto o
   fondo de color siguen pidiendo iconos claros con `SystemBarIcons`.
+- **El selector** (Perfil → Tema, `ThemeMode`: `System`, `Light`, `Dark`): `SettingsRepository.setThemeMode` lo guarda en Room (`settings.themeMode`,
+  v5) y se lo pide a AppCompat (`ThemeApplier` → `AppCompatDelegate.setDefaultNightMode`), que recrea la actividad con el modo nuevo; como el resto
+  del tema sigue el modo de la actividad (`isSystemInDarkTheme()`, `SystemBarStyle.auto`, `values-night`), todo cambia a la vez. AppCompat no guarda
+  el modo entre arranques, así que Room (la fuente de verdad que enseña Perfil) tiene una **copia rápida** en SharedPreferences (`AppThemePrefs`,
+  que `AppCompatThemeApplier` escribe al cambiar el modo y `AppContainer` repasa al arrancar): `TurismoApp.onCreate` la lee y llama a
+  `setDefaultNightMode` **antes de que exista ninguna actividad**, cuando Room aún no está abierto. Sin ella, quien fijó un modo distinto al del móvil
+  vería un primer cuadro con el del móvil y una recreación en cada arranque. La pantalla de arranque del sistema es lo único que sigue al móvil.
 
 ## Paleta
 
@@ -51,8 +59,12 @@ versión oscura en `ui/theme/Color.kt`.
   ser oscuro (`#AF3C02`: 6:1). Por eso `primary` es el naranja de texto y `action` el de relleno. Lo mismo pasa con `secondary`/`navy`, `bot`/`botAccent` y
   `tertiary`/`eco`. **Regla**: texto, iconos y bordes sobre un fondo, con `MaterialTheme.colorScheme.*`; el relleno de un botón, chip seleccionado, avatar o
   aviso, con `MaterialTheme.appColors.action` / `.navy`.
-- **Sigue el sistema, sin selector.** El diseño no tiene una fila de «Tema» en Perfil, y añadirla exigiría diseño nuevo y una columna más en Room (v5, con su
-  migración). Si hiciera falta, el sitio es `TurismoValenciaTheme(darkTheme = …)`: ya recibe el valor.
+- **Por defecto sigue el sistema; el selector es un añadido sin diseño.** El diseño no tiene una fila de «Tema» en Perfil: se añadió con los
+  componentes que ya había (`SettingRow` y el diálogo de opciones con botones de radio del tamaño del texto) y una columna más en Room (v5,
+  `Migration4To5`, con «System» por defecto, así que quien ya tenía la app no nota nada). Se eligió **AppCompat** (`setDefaultNightMode`) y no pasarle
+  un valor a `TurismoValenciaTheme(darkTheme = …)`: así también cambian el tema de Android (el fondo de la ventana de `values-night`), los iconos de
+  las barras del sistema y los recursos de cualquier ventana, todo con lo que la app ya hacía al cambiar el modo del móvil. A cambio, hace falta la
+  copia rápida de arriba.
 - **El QR es siempre tinta oscura sobre papel blanco** (`paper`/`onPaper`), también en oscuro: el lector del acceso lo tiene que leer, y un QR invertido no lo
   leen todos los lectores (el margen blanco también cuenta). El disco blanco del logotipo del arranque es lo mismo.
 - **El mapa oscuro es un filtro de color sobre las teselas de OpenStreetMap** (`DarkTilesFilter` en `OsmMap.kt`): invierte la luminosidad, gira el tono 180° y
@@ -75,6 +87,11 @@ versión oscura en `ui/theme/Color.kt`.
 
 - En el emulador: `adb shell cmd uimode night yes` (o `no`), o los ajustes del móvil. La app cambia sin cerrarse.
 - `./gradlew test`: `ThemeContrastTest` (todas las parejas de color, en claro y en oscuro).
+- `python tools/verify/verify_ui.py tema`: el selector de Perfil en el emulador (con el móvil en claro y en oscuro): «Oscuro» y «Claro» cada uno por su
+  cuenta, los iconos de la barra de estado, «Sigue al del sistema» y que sigue al móvil en caliente, que Room y la copia rápida guardan lo mismo, que
+  sobrevive a cerrar y abrir la app y que el gancho `resetData` lo restablece. `verify_release.py` lo repite bajo R8 (AppCompat, la copia rápida y Room).
+  Además, `AppThemeTest` (JVM: el valor de AppCompat de cada modo y la lectura del modo guardado), `PersistenceTest` y `MigrationTest` (instrumentados:
+  se guarda, se le pide al sistema una vez y la v4 llega a la v5 sin perder nada).
 - `python tools/verify/verify_ui.py oscuro`: 21 comprobaciones por píxeles en el emulador (fondo, barra superior, iconos de la barra de estado, chip, QR en
   blanco, mapa oscuro con detalle y su atribución, pantalla de arranque, y cambiar el modo con la app abierta). El resto de grupos de `verify_ui.py` fijan el modo
   claro al empezar.
@@ -82,6 +99,5 @@ versión oscura en `ui/theme/Color.kt`.
 
 ## Pendiente
 
-- Un selector Claro / Oscuro / Sistema en Perfil (no está en el diseño; exigiría Room v5).
 - Probarlo en un móvil real (OLED) y con TalkBack: hasta ahora solo en el emulador.
 - Un mapa con otro proveedor de teselas oscuras (CARTO u otro) si el filtro no bastara; hoy se lee bien.

@@ -6,6 +6,7 @@ import com.cmarcillovargas.turismovalencia.data.AppContainer
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
+import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 import com.cmarcillovargas.turismovalencia.data.repo.DownloadsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ data class PerfilUiState(
     val notifications: Boolean = true,
     val location: LocationMode = LocationMode.WhileUsing,
     val textScale: TextScale = TextScale.System,
+    val themeMode: ThemeMode = ThemeMode.System,
 )
 
 class PerfilViewModel(private val container: AppContainer) : ViewModel() {
@@ -29,7 +31,8 @@ class PerfilViewModel(private val container: AppContainer) : ViewModel() {
         container.reminders.active,
         container.settings.location,
         container.settings.textScale,
-    ) { language, notifications, location, scale -> listOf(language, notifications, location, scale) }
+        container.settings.themeMode,
+    ) { language, notifications, location, scale, theme -> listOf(language, notifications, location, scale, theme) }
 
     val uiState: StateFlow<PerfilUiState> = combine(
         settings, container.downloads.ids, container.downloads.mapDownloaded, container.reservations.items,
@@ -42,6 +45,7 @@ class PerfilViewModel(private val container: AppContainer) : ViewModel() {
             notifications = values[1] as Boolean,
             location = values[2] as LocationMode,
             textScale = values[3] as TextScale,
+            themeMode = values[4] as ThemeMode,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PerfilUiState())
 
@@ -57,4 +61,7 @@ class PerfilViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun onTextScale(value: TextScale) = container.settings.setTextScale(value)
+
+    /** Claro, oscuro o el del móvil: Android recrea la actividad con el modo nuevo (la pantalla vuelve a pintarse sola). */
+    fun onThemeMode(value: ThemeMode) = container.settings.setThemeMode(value)
 }

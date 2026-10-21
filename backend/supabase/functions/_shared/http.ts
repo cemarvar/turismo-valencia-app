@@ -34,6 +34,8 @@ const DOMAIN_ERRORS: Record<string, [number, string]> = {
   invalid_email: [422, "El correo no es válido."],
   sold_out: [409, "Ya no quedan plazas para ese día y horario."],
   idempotency_key_reused: [409, "Esa clave de idempotencia ya se usó con otros datos."],
+  reservation_not_found: [404, "No hay ninguna reserva con ese localizador para este dispositivo o este correo."],
+  reservation_past: [409, "Esa reserva ya no se puede cancelar: la actividad ya empezó o pasó."],
 };
 
 /** Convierte un error de la base de datos en una respuesta: los de negocio tienen su código; el resto es un 500 sin detalles. */

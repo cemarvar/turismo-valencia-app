@@ -23,11 +23,19 @@ data class Reservation(
 ) {
     val people: Int get() = adults + children
 
+    /** Una de las tres de demostración del primer arranque: solo existe en el móvil, el servidor no la conoce. */
+    val isDemo: Boolean get() = id.startsWith(DemoIdPrefix)
+
     /**
      * La reserva con el título y el lugar de su oferta tal como se ven ahora, en el idioma de la app: la base de datos guarda los del
      * momento de reservar (los de las de demostración, siempre en español).
      */
     fun shownAs(offer: Offer?): Reservation = if (offer == null) this else copy(title = offer.title, place = offer.place)
+
+    companion object {
+        /** Principio del identificador de las reservas de demostración (`seed-1`…). Las del servidor llevan un UUID. */
+        const val DemoIdPrefix = "seed-"
+    }
 }
 
 enum class NotificationKind { Event, Booking, Download, Eco, Bot }
@@ -70,6 +78,19 @@ enum class LanguageCode(val code: String, val tag: String) {
 enum class TextScale(val factor: Float) { System(1f), Small(0.9f), Large(1.15f), ExtraLarge(1.3f) }
 
 enum class LocationMode { WhileUsing, OnlyOnce, Denied }
+
+/** El modo claro u oscuro de la app: el del móvil (por defecto) o uno fijo. Se elige en Perfil → Tema; ver `data/AppTheme.kt`. */
+enum class ThemeMode {
+    System,
+    Light,
+    Dark,
+    ;
+
+    companion object {
+        /** El modo guardado con ese nombre; cualquier otra cosa (nada guardado, un valor que no se conoce) es el del móvil. */
+        fun fromName(name: String?): ThemeMode = entries.firstOrNull { it.name == name } ?: System
+    }
+}
 
 enum class SortMode { Distance, Rating, Name }
 

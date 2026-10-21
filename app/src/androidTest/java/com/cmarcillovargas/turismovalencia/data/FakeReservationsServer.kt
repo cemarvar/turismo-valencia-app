@@ -12,8 +12,8 @@ import java.util.UUID
 
 /**
  * Servidor de reservas falso para las pruebas del emulador: se comporta como la API real en lo que importa a la app (reserva con
- * localizador y total que pone él, idempotencia por clave, error con código) y apunta todo lo que le llega. Con [priceCents] da el
- * precio por adulto de cada oferta.
+ * localizador y total que pone él, idempotencia por clave, cancelar y recuperar con las mismas reglas de quién puede, error con
+ * código) y apunta todo lo que le llega. Con [priceCents] da el precio por adulto de cada oferta.
  */
 class FakeReservationsServer(private val priceCents: (offerId: String) -> Int = { 1800 }) : ReservationsService {
     data class Call(val deviceId: String, val idempotencyKey: String, val request: ReservationRequest)
@@ -23,6 +23,20 @@ class FakeReservationsServer(private val priceCents: (offerId: String) -> Int = 
 
     /** Reservas que guardó, por clave de idempotencia. */
     private val byKey = LinkedHashMap<String, ReservationDto>()
+
+    /** Qué móvil hizo cada reserva (por el identificador de la reserva). */
+    private val deviceOf = HashMap<String, String>()
+
+    /** Cancelaciones que le han llegado: móvil, localizador y correo, en orden. */
+    data class CancelCall(val deviceId: String, val locator: String, val email: String)
+
+    val cancelCalls = mutableListOf<CancelCall>()
+
+    /** Búsquedas por localizador y correo que le han llegado, en orden. */
+    val findCalls = mutableListOf<Pair<String, String>>()
+
+    /** El día de hoy para decidir si una actividad ya pasó (en las pruebas se puede fijar). */
+    var today: () -> LocalDate = { LocalDate.now() }
 
     /** Fallos que lanza, uno por petición y sin guardar nada (por ejemplo, `409 sold_out`). Se consumen en orden. */
     val failures = ArrayDeque<ApiException>()
@@ -61,7 +75,10 @@ class FakeReservationsServer(private val priceCents: (offerId: String) -> Int = 
             email = request.email.lowercase(),
             status = "confirmed",
             createdAt = Instant.now().toString(),
-        ).also { byKey[idempotencyKey] = it }
+        ).also {
+            byKey[idempotencyKey] = it
+            deviceOf[it.id] = deviceId
+        }
         if (loseNextResponses > 0) {
             loseNextResponses--
             throw ApiException("No se pudo crear la reserva", RuntimeException("se cortó la red"))
@@ -78,6 +95,41 @@ class FakeReservationsServer(private val priceCents: (offerId: String) -> Int = 
     override suspend fun list(deviceId: String): List<ReservationDto> {
         listCalls += deviceId
         return forcedList ?: byKey.values.toList().asReversed()
+    }
+
+    private fun keyOf(locator: String): String? = byKey.entries.firstOrNull { it.value.locator.equals(locator.trim(), ignoreCase = true) }?.key
+
+    private fun notFound() = error(404, "reservation_not_found")
+
+    override suspend fun cancel(deviceId: String, locator: String, email: String): ReservationDto {
+        cancelCalls += CancelCall(deviceId, locator, email)
+        if (delayMillis > 0) delay(delayMillis)
+        failures.removeFirstOrNull()?.let { throw it }
+        forcedReservation?.let { return it }
+        val key = keyOf(locator) ?: throw notFound()
+        val reservation = byKey.getValue(key)
+        // Como el servidor: la cancela el móvil que la hizo o quien tenga el localizador y el correo; si no, «no existe».
+        val owner = deviceOf[reservation.id] == deviceId || (email.isNotBlank() && reservation.email.equals(email.trim(), ignoreCase = true))
+        if (!owner) throw notFound()
+        if (reservation.status == "cancelled") return reservation
+        if (LocalDate.parse(reservation.date).isBefore(today())) throw error(409, "reservation_past")
+        val cancelled = reservation.copy(status = "cancelled")
+        byKey[key] = cancelled
+        if (loseNextResponses > 0) {
+            loseNextResponses--
+            throw ApiException("No se pudo cancelar la reserva", RuntimeException("se cortó la red"))
+        }
+        return cancelled
+    }
+
+    override suspend fun find(locator: String, email: String): ReservationDto {
+        findCalls += locator to email
+        if (delayMillis > 0) delay(delayMillis)
+        failures.removeFirstOrNull()?.let { throw it }
+        forcedReservation?.let { return it }
+        val reservation = keyOf(locator)?.let { byKey.getValue(it) } ?: throw notFound()
+        if (!reservation.email.equals(email.trim(), ignoreCase = true)) throw notFound()
+        return reservation
     }
 
     companion object {

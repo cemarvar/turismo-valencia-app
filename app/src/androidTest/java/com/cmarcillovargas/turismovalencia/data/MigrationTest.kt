@@ -11,6 +11,7 @@ import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
+import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -149,7 +150,35 @@ class MigrationTest {
     }
 
     @Test
-    fun deLaV1ALaV4PasaPorLasTresMigraciones() {
+    fun deLaV4ALaV5LlegaElModoDelTemaSinPerderNadaYEmpiezaEnElDelMovil() {
+        helper.createDatabase(name, 4).apply {
+            execSQL(
+                "INSERT INTO settings (id, language, notificationsEnabled, location, textScale, onboardingDone, wifiOnly, autoUpdate, mapDownloaded, deviceId) " +
+                    "VALUES (1, 'FR', 0, 'OnlyOnce', 'Large', 1, 0, 1, 0, 'dev-1')",
+            )
+            execSQL("INSERT INTO favorites (position, itemId) VALUES (1, 'paella')")
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(name, 5, true, AppDatabase.Migration4To5)
+
+        fun rows(sql: String) = migrated.query(sql).use { c ->
+            generateSequence { if (c.moveToNext()) (0 until c.columnCount).map { c.getString(it) } else null }.toList()
+        }
+        // Lo que ya había sigue ahí y el modo nuevo empieza en «el del móvil», que es lo que la app hacía hasta ahora.
+        assertEquals(
+            listOf(listOf("FR", "Large", "OnlyOnce", "1", "dev-1", "System")),
+            rows("SELECT language, textScale, location, onboardingDone, deviceId, themeMode FROM settings"),
+        )
+        assertEquals(listOf(listOf("paella")), rows("SELECT itemId FROM favorites"))
+        // Y se puede guardar otro.
+        migrated.execSQL("UPDATE settings SET themeMode = 'Dark'")
+        assertEquals(listOf(listOf("Dark")), rows("SELECT themeMode FROM settings"))
+        migrated.close()
+    }
+
+    @Test
+    fun deLaV1ALaV5PasaPorLasCuatroMigraciones() {
         helper.createDatabase(name, 1).apply {
             execSQL("INSERT INTO favorites (position, itemId) VALUES (1, 'paella')")
             execSQL(
@@ -159,7 +188,7 @@ class MigrationTest {
             close()
         }
 
-        val migrated = helper.runMigrationsAndValidate(name, 4, true, *AppDatabase.Migrations)
+        val migrated = helper.runMigrationsAndValidate(name, 5, true, *AppDatabase.Migrations)
 
         fun strings(sql: String) = migrated.query(sql).use { cursor -> generateSequence { if (cursor.moveToNext()) cursor.getString(0) else null }.toList() }
         assertEquals(listOf("paella"), strings("SELECT itemId FROM favorites"))
@@ -167,6 +196,7 @@ class MigrationTest {
         assertEquals(emptyList<String>(), strings("SELECT id FROM offers"))
         assertEquals(listOf("TV-2026-0413"), strings("SELECT locator FROM reservations"))
         assertEquals(listOf("3600"), strings("SELECT totalCents FROM reservations"))
+        assertEquals(emptyList<String>(), strings("SELECT themeMode FROM settings")) // esta base no tenía ajustes que migrar
         migrated.close()
     }
 
@@ -189,6 +219,7 @@ class MigrationTest {
             assertEquals(LocationMode.OnlyOnce, settings.location)
             assertTrue(settings.onboardingDone)
             assertEquals(false, settings.notificationsEnabled)
+            assertEquals(ThemeMode.System, settings.themeMode)
             assertEquals(listOf("fallas"), runBlocking { db.reminders().observeIds().first() })
             // Y se puede escribir en la tabla nueva.
             runBlocking {

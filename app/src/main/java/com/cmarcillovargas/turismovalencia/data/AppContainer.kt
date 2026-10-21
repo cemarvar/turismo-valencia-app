@@ -14,6 +14,7 @@ import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.DemoData
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
+import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 import com.cmarcillovargas.turismovalencia.data.notify.NotificationAccess
 import com.cmarcillovargas.turismovalencia.data.notify.ReminderScheduler
 import com.cmarcillovargas.turismovalencia.data.remote.ChatApi
@@ -70,6 +71,7 @@ class AppContainer(
     reservationsService: ReservationsService? = null,
     refreshScheduler: RefreshScheduler = WorkRefreshScheduler(application),
     languageApplier: LanguageApplier = AppCompatLanguageApplier(),
+    private val themeApplier: ThemeApplier = AppCompatThemeApplier(application),
 ) {
     /**
      * Ámbito de las escrituras y de los estados que siguen a Room: vive tanto como la app. La paralelización limitada a 1
@@ -110,7 +112,7 @@ class AppContainer(
         reservationsService ?: RetrofitReservationsService(api),
         scope,
     )
-    val settings = SettingsRepository(settingsStore, languageApplier)
+    val settings = SettingsRepository(settingsStore, languageApplier, themeApplier)
     val location = LocationRepository(application, settings, scope)
 
     /** Si el sistema deja mostrar notificaciones; `MainActivity` lo vuelve a mirar al volver a la app. */
@@ -196,6 +198,13 @@ class AppContainer(
     }
 
     init {
+        // El modo claro u oscuro lo pone `TurismoApp` al arrancar con la copia rápida de `AppThemePrefs`, antes de que exista ninguna
+        // actividad; esto lo da por bueno con lo que hay en Room (si coinciden no hace nada) y lo corrige si no (una copia de seguridad
+        // restaurada a medias, por ejemplo).
+        themeApplier.apply(settings.themeMode.value)
+    }
+
+    init {
         // Hasta que arranque una actividad (que sabe con qué idioma ha resuelto Android los recursos), vale el último que se guardó: es
         // el que necesitan, por ejemplo, la alarma de un aviso con la app cerrada.
         applyLanguage(settings.language.value)
@@ -219,6 +228,7 @@ class AppContainer(
      */
     fun resetToDemo() {
         runBlocking { demo.populate(database, language = strings.language) }
+        themeApplier.apply(ThemeMode.System)
         if (network.isOnline.value) scope.launch { refreshOffers() }
     }
 

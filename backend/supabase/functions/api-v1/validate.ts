@@ -42,6 +42,23 @@ export async function readJsonBody(req: Request): Promise<unknown> {
   }
 }
 
+/** Como [readJsonBody], pero un cuerpo vacío es válido y vale «sin datos» (`null`): cancelar una reserva puede no llevar ninguno. */
+export async function readOptionalJsonBody(req: Request): Promise<unknown> {
+  if (Number(req.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
+    throw new ApiError(413, "payload_too_large", "El cuerpo de la petición es demasiado grande.");
+  }
+  const text = await req.text();
+  if (new TextEncoder().encode(text).length > MAX_BODY_BYTES) {
+    throw new ApiError(413, "payload_too_large", "El cuerpo de la petición es demasiado grande.");
+  }
+  if (text.trim().length === 0) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new ApiError(400, "invalid_request", "El cuerpo no es un JSON válido.");
+  }
+}
+
 function isRealDate(value: string): boolean {
   if (!DATE.test(value)) return false;
   const date = new Date(`${value}T00:00:00Z`);

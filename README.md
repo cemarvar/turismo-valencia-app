@@ -10,7 +10,7 @@ siguiendo el diseño de Figma pantalla a pantalla.
 > **Estado:** frontend completo y funcional; ValBot conectado a la web, lo del usuario guardado en local con Room, mapa real de
 > OpenStreetMap con ubicación y rutas, avisos de eventos con notificaciones reales, icono propio y pantalla de arranque del sistema.
 > El backend propio (Supabase) está publicado y probado, y la app ya lo usa: lee de él el catálogo de ofertas y hace las reservas
-> reales (reservar exige conexión) y las pone al día cada noche en segundo plano. Está en cuatro idiomas (español, valenciano, inglés y
+> reales (reservar y cancelar exigen conexión; en otro móvil se recuperan con su localizador y su correo) y las pone al día cada noche en segundo plano. Está en cuatro idiomas (español, valenciano, inglés y
 > francés; el texto de las páginas de la web sigue solo en español, ver [`docs/idiomas.md`](docs/idiomas.md)). Aún no hay mapa descargable por
 > zonas (ver [Hoja de ruta](#hoja-de-ruta)).
 
@@ -24,8 +24,8 @@ siguiendo el diseño de Figma pantalla a pantalla.
 | **Mapa** | Mapa de OpenStreetMap con filtros por categoría, tu ubicación (con permiso), y ruta real a pie o en bici con los pasos por las calles (autobús y metro, estimados) |
 | **ValBot** | Asistente con IA (Gemini, a través de la web) con tarjetas de lugares y guías, dictado por voz, respuestas básicas si el servidor no responde y modo sin conexión |
 | **Favoritos y descargas** | Favoritos, fichas y mapa guardados, cuota de espacio, solo Wi-Fi y actualización automática cada noche |
-| **Reservas** | Reservar en dos pasos (la confirma el servidor, con aforo por día y horario), reserva confirmada con código QR, historial y reservas canceladas |
-| **Perfil** | Idioma, notificaciones (con el permiso del sistema), ubicación, tamaño del texto, cerrar sesión |
+| **Reservas** | Reservar en dos pasos (la confirma el servidor, con aforo por día y horario), reserva confirmada con código QR, **cancelarla** hasta que empieza la actividad, **recuperarla en otro móvil** con su localizador y su correo, historial y reservas canceladas |
+| **Perfil** | Idioma, tema (claro, oscuro o el del móvil), notificaciones (con el permiso del sistema), ubicación, tamaño del texto, cerrar sesión |
 | **Estados** | Sin conexión, cargando, favoritos vacío, búsqueda sin resultados |
 
 Las 27 pantallas del [diseño de Figma](docs/Figma) están implementadas y comparadas con las capturas en el emulador.
@@ -138,13 +138,14 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - **Avisos (emulador):** permiso real de notificaciones (diálogo, «No permitir» y «Abrir ajustes»), alarma de la mascletà en `dumpsys alarm`, disparo adelantando el reloj, tocar la notificación con la app cerrada y reinicio del móvil.
 - **Ofertas del servidor (emulador):** el catálogo llega y se guarda con su versión, el servidor confirma con 304 al reabrir, se ve sin conexión desde la caché y, sin nada guardado, el catálogo incluido en la app (`verify_ui.py ofertas`).
 - **Reservas (emulador + backend local):** el servidor confirma y la app guarda su localizador, aforo («Ya no quedan plazas»), sin conexión (aviso y botón desactivado), servidor inalcanzable con reintento con la misma clave (una sola reserva en el servidor) y reserva cancelada en el servidor (`verify_ui.py reservas`).
+- **Cancelar y recuperar reservas (emulador + backend local):** reservar y cancelar con su confirmación (el servidor libera las plazas y la app quita el código QR), sin conexión (botón desactivado), las de demostración (solo en el móvil), recuperar en un «móvil nuevo» con localizador y correo —primero uno que no existe y luego el bueno— y cancelarla desde allí (`verify_ui.py cancelar`).
 - **Refresco nocturno (emulador):** el trabajo de WorkManager se programa con los ajustes de Descargas (red sin tarifa con «Solo Wi-Fi», a partir de las 3:00), se cancela al apagar «Actualizar automáticamente» y, con la app cerrada y el reloj pasadas las 3:00, el sistema lo ejecuta y deja programado el de la noche siguiente (`verify_ui.py refresco`).
 - **Privacidad (emulador):** la política de privacidad de la web lleva debajo lo que añade la app (`verify_ui.py privacidad`).
-- **Publicación (emulador + backend local):** la versión minificada con R8 arranca, guarda en Room, pide el catálogo, programa y ejecuta el refresco nocturno (WorkManager) y reserva con Retrofit y lee el error «Ya no quedan plazas» (`verify_release.py`).
+- **Publicación (emulador + backend local):** la versión minificada con R8 arranca, guarda en Room, pide el catálogo, programa y ejecuta el refresco nocturno (WorkManager) y reserva con Retrofit, lee el error «Ya no quedan plazas» y recupera y cancela una reserva (`verify_release.py`).
 - **Modo oscuro (emulador):** fondo, barras, iconos de la barra de estado, QR siempre claro y legible, mapa oscuro con su atribución, pantalla de arranque y cambiar el modo con la app abierta (`verify_ui.py oscuro`, con `adb shell cmd uimode night yes`).
 - **Idiomas (emulador):** cambiar desde la hoja de idioma y desde los ajustes del móvil, y ver Inicio, fichas, reservas, notificaciones, Tickets & Tours, buscador y ValBot en español, valenciano, inglés y francés; que persiste; y el primer arranque con el móvil en inglés y en alemán (`verify_ui.py idiomas`).
 - **Fotos:** tras cambiar de sección, cada tarjeta muestra su propia foto.
-- **Backend (local):** `cd backend && npm test` prueba la API por HTTP (ofertas, reservas, idempotencia, aforo con peticiones simultáneas, límites y base de datos cerrada).
+- **Backend (local):** `cd backend && npm test` prueba la API por HTTP (ofertas, reservas, cancelar, idempotencia, aforo con peticiones simultáneas, límites y base de datos cerrada).
 
 ## Hoja de ruta
 
@@ -152,6 +153,7 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - [x] **Backend propio en Supabase** (`backend/`): PostgreSQL y una API de ofertas y reservas con escritura ([`docs/api.md`](docs/api.md)); publicado en Supabase y probado en local y en la nube
 - [x] **Ofertas del servidor** en la app: Retrofit + kotlinx.serialization, caché en Room (esquema v3 con migración) y respaldo sin conexión
 - [x] **Reservas reales** con el backend: reservar exige conexión, UUID del móvil e idempotencia por intento en Room (esquema v4 con migración), errores por código y dinero en céntimos
+- [x] **Cancelar y recuperar reservas**: `POST /reservations/{localizador}/cancel` (hasta que empieza la actividad, liberando las plazas) y recuperar una reserva en otro móvil con su localizador y su correo; probado en local, bajo R8 y contra la nube
 - [x] **Refresco nocturno en segundo plano** (WorkManager, respetando «Solo Wi-Fi» y «Actualizar automáticamente») y **privacidad de la app** en la página legal
 - [x] **Persistencia local** con Room: favoritos, descargas, reservas, ajustes, búsquedas, avisos y primer arranque
 - [x] **Mapa real** con osmdroid, ubicación del usuario y rutas a pie y en bici
@@ -161,7 +163,7 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - [x] **Icono de la app** y **pantalla de arranque del sistema** (SplashScreen API)
 - [x] **Idiomas** ES · VA · EN · FR: interfaz, contenido propio (fichas y ofertas), títulos de la web, ValBot sin conexión, avisos y formatos; elegir desde la app o desde los ajustes del móvil ([`docs/idiomas.md`](docs/idiomas.md))
 - [ ] Traducir el texto de las páginas de la web (hoy solo en español; se traducen sus títulos)
-- [x] **Modo oscuro**: la app sigue el modo del móvil, con la paleta de las imágenes de diseño, mapa oscuro y QR siempre legible ([`docs/modo-oscuro.md`](docs/modo-oscuro.md)). Opcional: un selector Claro / Oscuro / Sistema en Perfil
+- [x] **Modo oscuro**: la app sigue el modo del móvil o el que se fije en Perfil → Tema (Claro, Oscuro o el del móvil), con la paleta de las imágenes de diseño, mapa oscuro y QR siempre legible ([`docs/modo-oscuro.md`](docs/modo-oscuro.md))
 
 ## Créditos
 

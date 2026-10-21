@@ -240,6 +240,8 @@
     <string name="res_status_completed">Completed</string>
     <string name="res_status_cancelled">Cancelled</string>
     <string name="res_cancelled">Cancelled</string>
+    <string name="res_recover_title">Booked from another phone?</string>
+    <string name="res_recover_text">Get your booking back with its reference and the email you used.</string>
     <string name="book_title">Book</string>
     <string name="book_step">Step 1 of 2 · Date and guests</string>
     <string name="book_per_person">%1$s · %2$s per person</string>
@@ -280,6 +282,30 @@
     <string name="booking_total">Total</string>
     <string name="booking_show_code">Show this code at the jetty. Available offline.</string>
     <string name="booking_share_text">Booking %1$s: %2$s · %3$s at %4$s</string>
+    <string name="booking_cancelled">Booking cancelled</string>
+    <string name="booking_cancelled_text">We’ve released your spots. There’s nothing else you need to do.</string>
+    <string name="booking_cancelled_code">This booking is cancelled: the code is no longer valid.</string>
+    <string name="booking_cancel">Cancel booking</string>
+    <string name="booking_cancelling">Cancelling…</string>
+    <string name="booking_cancel_needs_connection">You need an internet connection to cancel the booking.</string>
+    <string name="booking_cancel_title">Cancel this booking?</string>
+    <string name="booking_cancel_text">Your spots for “%1$s” (%2$s) will be released. This can’t be undone.</string>
+    <string name="booking_cancel_confirm">Yes, cancel</string>
+    <string name="booking_cancel_keep">No, keep it</string>
+    <string name="booking_book_again">Book again</string>
+    <string name="booking_cancel_error_unreachable">We couldn’t reach the server and don’t know whether it was cancelled. Check your connection and try again; repeating it is safe.</string>
+    <string name="booking_cancel_error_too_late">It can no longer be cancelled: the activity has already started or passed.</string>
+    <string name="booking_cancel_error_not_found">The server can’t find this booking, so it can’t be cancelled from the app.</string>
+    <string name="booking_cancel_error_other">The booking couldn’t be cancelled. Try again later.</string>
+    <string name="recover_title">Recover a booking</string>
+    <string name="recover_text">Enter the reference (for example, %1$s) and the email you booked with.</string>
+    <string name="recover_email_label">Email you booked with</string>
+    <string name="recover_confirm">Recover</string>
+    <string name="recover_working">Searching…</string>
+    <string name="recover_needs_connection">Recovering a booking needs an internet connection.</string>
+    <string name="recover_privacy">The reference and email are sent to our server only to look up the booking.</string>
+    <string name="recover_error_not_found">There’s no booking with that reference and email. Check both.</string>
+    <string name="recover_error_other">The booking couldn’t be recovered. Try again later.</string>
 
     <plurals name="booking_adults">
         <item quantity="one">%1$d adult</item>
@@ -306,6 +332,10 @@
     <string name="profile_text_small">Small</string>
     <string name="profile_text_large">Large</string>
     <string name="profile_text_xlarge">Extra large</string>
+    <string name="profile_theme">Theme</string>
+    <string name="profile_theme_system">Follows system setting</string>
+    <string name="profile_theme_light">Light</string>
+    <string name="profile_theme_dark">Dark</string>
     <string name="profile_account">Account</string>
     <string name="profile_privacy">Privacy and data</string>
     <string name="profile_privacy_text">Your favourites, bookings and downloads are saved on your phone. We use your location only while you use the app, to sort places by distance and work out routes. Maps and routes are served by OpenStreetMap: to draw them, it receives the area you’re viewing and the start and end points of the route. You can change this whenever you like.</string>
@@ -364,8 +394,10 @@
         <item>A random identifier for your phone (see below), so we can show you your bookings without you having to create an account.</item>
     </string-array>
     <string name="privacy_app_bookings_use">We use it only to manage the booking (performance of a contract, as stated in section 4): to confirm it, control the places available and give you its reference. We don’t ask for payment details: payment in this version is simulated. We keep the data for as long as it is needed to manage the booking, and you can ask us to delete it whenever you like.</string>
+    <string name="privacy_app_cancel_title">Cancelling and recovering bookings</string>
+    <string name="privacy_app_cancel_body">When you cancel a booking, the app sends our server its reference, the email it was made with and the phone identifier; the server marks it as cancelled and releases the places, but keeps the record. To recover a booking on another phone, or after clearing the app’s data, you enter its reference and the email it was made with: the app sends them to the server to look it up and, if they match, saves the booking on your phone. Anyone who has a booking’s reference and email can view and cancel it, so don’t share them.</string>
     <string name="privacy_app_device_title">Phone identifier</string>
-    <string name="privacy_app_device_body">The first time you book, the app creates a random number and stores it on your phone. It contains no data about you or your device. It is sent with every booking and every time the app checks your bookings. If you clear the app’s data, the phone loses it and stops seeing its bookings in the app (if you use Android backup, it may come back with the rest of your data when you reinstall the app); on our server they remain until you ask for them to be deleted.</string>
+    <string name="privacy_app_device_body">The first time you book or cancel a booking, the app creates a random number and stores it on your phone. It contains no data about you or your device. It is sent with every booking, every cancellation and every time the app checks your bookings. If you clear the app’s data, the phone loses it and stops seeing its bookings in the app (you can recover them with their reference and email; if you use Android backup, it may come back with the rest of your data when you reinstall the app); on our server they remain until you ask for them to be deleted.</string>
     <string name="privacy_app_valbot_title">ValBot assistant</string>
     <string name="privacy_app_valbot_body">What you write to ValBot is sent to the website’s server, which processes it with Google’s Gemini artificial intelligence service to answer you (sections 2 and 6). Don’t write personal data in the chat. If there is no connection, or the server can’t answer, the app replies with basic answers from your phone (offline, nothing is sent).</string>
     <string name="privacy_app_map_title">Map, routes and location</string>

@@ -1,7 +1,7 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas refresco privacidad idiomas)
-El grupo `reservas` necesita el backend local (cd backend && npm start, con Docker Desktop) y la app instalada con su dirección;
-si no lo encuentra, se salta con un aviso.
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas cancelar refresco privacidad idiomas oscuro tema)
+Los grupos `reservas` y `cancelar` necesitan el backend local (cd backend && npm start, con Docker Desktop) y la app instalada con su
+dirección; si no lo encuentran, se saltan con un aviso.
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
 guardó la anterior; `start(..., reset=False)` reabre la app conservando lo guardado.
 Todos los grupos menos `idiomas` esperan la app en español: `start` le pide el idioma con `--es lang ES` (`lang=None` no lo toca) y
@@ -61,6 +61,7 @@ def nodes():
         out.append({
             "t": n.get("text") or "",
             "d": n.get("content-desc") or "",
+            "c": n.get("class") or "",
             "b": tuple(map(int, m.groups())),
             "chk": n.get("checkable") == "true",
             "on": n.get("checked") == "true",
@@ -72,6 +73,19 @@ def nodes():
 
 def texts(ns=None):
     return [n["t"] for n in (ns if ns is not None else nodes()) if n["t"]]
+
+
+def edit_fields(ns=None):
+    """Los campos de texto de la pantalla (también los vacíos, que no tienen texto por el que buscarlos), de arriba abajo."""
+    return sorted((n for n in (ns if ns is not None else nodes()) if n["c"].endswith("EditText")), key=lambda n: n["b"][1])
+
+
+def clear_field(field, chars=40):
+    """Vacía un campo de texto: lo pulsa, va al final y borra hacia atrás."""
+    tap(field)
+    adb("shell", "input", "keyevent", "KEYCODE_MOVE_END")
+    adb("shell", "input", "keyevent", *["KEYCODE_DEL"] * chars)
+    time.sleep(0.5)
 
 
 def shot():
@@ -1146,11 +1160,12 @@ def locator_on_screen(seconds=8.0):
     return ""
 
 
-def g_reservas():
-    print("\n## Reservas reales: confirma el servidor, aforo, sin conexión y reintento con la misma clave")
+def ready_local_app():
+    """Deja el backend local limpio y la app hablando con él, abierta en Reservar la barca de la Albufera. False (con un aviso
+    «SKIP») si el backend no está en marcha o la app no se instaló con su dirección."""
     if not local_api_up() or local_sql("select 1") is None:
         print("SKIP - hace falta el backend local en marcha (cd backend && npm start, con Docker Desktop) y la app: " + LOCAL_APP_HINT)
-        return
+        return False
     set_network(True)
     adb("reverse", "tcp:54321", "tcp:54321")
     clean_local_backend()
@@ -1161,8 +1176,15 @@ def g_reservas():
         time.sleep(1.0)
     if "prueba-aforo" not in [o[0] for o in app_offers_db()[0]]:
         print("SKIP - la app no habla con el backend local (su catálogo no trae «prueba-aforo»): " + LOCAL_APP_HINT)
-        return
+        return False
     start("reservar/albufera-barca", reset=False)
+    return True
+
+
+def g_reservas():
+    print("\n## Reservas reales: confirma el servidor, aforo, sin conexión y reintento con la misma clave")
+    if not ready_local_app():
+        return
 
     # Reservar con conexión: confirma el servidor y la app guarda lo que él contesta.
     ns = nodes()
@@ -1243,6 +1265,154 @@ def g_reservas():
     check("una reserva cancelada en el servidor sale en «Canceladas»", scroll_to("CANCELADAS") is not None)
     check("con su estado «Cancelada»", scroll_to("Cancelada") is not None)
     check("y la app la guarda como cancelada", [r[7] for r in app_reservations_db()[0] if r[0] == retried] == ["Cancelled"])
+    start(None)  # deja la app como un primer arranque
+
+
+def server_status(locator):
+    """Estado de una reserva en la base de datos del backend local (confirmed, cancelled…), o None si no existe."""
+    rows = local_sql("select status from app.reservations where locator = '%s'" % locator) or []
+    return rows[0] if rows else None
+
+
+def reservation_id(locator):
+    """Identificador (UUID) con el que la app guardó la reserva de ese localizador."""
+    rows = app_db("SELECT id FROM reservations WHERE locator = '%s'" % locator)[0]
+    return rows[0][0] if rows else None
+
+
+def open_cancel_button():
+    """Baja hasta «Cancelar reserva» (queda debajo del billete) y devuelve su control, o None si no hay."""
+    scroll_to("Cancelar reserva")
+    return control("Cancelar reserva")
+
+
+def g_cancelar():
+    print("\n## Cancelar y recuperar reservas: el servidor libera las plazas, sin conexión y desde otro móvil")
+    if not ready_local_app():
+        return
+
+    # 1) Reservar y cancelar desde la confirmación
+    tap_text("Confirmar reserva")
+    locator = locator_on_screen()
+    check("hay una reserva confirmada para cancelar", bool(locator), locator)
+    check("la confirmación enseña el código (QR) de la reserva", find("Muestra este código en el embarcadero. Disponible sin conexión.") is not None)
+    button = open_cancel_button()
+    check("ofrece «Cancelar reserva», activo", bool(button and button["en"]))
+    tap_text("Cancelar reserva")
+    check("pide confirmación antes de cancelar", wait_for("¿Cancelar esta reserva?", 5))
+    check("y dice qué se libera", any("Se liberarán tus plazas de «Paseo en barca por la Albufera»" in t for t in texts()))
+    tap_text("No, mantenerla")
+    time.sleep(1.0)
+    check("«No, mantenerla» cierra el diálogo y no cancela nada", find("¿Cancelar esta reserva?") is None and server_status(locator) == "confirmed")
+    tap_text("Cancelar reserva")
+    wait_for("¿Cancelar esta reserva?", 5)
+    tap_text("Sí, cancelar")
+    check("el servidor cancela y la pantalla lo dice", wait_for("Reserva cancelada", 10))
+    ts = texts()
+    check("con las plazas liberadas y el estado «Cancelada»", any("Hemos liberado tus plazas" in t for t in ts) and "Cancelada" in ts)
+    check("el código ya no se enseña: se avisa de que no vale", find("Esta reserva está cancelada: el código ya no vale.") is not None and find("Muestra este código en el embarcadero. Disponible sin conexión.") is None)
+    check("ya no se ofrece cancelarla otra vez", find("Cancelar reserva") is None)
+    check("la barra de abajo ofrece «Reservar de nuevo» y no el calendario", control("Reservar de nuevo") is not None and find("Calendario") is None)
+    check("el servidor la tiene cancelada", server_status(locator) == "cancelled")
+    check("la app la guarda cancelada", [r[7] for r in app_reservations_db()[0] if r[0] == locator] == ["Cancelled"])
+    rid = reservation_id(locator)
+
+    # 2) Mis reservas la pone en «Canceladas»; «Reservar de nuevo» abre la misma actividad
+    start("reservas", reset=False)
+    check("Mis reservas la enseña en «Canceladas»", scroll_to("CANCELADAS") is not None)
+    start("reserva/" + (rid or "x"), reset=False)
+    check("reabierta sigue cancelada, sin botón de cancelar", wait_for("Reserva cancelada", 6) and find("Cancelar reserva") is None)
+    tap_text("Reservar de nuevo")
+    check("«Reservar de nuevo» abre Reservar con la misma actividad", wait_for("Paso 1 de 2 · Fecha y personas", 6) and find("Paseo en barca por la Albufera", exact=False) is not None)
+
+    # 3) Sin conexión no se cancela una reserva del servidor (pero se ve su código); al volver la conexión se activa solo
+    tap_text("Confirmar reserva")
+    second = locator_on_screen()
+    rid2 = reservation_id(second)
+    check("una segunda reserva confirmada", bool(second) and second != locator, second)
+    set_network(False)
+    start("reserva/" + (rid2 or "x"), reset=False)
+    check("sin conexión sigue viéndose el código de la reserva", find("Muestra este código en el embarcadero. Disponible sin conexión.") is not None)
+    button = open_cancel_button()
+    check("sin conexión «Cancelar reserva» está desactivado", bool(button) and button["en"] is False)
+    check("y explica por qué", find("Para cancelar la reserva necesitas conexión a Internet.") is not None)
+    set_network(True)
+    time.sleep(2.5)
+    button = control("Cancelar reserva")
+    check("al volver la conexión se activa sin reabrir", bool(button and button["en"]) and find("Para cancelar la reserva necesitas conexión a Internet.") is None)
+
+    # 4) Las de demostración solo existen en el móvil: se cancelan aunque no haya conexión y el servidor no se entera
+    set_network(False)
+    start("reserva/seed-2")
+    demo = open_cancel_button()
+    check("una reserva de demostración se puede cancelar sin conexión", bool(demo and demo["en"]) and find("Para cancelar la reserva necesitas conexión a Internet.") is None)
+    tap_text("Cancelar reserva")
+    wait_for("¿Cancelar esta reserva?", 5)
+    tap_text("Sí, cancelar")
+    check("y queda cancelada", wait_for("Reserva cancelada", 8))
+    demo_locator = next((r[0] for r in app_reservations_db()[0] if r[7] == "Cancelled"), "")
+    check("solo en el móvil: el servidor no tiene esa reserva", bool(demo_locator) and server_status(demo_locator) is None, demo_locator)
+    start("reserva/seed-3")
+    check("una reserva ya completada no se puede cancelar", wait_for("Completada", 6) and find("Cancelar reserva") is None)
+    set_network(True)
+
+    # 5) Recuperar la reserva en otro móvil (sin reservas ni identificador): localizador y correo
+    adb("shell", "pm", "clear", PKG)
+    start("reservas")
+    check("en el otro móvil no está la reserva del servidor", locator not in [r[0] for r in app_reservations_db()[0]] and second not in [r[0] for r in app_reservations_db()[0]])
+    scroll_to("¿Reservaste desde otro móvil?")
+    check("Mis reservas ofrece recuperar una reserva", find("¿Reservaste desde otro móvil?") is not None)
+    tap_text("¿Reservaste desde otro móvil?")
+    check("se abre «Recuperar una reserva»", wait_for("Recuperar una reserva", 5))
+    check("con el aviso de lo que se envía al servidor", find("El localizador y el correo se envían a nuestro servidor solo para buscar la reserva.") is not None)
+    confirm = control("Recuperar")
+    check("«Recuperar» está desactivado hasta rellenar los dos datos", bool(confirm) and confirm["en"] is False)
+    fields = edit_fields()
+    check("hay dos campos: localizador y correo", len(fields) == 2, str(len(fields)))
+    if len(fields) == 2:
+        # Al enfocar un campo sale el teclado y el diálogo sube: cada paso mira de nuevo dónde están los campos (un toque con las
+        # coordenadas de antes caería fuera del diálogo y lo cerraría).
+        tap(edit_fields()[0])
+        type_text("tv-2099-9999")
+        tap(edit_fields()[1])
+        type_text("laura.garcia@example.com")
+        confirm = control("Recuperar")
+        check("con los dos datos se activa", bool(confirm and confirm["en"]))
+        tap_text("Recuperar")
+        check("un localizador que no existe: «No hay ninguna reserva con ese localizador y ese correo»", wait_for("No hay ninguna reserva con ese localizador y ese correo. Revisa los dos datos.", 10))
+        check("el diálogo sigue abierto para corregirlo", find("Recuperar una reserva") is not None)
+        clear_field(edit_fields()[0])
+        type_text(second.lower())
+        check("al corregir un dato desaparece el error", find("No hay ninguna reserva con ese localizador y ese correo. Revisa los dos datos.") is None)
+        tap_text("Recuperar")
+        shown = locator_on_screen(12)
+        check("con el localizador (en minúsculas) y el correo correctos se abre la reserva", shown == second, shown)
+        rows, _, _ = app_reservations_db()
+        check("y la app la guarda", second in [r[0] for r in rows])
+        check("sigue confirmada, con su código", find("Muestra este código en el embarcadero. Disponible sin conexión.") is not None)
+
+        # 6) Y se puede cancelar desde ese otro móvil: no la hizo él, pero tiene su localizador y su correo
+        button = open_cancel_button()
+        check("la reserva recuperada se puede cancelar", bool(button and button["en"]))
+        tap_text("Cancelar reserva")
+        wait_for("¿Cancelar esta reserva?", 5)
+        tap_text("Sí, cancelar")
+        check("desde el otro móvil, con localizador y correo", wait_for("Reserva cancelada", 10))
+        check("el servidor la tiene cancelada", server_status(second) == "cancelled")
+        device_here = app_reservations_db()[2]
+        owner = (local_sql("select device_id from app.reservations where locator = '%s'" % second) or [""])[0]
+        check("y el móvil que la hizo no es este", bool(device_here) and bool(owner) and owner != device_here, "%s / %s" % (owner, device_here))
+
+    # 7) Recuperar exige conexión
+    set_network(False)
+    start("reservas")
+    scroll_to("¿Reservaste desde otro móvil?")
+    tap_text("¿Reservaste desde otro móvil?")
+    wait_for("Recuperar una reserva", 5)
+    check("sin conexión el diálogo avisa de que recuperar necesita conexión", find("Recuperar una reserva necesita conexión a Internet.") is not None)
+    confirm = control("Recuperar")
+    check("y «Recuperar» está desactivado", bool(confirm) and confirm["en"] is False)
+    set_network(True)
     start(None)  # deja la app como un primer arranque
 
 
@@ -1375,7 +1545,7 @@ def g_privacidad():
     print("\n## Política de privacidad: la de la web y lo que añade la app")
     start("pagina/PoliticaPrivacidad")
     check("la política de la web sigue arriba", find("Política de Privacidad") is not None and find("1. Responsable del tratamiento") is not None)
-    sections = ("La app en tu móvil", "Reservas", "Identificador del móvil", "Asistente ValBot", "Mapa, rutas y ubicación", "Actualización automática", "Lo que la app no incluye", "Tus derechos")
+    sections = ("La app en tu móvil", "Reservas", "Cancelar y recuperar reservas", "Identificador del móvil", "Asistente ValBot", "Mapa, rutas y ubicación", "Actualización automática", "Lo que la app no incluye", "Tus derechos")
     for title in sections:
         check("debajo, lo que añade la app: «%s»" % title, scroll_to(title, tries=40) is not None)
         if title == "Reservas":
@@ -1635,7 +1805,111 @@ def g_oscuro():
     start(None)  # deja la app como un primer arranque
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas, "oscuro": g_oscuro}
+def tema_subtitle():
+    """El modo que enseña la fila «Tema» de Perfil (el texto de debajo de su título), o None si no se ve (por ejemplo, con el diálogo
+    abierto, que tapa la pantalla de debajo)."""
+    ns = nodes()
+    label = next((n for n in ns if n["t"] == "Tema"), None)
+    if not label:
+        return None
+    below = [n for n in ns if n["t"] and abs(n["b"][0] - label["b"][0]) < 6 and 0 <= n["b"][1] - label["b"][3] < 60]
+    return below[0]["t"] if below else None
+
+
+def room_theme():
+    """El modo claro u oscuro guardado en Room (Light, Dark o System) y en la copia rápida de `TurismoApp` (`shared_prefs/theme.xml`)."""
+    rows = app_db("SELECT themeMode FROM settings")[0]
+    prefs = adb("shell", "run-as", PKG, "cat", "shared_prefs/theme.xml")
+    saved = re.search(r'name="mode">([A-Za-z]+)<', prefs)
+    return (rows[0][0] if rows else None), (saved.group(1) if saved else None)
+
+
+def system_night():
+    """El modo oscuro del sistema (`cmd uimode night`): «yes» o «no»."""
+    return adb("shell", "cmd", "uimode", "night").strip().rsplit(" ", 1)[-1]
+
+
+def app_is_dark():
+    """La app se ve oscura: el fondo de la pantalla (una franja del borde izquierdo, entre las tarjetas) es casi negro."""
+    return region_luma(shot(), (0, 900, 24, 1500)) < 30
+
+
+def app_is_light():
+    return region_luma(shot(), (0, 900, 24, 1500)) > 230
+
+
+def g_tema():
+    print("\n## Selector de tema (Perfil → Tema): claro, oscuro o el del móvil, con independencia del modo del sistema")
+    try:
+        set_night(False)
+        start("perfil")
+        check("Perfil tiene la fila «Tema» y, por defecto, «Sigue al del sistema»", tema_subtitle() == "Sigue al del sistema", str(tema_subtitle()))
+        check("al principio, Room y la copia rápida dicen el del móvil (System)", room_theme() == ("System", "System"), str(room_theme()))
+        tap_text("Tema")
+        check("pulsarla abre el diálogo con las tres opciones", wait_for("Cancelar", 4) and find("Claro") is not None and find("Oscuro") is not None and find("Sigue al del sistema") is not None)
+
+        # ---- Oscuro con el móvil en claro
+        tap_text("Oscuro")
+        time.sleep(2.8)  # AppCompat recrea la actividad con el modo nuevo
+        img = shot()
+        lo, hi = region_extremes(img, (20, 30, 130, 66))
+        check("«Oscuro» con el móvil en claro: la app se pinta oscura", region_luma(img, (0, 900, 24, 1500)) < 30, "%.0f" % region_luma(img, (0, 900, 24, 1500)))
+        check("…con los iconos de la barra de estado claros (la hora en blanco)", hi > 200, "%.0f" % hi)
+        check("…sin salir de Perfil, con «Oscuro» en la fila", tema_subtitle() == "Oscuro", str(tema_subtitle()))
+        check("…mientras el sistema sigue en claro", system_night() == "no", system_night())
+        check("Room y la copia rápida guardan Dark", room_theme() == ("Dark", "Dark"), str(room_theme()))
+
+        # ---- Se guarda: cerrar y abrir la app (sin restablecer los datos)
+        start("perfil", reset=False)
+        check("tras cerrar y abrir la app sigue oscura y con «Oscuro» en la fila", app_is_dark() and tema_subtitle() == "Oscuro", str(tema_subtitle()))
+
+        # ---- Claro con el móvil en oscuro
+        set_night(True)
+        time.sleep(1.5)
+        check("con el móvil en oscuro y la app en «Oscuro», sigue oscura", app_is_dark())
+        tap_text("Tema")
+        wait_for("Cancelar", 4)
+        tap_text("Claro")
+        time.sleep(2.8)
+        img = shot()
+        lo, hi = region_extremes(img, (20, 30, 130, 66))
+        check("«Claro» con el móvil en oscuro: la app se pinta clara", region_luma(img, (0, 900, 24, 1500)) > 230, "%.0f" % region_luma(img, (0, 900, 24, 1500)))
+        check("…con la hora de la barra de estado oscura", lo < 90, "%.0f" % lo)
+        check("…con «Claro» en la fila y el sistema en oscuro", tema_subtitle() == "Claro" and system_night() == "yes", "%s / %s" % (tema_subtitle(), system_night()))
+        check("Room y la copia rápida guardan Light", room_theme() == ("Light", "Light"), str(room_theme()))
+        start("perfil", reset=False)
+        check("tras cerrar y abrir la app sigue clara, aunque el móvil esté en oscuro", app_is_light() and tema_subtitle() == "Claro")
+
+        # ---- Sigue al del sistema: la app vuelve a hacer lo que el móvil
+        tap_text("Tema")
+        wait_for("Cancelar", 4)
+        tap_last("Sigue al del sistema")
+        time.sleep(2.8)
+        check("«Sigue al del sistema» con el móvil en oscuro: la app pasa a oscura", app_is_dark() and tema_subtitle() == "Sigue al del sistema", str(tema_subtitle()))
+        check("Room y la copia rápida guardan System", room_theme() == ("System", "System"), str(room_theme()))
+        set_night(False)
+        time.sleep(2.8)
+        check("…y al cambiar el móvil a claro, la app lo sigue, con la app abierta", app_is_light())
+        set_night(True)
+        time.sleep(2.8)
+        check("…y al volver a oscuro, también", app_is_dark())
+        set_night(False)
+
+        # ---- El gancho de depuración `resetData` vuelve al del móvil
+        tap_text("Tema")
+        wait_for("Cancelar", 4)
+        tap_text("Oscuro")
+        time.sleep(2.5)
+        start("perfil")  # restablece los datos
+        time.sleep(1.5)
+        check("restablecer los datos (depuración) vuelve a «Sigue al del sistema» y a claro", tema_subtitle() == "Sigue al del sistema" and app_is_light(), str(tema_subtitle()))
+        check("Room y la copia rápida vuelven a System", room_theme() == ("System", "System"), str(room_theme()))
+    finally:
+        set_night(False)
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "cancelar": g_cancelar, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas, "oscuro": g_oscuro, "tema": g_tema}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     # El emulador está en inglés y la app sigue el idioma del móvil: los grupos esperan el español.

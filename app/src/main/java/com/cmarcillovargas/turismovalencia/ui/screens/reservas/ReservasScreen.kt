@@ -13,19 +13,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.ConfirmationNumber
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.HourglassEmpty
+import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,6 +42,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,6 +54,8 @@ import com.cmarcillovargas.turismovalencia.data.fake.FakeOfertas
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.Reservation
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
+import com.cmarcillovargas.turismovalencia.ui.components.ErrorNotice
+import com.cmarcillovargas.turismovalencia.ui.components.LabeledTextField
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.slotLabel
 import com.cmarcillovargas.turismovalencia.ui.components.SectionLabel
@@ -70,7 +81,17 @@ fun ReservasRoute(
     viewModel: ReservasViewModel = viewModel(factory = containerFactory { ReservasViewModel(it) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    ReservasScreen(uiState, onOpenReservation, onOpenProfile, viewModel::onSelectTab)
+    ReservasScreen(
+        uiState = uiState,
+        onOpenReservation = onOpenReservation,
+        onOpenProfile = onOpenProfile,
+        onSelectTab = viewModel::onSelectTab,
+        onOpenRecover = viewModel::onOpenRecover,
+        onDismissRecover = viewModel::onDismissRecover,
+        onRecoverLocator = viewModel::onRecoverLocator,
+        onRecoverEmail = viewModel::onRecoverEmail,
+        onRecover = { viewModel.onRecover(onOpenReservation) },
+    )
 }
 
 @Composable
@@ -79,6 +100,11 @@ fun ReservasScreen(
     onOpenReservation: (String) -> Unit,
     onOpenProfile: () -> Unit,
     onSelectTab: (ReservationsTab) -> Unit,
+    onOpenRecover: () -> Unit,
+    onDismissRecover: () -> Unit,
+    onRecoverLocator: (String) -> Unit,
+    onRecoverEmail: (String) -> Unit,
+    onRecover: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -109,8 +135,83 @@ fun ReservasScreen(
                     )
                 }
             }
+            item(key = "recover") { RecoverCard(onOpenRecover) }
         }
     }
+    uiState.recover?.let { state ->
+        RecoverDialog(state, uiState.online, onRecoverLocator, onRecoverEmail, onRecover, onDismissRecover)
+    }
+}
+
+/** Entrada a «Recuperar una reserva»: la de otro móvil, o la de antes de borrar los datos de la app. */
+@Composable
+private fun RecoverCard(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().clip(CardShape20).clickable(role = Role.Button, onClick = onClick),
+        shape = CardShape20,
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = Spacing.xxs / 2,
+    ) {
+        Row(Modifier.padding(Spacing.m), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.CloudDownload, contentDescription = null, tint = MaterialTheme.appColors.brand, modifier = Modifier.size(Spacing.xl))
+            Spacer(Modifier.width(Spacing.m))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.res_recover_title), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(R.string.res_recover_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Icon(Icons.AutoMirrored.Outlined.ArrowForwardIos, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(Spacing.m))
+        }
+    }
+}
+
+@Composable
+private fun RecoverDialog(
+    state: RecoverState,
+    online: Boolean,
+    onLocatorChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.recover_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                Text(stringResource(R.string.recover_text, stringResource(R.string.recover_locator_example)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                LabeledTextField(
+                    label = stringResource(R.string.booking_locator),
+                    value = state.locator,
+                    onValueChange = onLocatorChange,
+                    icon = Icons.Outlined.ConfirmationNumber,
+                    capitalization = KeyboardCapitalization.Characters,
+                    autoCorrect = false,
+                    enabled = !state.working,
+                )
+                LabeledTextField(
+                    label = stringResource(R.string.recover_email_label),
+                    value = state.email,
+                    onValueChange = onEmailChange,
+                    icon = Icons.Outlined.MailOutline,
+                    keyboardType = KeyboardType.Email,
+                    onDone = onConfirm,
+                    enabled = !state.working,
+                )
+                if (!online) {
+                    Text(stringResource(R.string.recover_needs_connection), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                state.failure?.let { ErrorNotice(it.recoverMessage()) }
+                Text(stringResource(R.string.recover_privacy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm, enabled = state.canSubmit && online) {
+                Text(stringResource(if (state.working) R.string.recover_working else R.string.recover_confirm))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss, enabled = !state.working) { Text(stringResource(R.string.common_cancel)) } },
+        containerColor = MaterialTheme.colorScheme.surface,
+    )
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.section(title: Int, rows: List<ReservationRow>, onOpen: (String) -> Unit) {
@@ -186,6 +287,6 @@ private val PreviewRows = listOf(
 @Composable
 private fun ReservasPreview() {
     TurismoValenciaTheme {
-        ReservasScreen(ReservasUiState(total = 3, pending = 1, thisWeek = PreviewRows.take(1), later = PreviewRows.slice(1..1), completed = PreviewRows.takeLast(1)), {}, {}, {})
+        ReservasScreen(ReservasUiState(total = 3, pending = 1, thisWeek = PreviewRows.take(1), later = PreviewRows.slice(1..1), completed = PreviewRows.takeLast(1)), {}, {}, {}, {}, {}, {}, {}, {})
     }
 }

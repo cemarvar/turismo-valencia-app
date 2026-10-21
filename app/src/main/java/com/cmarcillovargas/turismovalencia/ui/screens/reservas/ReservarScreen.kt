@@ -19,13 +19,10 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Remove
@@ -41,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +56,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.BottomActionBar
 import com.cmarcillovargas.turismovalencia.ui.components.ErrorNotice
 import com.cmarcillovargas.turismovalencia.ui.components.Eyebrow
+import com.cmarcillovargas.turismovalencia.ui.components.LabeledTextField
 import com.cmarcillovargas.turismovalencia.ui.components.OfflineBanner
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.slotLabel
@@ -77,7 +74,6 @@ private val DayShape = RoundedCornerShape(16.dp)
 private val SummaryShape = RoundedCornerShape(20.dp)
 private val ThumbShape = RoundedCornerShape(16.dp)
 private val CounterSize = 40.dp
-private val FieldShape = RoundedCornerShape(16.dp)
 
 @Composable
 fun ReservarRoute(
@@ -172,9 +168,7 @@ fun ReservarScreen(
 private fun ReservationFailure.message(): String = when (reason) {
     ReservationFailure.Reason.Unreachable -> stringResource(R.string.book_error_unreachable)
     ReservationFailure.Reason.Server -> stringResource(R.string.book_error_server)
-    ReservationFailure.Reason.RateLimited ->
-        retryAfterSeconds?.let { stringResource(R.string.book_error_rate_limited_wait, ((it + 59) / 60).coerceAtLeast(1)) }
-            ?: stringResource(R.string.book_error_rate_limited)
+    ReservationFailure.Reason.RateLimited -> rateLimitedText(retryAfterSeconds)
     ReservationFailure.Reason.SoldOut -> stringResource(R.string.book_error_sold_out)
     ReservationFailure.Reason.OfferGone -> stringResource(R.string.book_error_offer_gone)
     ReservationFailure.Reason.InvalidDate -> stringResource(R.string.book_error_invalid_date)
@@ -303,30 +297,7 @@ private fun CounterRow(title: String, subtitle: String, value: Int, onMinus: () 
 
 @Composable
 private fun EmailField(email: String, onChange: (String) -> Unit) {
-    val brand = MaterialTheme.appColors.brand
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(FieldShape)
-            .border(2.dp, brand, FieldShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = Spacing.m, vertical = Spacing.s),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null, tint = brand)
-        Spacer(Modifier.width(Spacing.m))
-        Column {
-            Text(stringResource(R.string.book_email_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-            BasicTextField(
-                value = email,
-                onValueChange = onChange,
-                singleLine = true,
-                textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(brand),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            )
-        }
-    }
+    LabeledTextField(stringResource(R.string.book_email_label), email, onChange, keyboardType = KeyboardType.Email)
 }
 
 @Preview(name = "F2 · Reservar", showBackground = true, widthDp = 390, heightDp = 844)

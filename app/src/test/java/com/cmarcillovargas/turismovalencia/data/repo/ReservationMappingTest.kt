@@ -39,6 +39,15 @@ class ReservationMappingTest {
     }
 
     @Test
+    fun `la reserva cancelada del contrato es la misma reserva con otro estado`() {
+        val cancelled = TurismoApiClient.Json.decodeFromString<ReservationDto>(contractExample("reservation-cancelled.json"))
+
+        assertEquals(contract.copy(status = "cancelled"), cancelled)
+        assertEquals(ReservationStatus.Cancelled, cancelled.toEntity(0)!!.status)
+        assertEquals(contract.toEntity(0)!!.id, cancelled.toEntity(0)!!.id)
+    }
+
+    @Test
     fun `la lista del contrato entera es legible`() {
         val list = TurismoApiClient.Json.decodeFromString<ReservationsResponse>(contractExample("reservations-list.json")).reservations
 
@@ -92,6 +101,27 @@ class ReservationMappingTest {
         assertEquals(ReservationFailure.Reason.Rejected, failureOf(403, null).reason)
         assertEquals(90, failureOf(429, "rate_limited", 90).retryAfterSeconds)
         assertTrue("falta cubrir algún motivo en la prueba", reasons.size == 10)
+    }
+
+    private fun actionOf(status: Int?, code: String? = null, retryAfter: Int? = null) =
+        ApiException("x", status = status, code = code, retryAfterSeconds = retryAfter).toActionFailure()
+
+    @Test
+    fun `cada error al cancelar o recuperar se convierte en el motivo que se le cuenta al usuario`() {
+        val reasons = ReservationActionFailure.Reason.entries
+        assertEquals(ReservationActionFailure.Reason.Unreachable, actionOf(null).reason)
+        assertEquals(ReservationActionFailure.Reason.Server, actionOf(500, "internal_error").reason)
+        assertEquals(ReservationActionFailure.Reason.Server, actionOf(502).reason)
+        assertEquals(ReservationActionFailure.Reason.RateLimited, actionOf(429, "rate_limited", 300).reason)
+        assertEquals(ReservationActionFailure.Reason.NotFound, actionOf(404, "reservation_not_found").reason)
+        assertEquals(ReservationActionFailure.Reason.TooLate, actionOf(409, "reservation_past").reason)
+        assertEquals(ReservationActionFailure.Reason.Rejected, actionOf(400, "invalid_request").reason)
+        assertEquals(ReservationActionFailure.Reason.Rejected, actionOf(413, "payload_too_large").reason)
+        // Una ruta que el servidor no tiene (una versión más antigua de la API) no es «esa reserva no existe».
+        assertEquals(ReservationActionFailure.Reason.Rejected, actionOf(404, "not_found").reason)
+        assertEquals(ReservationActionFailure.Reason.Rejected, actionOf(404, null).reason)
+        assertEquals(300, actionOf(429, "rate_limited", 300).retryAfterSeconds)
+        assertTrue("falta cubrir algún motivo en la prueba", reasons.size == 6)
     }
 
     @Test

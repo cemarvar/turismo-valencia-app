@@ -245,6 +245,8 @@
     <string name="res_status_completed">Completada</string>
     <string name="res_status_cancelled">Cancel·lada</string>
     <string name="res_cancelled">Cancel·lades</string>
+    <string name="res_recover_title">Vas reservar des d’un altre mòbil?</string>
+    <string name="res_recover_text">Recupera la reserva amb el seu localitzador i el correu amb què la vas fer.</string>
     <string name="book_title">Reservar</string>
     <string name="book_step">Pas 1 de 2 · Data i persones</string>
     <string name="book_per_person">%1$s · %2$s per persona</string>
@@ -285,6 +287,30 @@
     <string name="booking_total">Total</string>
     <string name="booking_show_code">Mostra este codi a l’embarcador. Disponible sense connexió.</string>
     <string name="booking_share_text">Reserva %1$s: %2$s · %3$s a les %4$s</string>
+    <string name="booking_cancelled">Reserva cancel·lada</string>
+    <string name="booking_cancelled_text">Hem alliberat les teues places. No has de fer res més.</string>
+    <string name="booking_cancelled_code">Esta reserva està cancel·lada: el codi ja no val.</string>
+    <string name="booking_cancel">Cancel·lar la reserva</string>
+    <string name="booking_cancelling">Cancel·lant…</string>
+    <string name="booking_cancel_needs_connection">Per a cancel·lar la reserva necessites connexió a Internet.</string>
+    <string name="booking_cancel_title">Vols cancel·lar esta reserva?</string>
+    <string name="booking_cancel_text">S’alliberaran les teues places de «%1$s» (%2$s). No es pot desfer.</string>
+    <string name="booking_cancel_confirm">Sí, cancel·lar</string>
+    <string name="booking_cancel_keep">No, mantindre-la</string>
+    <string name="booking_book_again">Tornar a reservar</string>
+    <string name="booking_cancel_error_unreachable">No hem pogut connectar amb el servidor i no sabem si s’ha cancel·lat. Comprova la connexió i torna-ho a intentar; repetir-ho és segur.</string>
+    <string name="booking_cancel_error_too_late">Ja no es pot cancel·lar: l’activitat ja ha començat o ha passat.</string>
+    <string name="booking_cancel_error_not_found">El servidor no troba esta reserva, així que no es pot cancel·lar des de l’app.</string>
+    <string name="booking_cancel_error_other">No s’ha pogut cancel·lar la reserva. Torna-ho a intentar més tard.</string>
+    <string name="recover_title">Recuperar una reserva</string>
+    <string name="recover_text">Escriu el localitzador (per exemple, %1$s) i el correu amb què vas reservar.</string>
+    <string name="recover_email_label">Correu amb què vas reservar</string>
+    <string name="recover_confirm">Recuperar</string>
+    <string name="recover_working">Buscant…</string>
+    <string name="recover_needs_connection">Recuperar una reserva necessita connexió a Internet.</string>
+    <string name="recover_privacy">El localitzador i el correu s’envien al nostre servidor només per a buscar la reserva.</string>
+    <string name="recover_error_not_found">No hi ha cap reserva amb eixe localitzador i eixe correu. Revisa les dos dades.</string>
+    <string name="recover_error_other">No s’ha pogut recuperar la reserva. Torna-ho a intentar més tard.</string>
 
     <plurals name="booking_adults">
         <item quantity="one">%1$d adult</item>
@@ -314,6 +340,10 @@
     <string name="profile_text_small">Xicotet</string>
     <string name="profile_text_large">Gran</string>
     <string name="profile_text_xlarge">Molt gran</string>
+    <string name="profile_theme">Tema</string>
+    <string name="profile_theme_system">Seguix el del sistema</string>
+    <string name="profile_theme_light">Clar</string>
+    <string name="profile_theme_dark">Fosc</string>
     <string name="profile_account">Compte</string>
     <string name="profile_privacy">Privadesa i dades</string>
     <string name="profile_privacy_text">Els teus preferits, reserves i descàrregues es guarden al teu mòbil. Usem la teua ubicació només mentre uses l’app per a ordenar llocs per proximitat i calcular rutes. El mapa i les rutes els servix OpenStreetMap: per a dibuixar-los li arriben la zona que mires i el punt d’eixida i d’arribada de la ruta. Pots canviar-ho quan vulgues.</string>
@@ -372,8 +402,10 @@
         <item>Un identificador aleatori del teu mòbil (mira més avall), per a mostrar-te les teues reserves sense que hages de crear un compte.</item>
     </string-array>
     <string name="privacy_app_bookings_use">L’usem només per a gestionar la reserva (execució del contracte, com s’indica al punt 4): confirmar-la, controlar les places i tornar-te el seu localitzador. No demanem dades de pagament: el pagament d’esta versió està simulat. Conservem les dades mentre siguen necessàries per a gestionar la reserva i pots demanar que les esborrem quan vulgues.</string>
+    <string name="privacy_app_cancel_title">Cancel·lar i recuperar reserves</string>
+    <string name="privacy_app_cancel_body">En cancel·lar una reserva, l’app envia al nostre servidor el seu localitzador, el correu amb què es va fer i l’identificador del mòbil; el servidor la marca com a cancel·lada i allibera les places, però en conserva el registre. Per a recuperar una reserva en un altre mòbil o després d’esborrar les dades de l’app, escrius el seu localitzador i el correu amb què es va fer: l’app els envia al servidor per a buscar-la i, si coincideixen, la guarda al teu mòbil. Qui tinga el localitzador i el correu d’una reserva pot veure-la i cancel·lar-la, així que no els compartisques.</string>
     <string name="privacy_app_device_title">Identificador del mòbil</string>
-    <string name="privacy_app_device_body">La primera vegada que reserves, l’app crea un número aleatori i el guarda al teu mòbil. No conté dades teues ni de l’aparell. S’envia amb cada reserva i cada vegada que l’app consulta les teues reserves. Si esborres les dades de l’app, el mòbil el perd i deixa de veure les seues reserves en l’app (si uses la còpia de seguretat d’Android, en reinstal·lar-la pot tornar amb la resta de les teues dades); en el nostre servidor continuen fins que demanes esborrar-les.</string>
+    <string name="privacy_app_device_body">La primera vegada que reserves o cancel·les una reserva, l’app crea un número aleatori i el guarda al teu mòbil. No conté dades teues ni de l’aparell. S’envia amb cada reserva, amb cada cancel·lació i cada vegada que l’app consulta les teues reserves. Si esborres les dades de l’app, el mòbil el perd i deixa de veure les seues reserves en l’app (pots recuperar-les amb el seu localitzador i el seu correu; si uses la còpia de seguretat d’Android, en reinstal·lar-la pot tornar amb la resta de les teues dades); en el nostre servidor continuen fins que demanes esborrar-les.</string>
     <string name="privacy_app_valbot_title">Assistent ValBot</string>
     <string name="privacy_app_valbot_body">El que escrius a ValBot s’envia al servidor de la web, que el processa amb el servei d’intel·ligència artificial Gemini de Google per a respondre’t (punts 2 i 6). No escrigues dades personals en el xat. Si no hi ha connexió, o el servidor no pot respondre, l’app respon amb respostes bàsiques des del teu mòbil (sense connexió no s’envia res).</string>
     <string name="privacy_app_map_title">Mapa, rutes i ubicació</string>

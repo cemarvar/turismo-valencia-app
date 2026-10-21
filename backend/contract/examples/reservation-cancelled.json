@@ -1,0 +1,15 @@
+{
+  "id": "12b229f7-e8d4-475b-9637-2a80c1739f2d",
+  "locator": "TV-2027-1100",
+  "offerId": "albufera-barca",
+  "title": "Paseo en barca por la Albufera",
+  "place": "El Palmar",
+  "date": "2027-02-11",
+  "time": "18:30",
+  "adults": 2,
+  "children": 1,
+  "email": "laura.garcia@email.com",
+  "totalCents": 3600,
+  "status": "cancelled",
+  "createdAt": "2026-10-14T17:04:06Z"
+}

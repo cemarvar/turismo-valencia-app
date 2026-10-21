@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cmarcillovargas.turismovalencia.data.AppContainer
 import com.cmarcillovargas.turismovalencia.data.model.Offer
 import com.cmarcillovargas.turismovalencia.data.repo.ReservationFailure
+import com.cmarcillovargas.turismovalencia.data.repo.isPlausibleEmail
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +38,7 @@ data class ReservarUiState(
 ) {
     /** El total que se enseña; el que vale es el que calcula el servidor (precio por adulto × adultos). */
     val totalCents: Int get() = (offer?.priceFromCents ?: 0) * adults
-    val emailValid: Boolean get() = email.contains("@") && email.substringAfter("@").contains(".")
+    val emailValid: Boolean get() = isPlausibleEmail(email)
     val canConfirm: Boolean get() = offer != null && time != null && adults >= 1 && emailValid && online && !submitting
     val canGoBackWeek: Boolean get() = weekDays.firstOrNull()?.let { it.isAfter(today) } == true
 }

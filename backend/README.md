@@ -20,13 +20,14 @@ backend/
 ## Cómo está hecho (y por qué)
 
 - **Las reglas viven en la base de datos.** Validar la reserva, no duplicarla, contar plazas y dar forma al JSON lo hacen funciones SQL
-  (`create_reservation`, `list_offers`…) dentro de una transacción; la función de borde solo traduce HTTP (rutas, cabeceras, formas
+  (`create_reservation`, `cancel_reservation`, `list_offers`…) dentro de una transacción; la función de borde solo traduce HTTP (rutas, cabeceras, formas
   del cuerpo, límites). Así dos reservas simultáneas no pueden pasarse del aforo, y un reintento no duplica nada.
 - **La base de datos está cerrada.** Todo está en el esquema `app`, que la API automática de Supabase no expone; además cada tabla
   tiene la seguridad por filas activada y sin políticas, y los roles `anon` y `authenticated` no tienen ningún permiso. La función se
   conecta por su cuenta (`SUPABASE_DB_URL`). Una prueba lo comprueba con la clave pública.
 - **Ninguna clave en el APK.** La función es pública (`verify_jwt = false`) y la app solo conoce su dirección.
-- **Sin cuentas.** El móvil genera un UUID (`X-Device-Id`) y cada intento de reservar lleva otro (`Idempotency-Key`).
+- **Sin cuentas.** El móvil genera un UUID (`X-Device-Id`) y cada intento de reservar lleva otro (`Idempotency-Key`). Una reserva la ve y
+  la cancela el móvil que la hizo o quien tenga su localizador y su correo.
 - **Límites de peticiones** por IP, dispositivo y correo (tabla de contadores con un resumen con sal, sin guardar IPs ni correos).
 - **El precio y el localizador los pone el servidor**, nunca el cliente.
 
@@ -64,7 +65,7 @@ nube, `./gradlew installDebug` sin `-PapiBaseUrl`.
 
 Contra el backend local se pueden hacer reservas de prueba sin tocar la nube: `prueba-aforo` tiene 3 plazas a las 10:00 y a las 11:00
 (lo que la app muestra como «Ya no quedan plazas» a la segunda reserva de 2 personas). Las pruebas de interfaz de la app
-(`tools/verify/verify_ui.py reservas` y `verify_release.py`, con el APK de `./gradlew assembleReleaseCheck`, que apunta siempre a este
+(`tools/verify/verify_ui.py reservas` y `cancelar`, y `verify_release.py`, con el APK de `./gradlew assembleReleaseCheck`, que apunta siempre a este
 backend) borran antes de empezar los contadores de límites y sus reservas de pruebas anteriores (las del correo `laura.garcia@example.com`,
 las del correo `precarga@example.com` y las de `prueba-aforo`): `docker exec supabase_db_turismo-valencia psql -U postgres -c "…"` es lo
 que usan, y tarda décimas de segundo (`npx supabase db query --local` tarda unos 8 s).
@@ -116,7 +117,10 @@ llega débil (`W/"…"`); funciona igual y las pruebas aceptan las dos formas.
 ## Límites conocidos
 
 - Sin cuentas, el UUID del dispositivo es el «secreto» de sus reservas; si se pierde (reinstalar la app, borrar sus datos), se recuperan
-  con el localizador y el correo (la API lo permite; la app todavía no tiene la pantalla para hacerlo).
+  con el localizador y el correo (la app lo hace desde Mis reservas). Quien tenga el localizador y el correo de una reserva puede verla y
+  cancelarla: el localizador es correlativo, pero sin el correo no sirve de nada (el servidor responde igual que si no existiera) y las
+  búsquedas por localizador tienen su propio límite.
 - Los límites de peticiones son una defensa básica, suficiente para este proyecto; no sustituyen a un captcha ni a un cortafuegos.
-- La API todavía no cancela ni modifica reservas (el estado `cancelled` existe en la base de datos).
-- El pago está simulado.
+- La API cancela reservas (`POST /reservations/{localizador}/cancel`, hasta que empieza la actividad; se conservan con
+  `status = cancelled` y sus plazas se liberan) pero no las modifica: cambiar la fecha o las personas es cancelar y reservar otra vez.
+- El pago está simulado: al cancelar no hay nada que reembolsar.

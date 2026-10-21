@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.AccessibilityNew
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.GpsFixed
@@ -66,6 +67,7 @@ import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
+import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 import com.cmarcillovargas.turismovalencia.ui.components.AppSwitch
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.NotificationAccessResult
@@ -85,7 +87,7 @@ import com.cmarcillovargas.turismovalencia.util.openNotificationSettings
 private val AvatarSize = 80.dp
 private val GroupShape = RoundedCornerShape(24.dp)
 
-private enum class Dialog { Location, TextSize, Privacy, Logout }
+private enum class Dialog { Location, Theme, TextSize, Privacy, Logout }
 
 /** Permiso que el sistema ya no deja pedir: solo se puede activar desde los ajustes del móvil. */
 private enum class SettingsDialog { Location, Notifications }
@@ -149,6 +151,7 @@ fun PerfilRoute(
             }
         },
         onTextScale = viewModel::onTextScale,
+        onThemeMode = viewModel::onThemeMode,
         onLogout = onLogout,
     )
     IdiomaSheetHost(visible = showLanguage, onDismiss = { showLanguage = false })
@@ -165,6 +168,7 @@ fun PerfilScreen(
     onNotifications: (Boolean) -> Unit,
     onLocation: (LocationMode) -> Unit,
     onTextScale: (TextScale) -> Unit,
+    onThemeMode: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -176,6 +180,8 @@ fun PerfilScreen(
             SectionLabel(stringResource(R.string.profile_prefs), Modifier.padding(top = Spacing.m))
             Group {
                 SettingRow(Icons.Outlined.Translate, stringResource(R.string.common_language), stringResource(uiState.language.label()), onClick = onOpenLanguage) { Chevron() }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                SettingRow(Icons.Outlined.DarkMode, stringResource(R.string.profile_theme), stringResource(uiState.themeMode.label()), onClick = { dialog = Dialog.Theme }) { Chevron() }
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 SettingRow(Icons.Outlined.NotificationsNone, stringResource(R.string.common_notifications), stringResource(R.string.profile_notifications_text)) {
                     AppSwitch(uiState.notifications, onNotifications)
@@ -210,6 +216,14 @@ fun PerfilScreen(
             options = LocationMode.entries.map { it to stringResource(it.label()) },
             selected = uiState.location,
             onSelect = { onLocation(it); dialog = null },
+            onDismiss = { dialog = null },
+        )
+
+        Dialog.Theme -> ChoiceDialog(
+            title = stringResource(R.string.profile_theme),
+            options = ThemeMode.entries.map { it to stringResource(it.label()) },
+            selected = uiState.themeMode,
+            onSelect = { onThemeMode(it); dialog = null },
             onDismiss = { dialog = null },
         )
 
@@ -339,6 +353,12 @@ private fun LocationMode.label(): Int = when (this) {
     LocationMode.Denied -> R.string.permiso_no_permitir
 }
 
+private fun ThemeMode.label(): Int = when (this) {
+    ThemeMode.System -> R.string.profile_theme_system
+    ThemeMode.Light -> R.string.profile_theme_light
+    ThemeMode.Dark -> R.string.profile_theme_dark
+}
+
 private fun TextScale.label(): Int = when (this) {
     TextScale.System -> R.string.profile_text_system
     TextScale.Small -> R.string.profile_text_small
@@ -349,5 +369,5 @@ private fun TextScale.label(): Int = when (this) {
 @Preview(name = "G1 · Perfil y ajustes", showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 private fun PerfilPreview() {
-    TurismoValenciaTheme { PerfilScreen(PerfilUiState(offlineMb = 48, reservations = 3), {}, {}, {}, {}, {}, {}, {}, {}, {}) }
+    TurismoValenciaTheme { PerfilScreen(PerfilUiState(offlineMb = 48, reservations = 3), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}) }
 }

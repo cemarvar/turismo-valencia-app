@@ -55,6 +55,42 @@ internal fun ApiException.toReservationFailure(): ReservationFailure {
     return ReservationFailure(reason, retryAfterSeconds, this)
 }
 
+/** Por qué no se pudo cancelar o recuperar una reserva. Lo que se le dice al usuario depende de esto, no del texto del servidor. */
+class ReservationActionFailure(val reason: Reason, val retryAfterSeconds: Int? = null, cause: Throwable? = null) : Exception(reason.name, cause) {
+    enum class Reason {
+        /** Sin red, tiempo agotado o respuesta ilegible. */
+        Unreachable,
+
+        /** Error 5xx del servidor. */
+        Server,
+
+        /** Demasiadas peticiones (429). */
+        RateLimited,
+
+        /** El servidor no la conoce o no es de quien lo pide; al recuperar, el localizador y el correo no coinciden. */
+        NotFound,
+
+        /** La actividad ya empezó o pasó: no se puede cancelar. */
+        TooLate,
+
+        /** Cualquier otro rechazo del servidor (datos con forma incorrecta…). */
+        Rejected,
+    }
+}
+
+/** El fallo de la API al cancelar o recuperar, por el estado y el código de error del contrato (`docs/api.md`, «Errores»). */
+internal fun ApiException.toActionFailure(): ReservationActionFailure {
+    val reason = when {
+        status == null -> ReservationActionFailure.Reason.Unreachable
+        status == 429 || code == "rate_limited" -> ReservationActionFailure.Reason.RateLimited
+        status >= 500 -> ReservationActionFailure.Reason.Server
+        code == "reservation_not_found" -> ReservationActionFailure.Reason.NotFound
+        code == "reservation_past" -> ReservationActionFailure.Reason.TooLate
+        else -> ReservationActionFailure.Reason.Rejected
+    }
+    return ReservationActionFailure(reason, retryAfterSeconds, this)
+}
+
 /** Estado del servidor a estado de la app: `confirmed`, `cancelled`; uno desconocido se enseña como pendiente, nunca como confirmado. */
 internal fun reservationStatusOf(raw: String): ReservationStatus = when (raw.trim().lowercase()) {
     "confirmed" -> ReservationStatus.Confirmed

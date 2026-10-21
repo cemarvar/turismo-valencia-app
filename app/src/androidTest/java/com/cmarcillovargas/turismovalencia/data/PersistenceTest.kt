@@ -13,6 +13,7 @@ import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
+import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 import com.cmarcillovargas.turismovalencia.data.remote.NoOffersService
 import com.cmarcillovargas.turismovalencia.data.remote.NoReservationsService
 import com.cmarcillovargas.turismovalencia.data.repo.ContentRepository
@@ -81,7 +82,10 @@ class PersistenceTest {
         val favorites = FavoritesRepository(db.favorites(), scope)
         val downloads = DownloadsRepository(content, db.downloads(), store, scope)
         val reservations = ReservationsRepository(db.reservations(), db.reservationAttempts(), store, server, scope)
-        val settings = SettingsRepository(store)
+
+        /** Los modos claro u oscuro que se le han pedido al sistema (el de la prueba no toca el del móvil). */
+        val appliedThemes = mutableListOf<ThemeMode>()
+        val settings = SettingsRepository(store, themeApplier = ThemeApplier { appliedThemes += it })
         val notifications = NotificationsRepository(db.notifications(), scope)
         val searches = SearchHistoryRepository(db.recentSearches(), scope)
 
@@ -186,13 +190,17 @@ class PersistenceTest {
     fun ajustesPersisten() {
         val first = Session()
         assertFalse(first.settings.onboardingDone.value)
+        assertEquals("de entrada, el modo del móvil", ThemeMode.System, first.settings.themeMode.value)
         first.settings.setLanguage(LanguageCode.VA)
+        first.settings.setThemeMode(ThemeMode.Dark)
         first.settings.setTextScale(TextScale.Large)
         first.settings.setLocation(LocationMode.OnlyOnce)
         first.settings.setNotificationsEnabled(false)
         first.settings.setOnboardingDone(true)
         first.settings.onboardingDone.await(true)
         first.settings.language.await(LanguageCode.VA)
+        first.settings.themeMode.await(ThemeMode.Dark)
+        assertEquals("elegir un modo se lo pide al sistema, una vez", listOf(ThemeMode.Dark), first.appliedThemes)
         first.settings.textScale.await(TextScale.Large)
         first.settings.location.await(LocationMode.OnlyOnce)
         first.settings.notificationsEnabled.await(false)
@@ -200,6 +208,8 @@ class PersistenceTest {
 
         val second = Session()
         assertEquals(LanguageCode.VA, second.settings.language.value)
+        assertEquals(ThemeMode.Dark, second.settings.themeMode.value)
+        assertEquals("abrir la base de datos no le pide nada al sistema", emptyList<ThemeMode>(), second.appliedThemes)
         assertEquals(TextScale.Large, second.settings.textScale.value)
         assertEquals(LocationMode.OnlyOnce, second.settings.location.value)
         assertFalse(second.settings.notificationsEnabled.value)
@@ -213,11 +223,14 @@ class PersistenceTest {
     fun cambiarUnAjusteNoPisaLosDemas() {
         val session = Session()
         session.settings.setTextScale(TextScale.ExtraLarge)
+        session.settings.setThemeMode(ThemeMode.Light)
         session.downloads.setWifiOnly(false)
         session.settings.language.await(LanguageCode.ES)
         session.settings.textScale.await(TextScale.ExtraLarge)
+        session.settings.themeMode.await(ThemeMode.Light)
         session.downloads.wifiOnly.await(false)
         assertEquals(TextScale.ExtraLarge, session.settings.textScale.value)
+        assertEquals(ThemeMode.Light, session.settings.themeMode.value)
         assertFalse(session.downloads.wifiOnly.value)
         assertTrue(session.downloads.autoUpdate.value)
     }
@@ -290,7 +303,7 @@ class PersistenceTest {
         val app = ApplicationProvider.getApplicationContext<Application>()
         val memory = Room.inMemoryDatabaseBuilder(app, AppDatabase::class.java).build()
         try {
-            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, NoRefreshScheduler, NoLanguageApplier)
+            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, NoRefreshScheduler, NoLanguageApplier, NoThemeApplier)
             assertEquals(6, container.favorites.ids.value.size)
             assertEquals(setOf("fallas"), container.reminders.ids.value)
             container.favorites.clear()

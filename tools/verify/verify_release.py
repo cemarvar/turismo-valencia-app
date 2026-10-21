@@ -1,7 +1,8 @@
 """Prueba rápida de la versión de publicación (release, con R8): arranca, guarda en Room, catálogo de ofertas del servidor
-y reservas (Retrofit + kotlinx.serialization: GET, POST con cabeceras y cuerpo, y el cuerpo de los errores), el refresco nocturno
+y reservas (Retrofit + kotlinx.serialization: GET, POST con cabeceras y cuerpo, y el cuerpo de los errores; recuperarlas con su
+localizador y su correo y cancelarlas), el refresco nocturno
 (WorkManager con su `WorkerFactory`: se programa y, al lanzarlo adelantando el reloj, el trabajo pone todo al día), ValBot (OkHttp),
-mapa, ruta, aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones), el cambio de idioma (AppCompat) y el modo oscuro (tema DayNight, esquema oscuro y filtro del mapa).
+mapa, ruta, aviso de la mascletà (alarma con `AlarmManager`, receptores y notificaciones), el cambio de idioma (AppCompat), el modo oscuro (tema DayNight, esquema oscuro y filtro del mapa) y el selector de tema (Claro / Oscuro / el del móvil: AppCompat, la copia rápida y Room).
 Una versión minificada puede romperse sin que la de depuración lo note (p. ej. al añadir una librería de Kotlin fuera de
 `packageScope`), así que conviene pasarla tras tocar dependencias o `app/build.gradle.kts`.
 
@@ -154,6 +155,36 @@ def main():
     v.back()
     v.back()
 
+    # Recuperar y cancelar: Retrofit con @Path, @Query, @Header y @Body, la reserva ya cancelada que lee kotlinx.serialization y el error
+    # 404 del contrato, todo bajo R8. Se recupera la reserva de antes (ya está en el móvil: no se duplica) y se cancela.
+    tab("reservas")
+    v.scroll_to("¿Reservaste desde otro móvil?")
+    v.tap_text("¿Reservaste desde otro móvil?")
+    v.check("Recuperar: se abre el diálogo bajo R8", wait_for("Recuperar una reserva", 5))
+    if len(v.edit_fields()) == 2:
+        v.tap(v.edit_fields()[0])
+        v.type_text("TV-2099-9999")
+        v.tap(v.edit_fields()[1])
+        v.type_text("laura.garcia@example.com")
+        v.tap_text("Recuperar")
+        v.check("Recuperar: un localizador que no existe devuelve el error del contrato (404 reservation_not_found)", wait_for("No hay ninguna reserva con ese localizador y ese correo. Revisa los dos datos.", 10))
+        v.clear_field(v.edit_fields()[0])
+        v.type_text(locator.lower())
+        v.tap_text("Recuperar")
+        shown = v.locator_on_screen(12)
+        v.check("Recuperar: con su localizador y su correo se abre la reserva (GET con @Path y @Query)", shown == locator, shown)
+        button = v.open_cancel_button()
+        v.check("la reserva ofrece «Cancelar reserva»", bool(button and button["en"]))
+        v.tap_text("Cancelar reserva")
+        wait_for("¿Cancelar esta reserva?", 5)
+        v.tap_text("Sí, cancelar")
+        v.check("Cancelar: el servidor la cancela (POST con @Path, @Header y @Body) y la pantalla lo dice", wait_for("Reserva cancelada", 10))
+        v.check("el servidor la tiene cancelada", v.server_status(locator) == "cancelled", str(v.server_status(locator)))
+    else:
+        v.check("Recuperar: el diálogo tiene sus dos campos", False)
+    v.back()  # la confirmación de una reserva no lleva la barra inferior
+    tab("inicio")
+
     # Avisos de eventos: receptores, AlarmManager y notificaciones (androidx.core) bajo R8
     v.set_notification_permission(True)
     restart()
@@ -191,6 +222,29 @@ def main():
     v.check("Idiomas: desde los ajustes del móvil, valenciano (ca-ES-valencia → values-ca)", wait_for("Cerca a València…", 8) and v.find("Què veure") is not None)
     v.set_app_locale("es")
     v.check("Idiomas: de vuelta al español", wait_for("Buscar en Valencia…", 8) and v.find("Qué ver") is not None)
+
+    # Selector de tema (Perfil → Tema): `AppCompatDelegate.setDefaultNightMode`, la copia rápida del modo en SharedPreferences que lee
+    # `TurismoApp` antes de crear la actividad y Room, bajo R8. El móvil sigue en claro: «Oscuro» tiene que pintar la app oscura por sí solo.
+    tab("favoritos")
+    v.tap_text("LG")
+    v.check("Tema: Perfil ofrece la fila «Tema» con «Sigue al del sistema»", wait_for("Tema", 5) and v.tema_subtitle() == "Sigue al del sistema", str(v.tema_subtitle()))
+    v.tap_text("Tema")
+    wait_for("Cancelar", 4)
+    v.tap_text("Oscuro")
+    time.sleep(2.8)
+    v.check("Tema: «Oscuro» con el móvil en claro pinta la app oscura bajo R8", v.app_is_dark() and v.tema_subtitle() == "Oscuro", str(v.tema_subtitle()))
+    restart()
+    v.check("Tema: tras cerrar y abrir la app sigue oscura (se guardó y se aplica al arrancar)", wait_for("Buscar en Valencia…", 8) and v.app_is_dark())
+    tab("favoritos")
+    v.tap_text("LG")
+    wait_for("Tema", 5)
+    v.tap_text("Tema")
+    wait_for("Cancelar", 4)
+    v.tap_last("Sigue al del sistema")
+    time.sleep(2.8)
+    v.check("Tema: «Sigue al del sistema» con el móvil en claro vuelve a pintarla clara", v.app_is_light() and v.tema_subtitle() == "Sigue al del sistema", str(v.tema_subtitle()))
+    v.back()
+    tab("inicio")
 
     # Modo oscuro: el tema DayNight de AppCompat, el esquema oscuro de Compose y el filtro de color del mapa bajo R8. El resto de la prueba
     # es en modo claro; aquí se enciende el oscuro del sistema (`cmd uimode night yes`) y se vuelve al claro al terminar.

@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
+import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import kotlinx.coroutines.flow.Flow
 
 // Las consultas que devuelven `Flow` avisan solas cuando cambia la tabla; las `suspend` no bloquean el hilo principal.
@@ -75,6 +76,9 @@ abstract class ReservationDao {
 
     @Insert
     abstract suspend fun insertAll(entities: List<ReservationEntity>)
+
+    @Query("UPDATE reservations SET status = :status WHERE id = :id")
+    abstract suspend fun setStatus(id: String, status: ReservationStatus)
 
     @Query("DELETE FROM reservations")
     abstract suspend fun clear()

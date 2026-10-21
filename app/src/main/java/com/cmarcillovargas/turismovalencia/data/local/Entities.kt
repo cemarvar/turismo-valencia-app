@@ -11,6 +11,7 @@ import com.cmarcillovargas.turismovalencia.data.model.NotificationKind
 import com.cmarcillovargas.turismovalencia.data.model.OfferKind
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.data.model.TextScale
+import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 
 // Tablas de la base de datos local (`turismo.db`). Las entidades solo usan tipos simples; el paso a los modelos
 // de la app (fechas, localizador…) está en `Mappers.kt`.
@@ -83,6 +84,8 @@ data class SettingsEntity(
     val notificationsEnabled: Boolean = true,
     val location: LocationMode = LocationMode.WhileUsing,
     val textScale: TextScale = TextScale.System,
+    /** Claro, oscuro o el del móvil (la columna se añadió en la v5 con ese valor por defecto). */
+    @ColumnInfo(defaultValue = "System") val themeMode: ThemeMode = ThemeMode.System,
     /** La bienvenida (splash, onboarding y permiso) ya se hizo. */
     val onboardingDone: Boolean = false,
     val wifiOnly: Boolean = true,

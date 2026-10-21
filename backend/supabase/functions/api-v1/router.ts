@@ -3,7 +3,7 @@ import { ApiError, errorResponse } from "../_shared/http.ts";
 import { clientIp, enforce } from "../_shared/limits.ts";
 import type { Handler } from "./context.ts";
 import { getOffer, listOffers } from "./offers.ts";
-import { createReservation, findReservation, listReservations } from "./reservations.ts";
+import { cancelReservation, createReservation, findReservation, listReservations } from "./reservations.ts";
 
 interface Route {
   method: string;
@@ -21,6 +21,7 @@ const routes: Route[] = [
   route("POST", "/reservations", createReservation),
   route("GET", "/reservations", listReservations),
   route("GET", "/reservations/:locator", findReservation),
+  route("POST", "/reservations/:locator/cancel", cancelReservation),
 ];
 
 export async function handle(req: Request): Promise<Response> {

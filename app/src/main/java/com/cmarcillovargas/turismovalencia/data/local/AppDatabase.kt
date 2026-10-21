@@ -30,7 +30,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CacheMetaEntity::class,
         ReservationAttemptEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -110,7 +110,14 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        val Migrations = arrayOf(Migration1To2, Migration2To3, Migration3To4)
+        /** v4 → v5: el modo claro u oscuro de la app (Perfil → Tema). Quien ya tenía la app sigue con el del móvil, como hasta ahora. */
+        val Migration4To5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `settings` ADD COLUMN `themeMode` TEXT NOT NULL DEFAULT 'System'")
+            }
+        }
+
+        val Migrations = arrayOf(Migration1To2, Migration2To3, Migration3To4, Migration4To5)
 
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, Name)
