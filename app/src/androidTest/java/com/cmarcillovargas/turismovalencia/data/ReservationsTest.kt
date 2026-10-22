@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.ReservationAttemptEntity
 import com.cmarcillovargas.turismovalencia.data.local.ReservationEntity
+import com.cmarcillovargas.turismovalencia.data.local.SettingsEntity
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
 import com.cmarcillovargas.turismovalencia.data.model.Reservation
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
@@ -302,7 +303,8 @@ class ReservationsTest {
         other.create(email = "x@y.es")
         val s = Session(server, Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build())
         assertTrue(s.repo.items.value.isEmpty())
-        runBlocking { s.store.deviceId() } // este móvil ya había reservado alguna vez: tiene su identificador
+        // Este móvil ya había reservado (se le borró la base de datos): conserva el identificador con el que lo hizo.
+        runBlocking { s.db.settings().save(SettingsEntity(deviceId = server.calls.single().deviceId)) }
 
         val first = runBlocking { s.repo.refresh() }
         val again = runBlocking { s.repo.refresh() }
@@ -545,9 +547,11 @@ class ReservationsTest {
 
         assertEquals(original, recovered)
         assertEquals(listOf(original.id), s.repo.items.value.map { it.id })
-        // Se pidió con el localizador en mayúsculas y sin espacios, y el correo sin espacios.
-        assertEquals(original.locator to "Laura@Example.com", server.findCalls.single())
-        assertNull("recuperar no crea identificador de móvil", runBlocking { s.store.deviceIdOrNull() })
+        // Se pidió con el localizador en mayúsculas y sin espacios, el correo sin espacios y el identificador de este móvil (que se crea ahora).
+        val deviceId = runBlocking { s.store.deviceIdOrNull() }
+        assertNotNull("recuperar crea el identificador de este móvil: el servidor apunta la reserva a su nombre", deviceId)
+        assertNotEquals("no es el del móvil que reservó", server.calls.single().deviceId, deviceId)
+        assertEquals(Triple(original.locator, "Laura@Example.com", deviceId), server.findCalls.single())
     }
 
     @Test
@@ -577,6 +581,40 @@ class ReservationsTest {
         assertNotEquals("la cancela otro móvil", server.calls.single().deviceId, sent.deviceId)
         assertEquals("laura@example.com", sent.email)
         assertEquals("cancelled", server.stored.single().status)
+    }
+
+    @Test
+    fun unaReservaRecuperadaSePoneAlDiaSola() {
+        val server = FakeReservationsServer()
+        val creator = Session(server)
+        val original = creator.create(email = "laura@example.com")
+        val s = Session(server)
+        runBlocking { s.repo.recover(original.locator, "laura@example.com") }
+
+        // La lista de este móvil ya la trae, sin duplicarla.
+        assertEquals(ReservationsRefresh.Updated(1), runBlocking { s.repo.refresh() })
+        assertEquals(listOf(original.id), s.repo.items.value.map { it.id })
+        assertEquals(ReservationStatus.Confirmed, s.repo.get(original.id)?.status)
+
+        // El otro móvil la cancela: aquí, al ponerla al día, sale cancelada (antes había que recuperarla otra vez).
+        runBlocking { creator.repo.cancel(original.id) }
+        runBlocking { s.repo.refresh() }
+
+        val updated = s.repo.items.awaitThat { list -> list.any { it.id == original.id && it.status == ReservationStatus.Cancelled } }
+        assertEquals(1, updated.size)
+    }
+
+    @Test
+    fun recuperarUnaQueNoCoincideNoApuntaNadaAEsteMovil() {
+        val server = FakeReservationsServer()
+        val original = Session(server).create(email = "laura@example.com")
+        val s = Session(server)
+
+        actionFailureOf { runBlocking { s.repo.recover(original.locator, "otra@example.com") } }
+
+        // Tiene identificador (se crea al intentarlo), pero el servidor no le apuntó nada.
+        assertEquals(ReservationsRefresh.Updated(0), runBlocking { s.repo.refresh() })
+        assertEquals(emptyList<Reservation>(), s.repo.items.value)
     }
 
     @Test

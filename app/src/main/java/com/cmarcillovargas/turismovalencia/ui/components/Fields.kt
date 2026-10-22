@@ -39,8 +39,10 @@ private val FieldBorder = 2.dp
 
 /**
  * Campo de texto del diseño (el del correo de F2): borde de 2dp en el naranja de marca, icono decorativo, etiqueta pequeña y el texto
- * debajo. [capitalization] y [autoCorrect] sirven para códigos como el localizador (mayúsculas y sin corrector); [onDone] es lo que
- * hace la tecla «Hecho» del teclado.
+ * debajo. La etiqueta y el icono van **dentro** del campo (`decorationBox`) y no a su lado: así el lector de pantalla las lee como parte
+ * del campo («Localizador, cuadro de edición») y el campo entero, y no solo la línea del texto, recoge el toque.
+ * [capitalization] y [autoCorrect] sirven para códigos como el localizador (mayúsculas y sin corrector); [onDone] es lo que hace la
+ * tecla «Hecho» del teclado.
  */
 @Composable
 fun LabeledTextField(
@@ -56,37 +58,36 @@ fun LabeledTextField(
     enabled: Boolean = true,
 ) {
     val brand = MaterialTheme.appColors.brand
-    Row(
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
             .clip(FieldShape)
             .border(BorderStroke(FieldBorder, brand), FieldShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = Spacing.m, vertical = Spacing.s),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = brand)
-        Spacer(Modifier.width(Spacing.m))
-        Column(Modifier.weight(1f)) {
-            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = enabled,
-                singleLine = true,
-                textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(brand),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = capitalization,
-                    autoCorrectEnabled = autoCorrect,
-                    keyboardType = keyboardType,
-                    imeAction = if (onDone != null) ImeAction.Done else ImeAction.Default,
-                ),
-                keyboardActions = KeyboardActions(onDone = { onDone?.invoke() }),
-            )
-        }
-    }
+            .background(MaterialTheme.colorScheme.surface),
+        enabled = enabled,
+        singleLine = true,
+        textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal, color = MaterialTheme.colorScheme.onSurface),
+        cursorBrush = SolidColor(brand),
+        keyboardOptions = KeyboardOptions(
+            capitalization = capitalization,
+            autoCorrectEnabled = autoCorrect,
+            keyboardType = keyboardType,
+            imeAction = if (onDone != null) ImeAction.Done else ImeAction.Default,
+        ),
+        keyboardActions = KeyboardActions(onDone = { onDone?.invoke() }),
+        decorationBox = { field ->
+            Row(Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s), verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = brand)
+                Spacer(Modifier.width(Spacing.m))
+                Column(Modifier.weight(1f)) {
+                    Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    field()
+                }
+            }
+        },
+    )
 }
 
 @Preview(name = "Campo de texto", showBackground = true, widthDp = 390)

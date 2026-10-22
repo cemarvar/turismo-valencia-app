@@ -233,6 +233,18 @@ class ReservationsApiTest {
     }
 
     @Test
+    fun `recuperar con el identificador del movil lo manda en la cabecera para que el servidor apunte la reserva`() {
+        server.enqueue(MockResponse().setBody(contractExample("reservation.json")))
+
+        runBlocking { service.find("TV-2027-1100", "laura.garcia@email.com", device) }
+
+        val sent = server.takeRequest()
+        assertEquals("GET", sent.method)
+        assertEquals(device, sent.getHeader("X-Device-Id"))
+        assertEquals("laura.garcia@email.com", sent.requestUrl!!.queryParameter("email"))
+    }
+
+    @Test
     fun `un correo con un mas se manda codificado para que el servidor no lo lea como un espacio`() {
         server.enqueue(MockResponse().setBody(contractExample("reservation.json")))
 

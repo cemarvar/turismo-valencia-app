@@ -27,13 +27,16 @@ class FakeReservationsServer(private val priceCents: (offerId: String) -> Int = 
     /** Qué móvil hizo cada reserva (por el identificador de la reserva). */
     private val deviceOf = HashMap<String, String>()
 
+    /** Los móviles que han recuperado cada reserva (por el identificador de la reserva): `list` también se las trae. */
+    private val linked = HashMap<String, MutableSet<String>>()
+
     /** Cancelaciones que le han llegado: móvil, localizador y correo, en orden. */
     data class CancelCall(val deviceId: String, val locator: String, val email: String)
 
     val cancelCalls = mutableListOf<CancelCall>()
 
-    /** Búsquedas por localizador y correo que le han llegado, en orden. */
-    val findCalls = mutableListOf<Pair<String, String>>()
+    /** Búsquedas por localizador y correo que le han llegado, en orden, con el identificador del móvil que las mandó (si lo mandó). */
+    val findCalls = mutableListOf<Triple<String, String, String?>>()
 
     /** El día de hoy para decidir si una actividad ya pasó (en las pruebas se puede fijar). */
     var today: () -> LocalDate = { LocalDate.now() }
@@ -94,7 +97,8 @@ class FakeReservationsServer(private val priceCents: (offerId: String) -> Int = 
 
     override suspend fun list(deviceId: String): List<ReservationDto> {
         listCalls += deviceId
-        return forcedList ?: byKey.values.toList().asReversed()
+        // Las suyas y las que ha recuperado, las más recientes primero (como el servidor).
+        return forcedList ?: byKey.values.filter { deviceOf[it.id] == deviceId || deviceId in linked[it.id].orEmpty() }.asReversed()
     }
 
     private fun keyOf(locator: String): String? = byKey.entries.firstOrNull { it.value.locator.equals(locator.trim(), ignoreCase = true) }?.key
@@ -122,13 +126,14 @@ class FakeReservationsServer(private val priceCents: (offerId: String) -> Int = 
         return cancelled
     }
 
-    override suspend fun find(locator: String, email: String): ReservationDto {
-        findCalls += locator to email
+    override suspend fun find(locator: String, email: String, deviceId: String?): ReservationDto {
+        findCalls += Triple(locator, email, deviceId)
         if (delayMillis > 0) delay(delayMillis)
         failures.removeFirstOrNull()?.let { throw it }
         forcedReservation?.let { return it }
         val reservation = keyOf(locator)?.let { byKey.getValue(it) } ?: throw notFound()
         if (!reservation.email.equals(email.trim(), ignoreCase = true)) throw notFound()
+        if (deviceId != null && deviceOf[reservation.id] != deviceId) linked.getOrPut(reservation.id) { mutableSetOf() } += deviceId
         return reservation
     }
 

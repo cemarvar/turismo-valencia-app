@@ -296,6 +296,56 @@ class Reservas(unittest.TestCase):
                 status, _, body = call("GET", path, ip=random_ip())
                 self.assertEqual((status, body["error"]["code"]), (404, "reservation_not_found"))
 
+    def test_recuperar_con_el_dispositivo_la_apunta_a_su_nombre(self):
+        owner, other = str(uuid.uuid4()), str(uuid.uuid4())
+        email = "Enlace-%s@Example.com" % uuid.uuid4().hex[:8]
+        created = reserve(device=owner, email=email)[2]
+        path = "/reservations/%s?email=%s" % (created["locator"], urllib.request.quote(email))
+
+        def listed(device):
+            return call("GET", "/reservations", headers={"X-Device-Id": device})[2]["reservations"]
+
+        # sin el identificador solo se ve: el otro móvil no la tiene en su lista
+        self.assertEqual(call("GET", path, ip=random_ip())[0], 200)
+        self.assertEqual(listed(other), [])
+        # con el identificador queda apuntada a su nombre y la lista del móvil la trae
+        status, _, found = call("GET", path, headers={"X-Device-Id": other}, ip=random_ip())
+        self.assertEqual((status, found), (200, created))
+        self.assertEqual([r["id"] for r in listed(other)], [created["id"]])
+        # una sola vez aunque se repita, y la del dueño sigue siendo suya (recuperar la propia no la apunta)
+        call("GET", path, headers={"X-Device-Id": other}, ip=random_ip())
+        call("GET", path, headers={"X-Device-Id": owner}, ip=random_ip())
+        self.assertEqual(len(listed(other)), 1)
+        self.assertEqual(len(listed(owner)), 1)
+        if local_sql("select 1") == "1":
+            self.assertEqual(local_sql("select count(*) from app.reservation_devices where reservation_id = '%s'" % created["id"]), "1")
+        # y se pone al día sola: lo que cambie uno (cancelar) lo ve el otro al listar
+        self.assertEqual(cancel(created["locator"], device=owner)[0], 200)
+        self.assertEqual(listed(other)[0]["status"], "cancelled")
+
+    def test_recuperar_con_un_correo_que_no_es_no_apunta_nada(self):
+        owner, other = str(uuid.uuid4()), str(uuid.uuid4())
+        created = reserve(device=owner)[2]
+        status, _, body = call("GET", "/reservations/%s?email=otra@example.com" % created["locator"], headers={"X-Device-Id": other}, ip=random_ip())
+        self.assertEqual((status, body["error"]["code"]), (404, "reservation_not_found"))
+        self.assertEqual(call("GET", "/reservations", headers={"X-Device-Id": other})[2], {"reservations": []})
+
+    def test_el_identificador_de_quien_recupera_tiene_que_ser_un_uuid(self):
+        created = reserve()[2]
+        path = "/reservations/%s?email=%s" % (created["locator"], urllib.request.quote(created["email"]))
+        for name, value in {"no es un uuid": "no-es-un-uuid", "vacío": ""}.items():
+            with self.subTest(name):
+                status, _, body = call("GET", path, headers={"X-Device-Id": value}, ip=random_ip())
+                self.assertEqual((status, body["error"]["code"]), (400, "invalid_request"))
+
+    def test_las_apuntadas_se_mezclan_con_las_propias_por_fecha(self):
+        first_owner, device = str(uuid.uuid4()), str(uuid.uuid4())
+        old = reserve(device=first_owner)[2]
+        own = reserve(device=device)[2]  # la propia es más reciente que la que se recupera después
+        call("GET", "/reservations/%s?email=%s" % (old["locator"], urllib.request.quote(old["email"])), headers={"X-Device-Id": device}, ip=random_ip())
+        ids = [r["id"] for r in call("GET", "/reservations", headers={"X-Device-Id": device})[2]["reservations"]]
+        self.assertEqual(ids, [own["id"], old["id"]])  # por fecha de creación de la reserva, no por la de apuntarla
+
     @unittest.skipUnless(FULL, "usa la oferta de pruebas, que solo existe en local")
     def test_horario_de_hoy(self):
         today = madrid_today()
@@ -532,7 +582,7 @@ class Contrato(unittest.TestCase):
 class BaseDeDatosCerrada(unittest.TestCase):
     def test_la_api_automatica_no_ve_el_esquema_app(self):
         root = API_BASE.split("/functions/v1")[0]
-        for table in ("offers", "offer_slots", "reservations", "rate_limits"):
+        for table in ("offers", "offer_slots", "reservations", "rate_limits", "reservation_devices"):
             for profile in (None, "app"):
                 headers = {"apikey": ANON_KEY, "Authorization": "Bearer " + ANON_KEY}
                 if profile:

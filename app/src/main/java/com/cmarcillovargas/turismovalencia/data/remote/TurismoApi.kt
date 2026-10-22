@@ -40,9 +40,12 @@ interface TurismoApi {
     @GET("reservations")
     suspend fun reservations(@Header("X-Device-Id") deviceId: String): Response<ReservationsResponse>
 
-    /** Una reserva por localizador y correo (sirve para recuperarla en otro móvil). 404 `reservation_not_found` si no coinciden. */
+    /**
+     * Una reserva por localizador y correo (sirve para recuperarla en otro móvil). 404 `reservation_not_found` si no coinciden. Con
+     * `X-Device-Id` (el identificador de quien la recupera) el servidor la apunta a ese móvil y su lista de reservas la trae desde entonces.
+     */
     @GET("reservations/{locator}")
-    suspend fun reservation(@Path("locator") locator: String, @Query("email") email: String): Response<ReservationDto>
+    suspend fun reservation(@Path("locator") locator: String, @Query("email") email: String, @Header("X-Device-Id") deviceId: String?): Response<ReservationDto>
 
     /**
      * Cancela una reserva: la hizo este móvil (`X-Device-Id`) o se conocen su localizador y su correo (`request.email`). 200 con la reserva ya

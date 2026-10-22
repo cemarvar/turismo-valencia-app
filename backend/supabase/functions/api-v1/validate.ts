@@ -27,6 +27,12 @@ export function requireUuidHeader(req: Request, name: string): string {
   return value.toLowerCase();
 }
 
+/** Como [requireUuidHeader], pero la cabecera puede faltar (`null`); si viene, tiene que ser un UUID. */
+export function optionalUuidHeader(req: Request, name: string): string | null {
+  if (req.headers.get(name) === null) return null;
+  return requireUuidHeader(req, name);
+}
+
 export async function readJsonBody(req: Request): Promise<unknown> {
   if (Number(req.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
     throw new ApiError(413, "payload_too_large", "El cuerpo de la petición es demasiado grande.");

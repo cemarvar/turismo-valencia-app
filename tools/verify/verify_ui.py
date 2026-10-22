@@ -1135,7 +1135,7 @@ def clean_local_backend():
     ellas mismas (las del correo de demostración de la app, las precargadas y todas las de la oferta de pruebas), que irían
     llenando el aforo de cada horario (la barca de la Albufera tiene 12 plazas por horario y día)."""
     local_sql("delete from app.rate_limits")
-    local_sql("delete from app.reservations where email in ('laura.garcia@example.com', 'precarga@example.com') or offer_id = 'prueba-aforo'")
+    local_sql("delete from app.reservations where email in ('laura.garcia@example.com', 'precarga@example.com', 'enlace@example.com') or offer_id = 'prueba-aforo'")
 
 
 def app_reservations_db():
@@ -1403,6 +1403,29 @@ def g_cancelar():
         owner = (local_sql("select device_id from app.reservations where locator = '%s'" % second) or [""])[0]
         check("y el móvil que la hizo no es este", bool(device_here) and bool(owner) and owner != device_here, "%s / %s" % (owner, device_here))
 
+    # 6b) Una reserva recuperada se pone al día sola: el servidor la apunta a este móvil y su lista de reservas la trae
+    linked = (local_sql("select app.create_reservation(gen_random_uuid(), gen_random_uuid(), 'albufera-barca', (now() at time zone 'Europe/Madrid')::date + 3, '18:30', 2, 0, 'enlace@example.com')->'reservation'->>'locator'") or [""])[0]
+    start("reservas", reset=False)
+    scroll_to("¿Reservaste desde otro móvil?")
+    tap_text("¿Reservaste desde otro móvil?")
+    wait_for("Recuperar una reserva", 5)
+    if len(edit_fields()) == 2:
+        tap(edit_fields()[0])
+        type_text(linked.lower())
+        tap(edit_fields()[1])
+        type_text("enlace@example.com")
+        tap_text("Recuperar")
+        shown = locator_on_screen(12)
+        check("recuperar otra reserva, hecha en otro móvil, con sus dos datos", bool(linked) and shown == linked, "%s / %s" % (linked, shown))
+        count = (local_sql("select count(*) from app.reservation_devices where reservation_id = (select id from app.reservations where locator = '%s')" % linked) or [""])[0]
+        check("el servidor la apunta a este móvil (una vez)", count == "1", count)
+        local_sql("update app.reservations set status = 'cancelled' where locator = '%s'" % linked)  # la cancela el otro móvil
+        start("reservas", reset=False)
+        time.sleep(3.0)
+        check("al abrir la app, la que se canceló desde el otro móvil sale cancelada sin recuperarla otra vez", [r[7] for r in app_reservations_db()[0] if r[0] == linked] == ["Cancelled"], str([r[7] for r in app_reservations_db()[0] if r[0] == linked]))
+    else:
+        check("el diálogo de recuperar tiene sus dos campos", False)
+
     # 7) Recuperar exige conexión
     set_network(False)
     start("reservas")
@@ -1545,7 +1568,7 @@ def g_privacidad():
     print("\n## Política de privacidad: la de la web y lo que añade la app")
     start("pagina/PoliticaPrivacidad")
     check("la política de la web sigue arriba", find("Política de Privacidad") is not None and find("1. Responsable del tratamiento") is not None)
-    sections = ("La app en tu móvil", "Reservas", "Cancelar y recuperar reservas", "Identificador del móvil", "Asistente ValBot", "Mapa, rutas y ubicación", "Actualización automática", "Lo que la app no incluye", "Tus derechos")
+    sections = ("La app en tu móvil", "Reservas", "Cancelar y recuperar reservas", "Identificador del móvil", "Copia de seguridad de Android", "Asistente ValBot", "Mapa, rutas y ubicación", "Actualización automática", "Lo que la app no incluye", "Tus derechos")
     for title in sections:
         check("debajo, lo que añade la app: «%s»" % title, scroll_to(title, tries=40) is not None)
         if title == "Reservas":

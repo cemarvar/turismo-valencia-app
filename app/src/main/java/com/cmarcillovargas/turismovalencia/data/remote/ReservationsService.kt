@@ -20,8 +20,11 @@ interface ReservationsService {
      */
     suspend fun cancel(deviceId: String, locator: String, email: String): ReservationDto
 
-    /** Una reserva por localizador y correo (`GET /reservations/{locator}?email=`): la forma de recuperarla en otro móvil. */
-    suspend fun find(locator: String, email: String): ReservationDto
+    /**
+     * Una reserva por localizador y correo (`GET /reservations/{locator}?email=`): la forma de recuperarla en otro móvil. Con [deviceId] (el de
+     * quien la recupera) el servidor la apunta a ese móvil, así que [list] la trae desde entonces y se pone al día sola; sin él, solo se ve.
+     */
+    suspend fun find(locator: String, email: String, deviceId: String? = null): ReservationDto
 }
 
 class RetrofitReservationsService(private val api: TurismoApi) : ReservationsService {
@@ -45,8 +48,8 @@ class RetrofitReservationsService(private val api: TurismoApi) : ReservationsSer
         response.body() ?: throw ApiException("El servidor respondió sin reserva", status = response.code())
     }
 
-    override suspend fun find(locator: String, email: String): ReservationDto = guardedApiCall("buscar la reserva") {
-        val response = api.reservation(locator, email)
+    override suspend fun find(locator: String, email: String, deviceId: String?): ReservationDto = guardedApiCall("buscar la reserva") {
+        val response = api.reservation(locator, email, deviceId)
         if (!response.isSuccessful) throw response.toApiException()
         response.body() ?: throw ApiException("El servidor respondió sin reserva", status = response.code())
     }
@@ -61,5 +64,5 @@ object NoReservationsService : ReservationsService {
 
     override suspend fun cancel(deviceId: String, locator: String, email: String): ReservationDto = throw ApiException("Sin conexión con el servidor")
 
-    override suspend fun find(locator: String, email: String): ReservationDto = throw ApiException("Sin conexión con el servidor")
+    override suspend fun find(locator: String, email: String, deviceId: String?): ReservationDto = throw ApiException("Sin conexión con el servidor")
 }

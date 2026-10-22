@@ -1,13 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copia de seguridad automática de Android (Google) en Android 11 o menos; en Android 12 o más se usa data_extraction_rules.xml con lo
+   mismo (mantener los dos iguales). Se copia lo que el usuario ha ido guardando: la base de datos de Room (favoritos, descargas,
+   ajustes, búsquedas, avisos y las reservas con su correo y su localizador) y las dos preferencias del idioma y del tema. Se deja
+   fuera lo que es del móvil o se puede volver a bajar:
+   - La caché de teselas del mapa (files/osmdroid): es de OpenStreetMap, se vuelve a descargar y puede pasar de los 25 MB que admite la
+     copia de una app, y si no cabe no se copia nada.
+   - La configuración de osmdroid (shared_prefs/osmdroid.xml): guarda rutas de este móvil y la app la rehace en cada arranque.
+   - La marca de ProfileInstaller (files/profileInstalled): dice si el perfil de arranque se instaló en este móvil.
+   WorkManager guarda su base de datos en no_backup/ y no se copia sola; la caché del sistema (cache/) tampoco.
+   Qué se copia y por qué, en docs/progreso.md («Decisiones»), y qué cuenta la política de privacidad de la app, en AppPrivacy.kt.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="file" path="osmdroid" />
+    <exclude domain="sharedpref" path="osmdroid.xml" />
+    <exclude domain="file" path="profileInstalled" />
 </full-backup-content>

@@ -1,4 +1,4 @@
--- Derecho de supresión: borra todas las reservas de un correo.
+-- Derecho de supresión: borra todas las reservas de un correo (y, en cascada, los apuntes de los móviles que las recuperaron).
 -- Se ejecuta en el editor SQL del panel de Supabase (SQL Editor). Cambia el correo y ejecuta; devuelve cuántas se borraron.
 
 with borradas as (

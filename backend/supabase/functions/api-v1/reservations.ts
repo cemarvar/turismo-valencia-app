@@ -1,7 +1,7 @@
 import { ApiError, fromDatabaseError, json } from "../_shared/http.ts";
 import { enforce } from "../_shared/limits.ts";
 import type { Ctx } from "./context.ts";
-import { LOCATOR, parseReservation, readJsonBody, readOptionalJsonBody, requireUuidHeader } from "./validate.ts";
+import { LOCATOR, optionalUuidHeader, parseReservation, readJsonBody, readOptionalJsonBody, requireUuidHeader } from "./validate.ts";
 
 // Las reservas no se guardan en ninguna caché.
 const NO_STORE = { "cache-control": "no-store" };
@@ -35,7 +35,7 @@ export async function createReservation({ req, sql, ip }: Ctx): Promise<Response
   });
 }
 
-/** GET /reservations — las del dispositivo (`X-Device-Id`), las más recientes primero. */
+/** GET /reservations — las del dispositivo (`X-Device-Id`: las que hizo y las que ha recuperado), las más recientes primero. */
 export async function listReservations({ req, sql }: Ctx): Promise<Response> {
   const device = requireUuidHeader(req, "x-device-id");
   await enforce(sql, "device-list", device, 120, 3600);
@@ -45,16 +45,19 @@ export async function listReservations({ req, sql }: Ctx): Promise<Response> {
 
 /**
  * GET /reservations/:locator?email=… — recupera una reserva con su localizador y el correo con el que se hizo. Si no coincide,
- * responde igual que si no existiera (así no se puede averiguar qué localizadores existen).
+ * responde igual que si no existiera (así no se puede averiguar qué localizadores existen). Con la cabecera opcional `X-Device-Id`
+ * (el UUID de quien la recupera), la reserva queda apuntada a ese móvil y su `GET /reservations` la trae desde entonces, así que se
+ * pone al día sola; sin ella, solo se ve.
  */
-export async function findReservation({ params, url, sql, ip }: Ctx): Promise<Response> {
+export async function findReservation({ req, params, url, sql, ip }: Ctx): Promise<Response> {
   await enforce(sql, "ip-lookup", ip, 20, 3600);
+  const device = optionalUuidHeader(req, "x-device-id");
   const locator = params.locator.toUpperCase();
   const email = url.searchParams.get("email")?.trim() ?? "";
   if (!LOCATOR.test(locator) || email.length === 0 || email.length > 254) {
     throw new ApiError(404, "reservation_not_found", "No hay ninguna reserva con ese localizador y ese correo.");
   }
-  const [{ body }] = await sql`select app.find_reservation(${locator}, ${email}) as body`;
+  const [{ body }] = await sql`select app.find_reservation(${locator}, ${email}, ${device}::uuid) as body`;
   if (body === null) throw new ApiError(404, "reservation_not_found", "No hay ninguna reserva con ese localizador y ese correo.");
   return json(200, body, NO_STORE);
 }

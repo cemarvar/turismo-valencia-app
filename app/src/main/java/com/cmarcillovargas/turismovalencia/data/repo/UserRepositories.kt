@@ -188,13 +188,16 @@ class ReservationsRepository(
 
     /**
      * Recupera una reserva con su localizador y el correo con el que se hizo (la de otro móvil, o la de antes de borrar los datos de la
-     * app) y la guarda aquí; devuelve cuando ya aparece en [items]. Lanza [ReservationActionFailure]: `NotFound` si el localizador y
-     * el correo no coinciden con ninguna (el servidor no dice cuál de los dos falla).
+     * app) y la guarda aquí; devuelve cuando ya aparece en [items]. El servidor la deja apuntada al identificador de este móvil (que se
+     * crea ahora si hace falta), así que [refresh] la trae desde entonces y la pone al día sola (si se cancela desde el otro móvil, aquí
+     * también sale cancelada). Lanza [ReservationActionFailure]: `NotFound` si el localizador y el correo no coinciden con ninguna (el
+     * servidor no dice cuál de los dos falla).
      */
     suspend fun recover(locator: String, email: String): Reservation =
         scope.async {
+            val deviceId = settings.deviceId()
             val found = try {
-                service.find(locator.trim().uppercase(), email.trim())
+                service.find(locator.trim().uppercase(), email.trim(), deviceId)
             } catch (e: ApiException) {
                 throw e.toActionFailure()
             }
