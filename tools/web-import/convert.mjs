@@ -27,6 +27,7 @@ function matchBalanced(src, start) {
   return -1;
 }
 const clean = (s) => String(s ?? '')
+  .replace(/\\'/g, "'") // un `l\'Olla` suelto en el JSX de la web
   .replace(/<br\s*\/?>/gi, ' ')
   .replace(/<[^>]+>/g, '')
   .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&middot;/g, '·').replace(/&mdash;/g, '—').replace(/&ndash;/g, '–')
@@ -228,7 +229,9 @@ const FAMILY = (f) => {
 };
 
 const UI_VARS = new Set(['filtros', 'categorias', 'categoriasFiltro', 'tipoBadge', 'mercadosCat']);
-const museosFrom = (cats) => Array.isArray(cats) && cats.some((c) => Array.isArray(c.museos)) ? cats.filter((c) => Array.isArray(c.museos)).map((c) => ({ title: c.label, bullets: c.museos.map(String) })) : null;
+// Cada museo es un objeto {nombre, nota, gratuito}: una viñeta «Nombre · nota · Gratuito» (antes salía «[object Object]»).
+const museoLine = (m) => typeof m === 'object' ? [m.nombre, m.nota, m.gratuito ? 'Gratuito' : null].filter(Boolean).join(' · ') : String(m);
+const museosFrom = (cats) => Array.isArray(cats) && cats.some((c) => Array.isArray(c.museos)) ? cats.filter((c) => Array.isArray(c.museos)).map((c) => ({ title: c.label, bullets: c.museos.map(museoLine) })) : null;
 
 const pages = {};
 const files = fs.readdirSync(DIR).sort();
@@ -292,7 +295,7 @@ for (const f of files) {
     blocks.push(block);
   }
   const museos = museosFrom(vars.categorias?.v);
-  if (museos) blocks.push({ pos: jsx.indexOf('museos', jsx.indexOf('export default')), type: 'items', title: 'Museos', items: museos });
+  if (museos) blocks.push({ pos: jsx.indexOf('museos.map', jsx.indexOf('export default')), type: 'items', title: 'Museos', items: museos });
   for (const l of staticLists(jsx)) blocks.push({ pos: l.pos, type: 'bullets', title: l.title, items: l.items });
   blocks.sort((a, b) => a.pos - b.pos);
   blocks.forEach((b) => { delete b.pos; });

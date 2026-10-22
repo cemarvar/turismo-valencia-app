@@ -16,3 +16,8 @@ python images.py    # descarga las fotos referenciadas, las reduce a 900 px y la
 - Las fotos conservan la ruta de la web (`img-espacios/MercadoCentral/cupulamc.webp`), así que el JSON y `assets/img/` encajan sin tablas.
 - `images.py` es incremental: salta las fotos que ya existen en `assets/img/`.
 - La carpeta `work/` es temporal y no se sube a git.
+- Al preparar las traducciones aparecieron dos defectos del importador, ya corregidos: los museos de `MonumentosMuseos` (objetos
+  `{nombre, nota, gratuito}`) salían como «[object Object]» y ahora son una viñeta «Nombre · nota · Gratuito»; y un `l\'Olla` suelto en el
+  JSX de la web (`Ecoturismo`) salía con la barra. **Si se reimporta la web, hay que volver a traducir las páginas cuyo texto cambie**:
+  `python tools/i18n/pages.py status` y `extract` (ver `tools/i18n/README.md`); `WebPageTextTest` falla si una traducción deja de tener la
+  forma de su página.

@@ -30,7 +30,6 @@ import com.cmarcillovargas.turismovalencia.R
 import com.cmarcillovargas.turismovalencia.data.appLanguage
 import com.cmarcillovargas.turismovalencia.data.containerFactory
 import com.cmarcillovargas.turismovalencia.data.model.Category
-import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.WebFamily
 import com.cmarcillovargas.turismovalencia.data.model.WebPage
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
@@ -111,7 +110,8 @@ private fun PageContent(
     onOpenWeb: () -> Unit,
 ) {
     val extraBlocks = if (page.id == PrivacyPageId) appPrivacyBlocks() else emptyList()
-    val spanishOnly = LocalContext.current.appLanguage() != LanguageCode.ES
+    // El texto de la página puede no estar traducido al idioma de la app (sigue en español): se avisa.
+    val notTranslated = page.textLanguage != LocalContext.current.appLanguage()
     LazyColumn(Modifier.fillMaxSize(), state = rememberLazyListState(), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
         if (hero) {
             item(key = "hero") {
@@ -129,8 +129,7 @@ private fun PageContent(
                 )
             }
         }
-        // Los textos de las páginas de la web solo están en español: se avisa si la app está en otro idioma.
-        if (spanishOnly) {
+        if (notTranslated) {
             item(key = "spanish-only") { InfoNotice(stringResource(R.string.web_only_spanish), Modifier.padding(horizontal = Spacing.m).padding(top = if (hero) 0.dp else Spacing.m)) }
         }
         if (page.lead.isNotEmpty()) {

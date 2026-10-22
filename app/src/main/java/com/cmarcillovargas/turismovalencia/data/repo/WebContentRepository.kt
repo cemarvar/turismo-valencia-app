@@ -5,27 +5,23 @@ import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.CategoryIndex
 import com.cmarcillovargas.turismovalencia.data.model.HomeTile
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
-import com.cmarcillovargas.turismovalencia.data.model.WebBlock
 import com.cmarcillovargas.turismovalencia.data.model.WebFamily
-import com.cmarcillovargas.turismovalencia.data.model.WebFilter
 import com.cmarcillovargas.turismovalencia.data.model.WebIndex
-import com.cmarcillovargas.turismovalencia.data.model.WebItem
 import com.cmarcillovargas.turismovalencia.data.model.WebPage
 import com.cmarcillovargas.turismovalencia.data.model.WebPageMeta
-import com.cmarcillovargas.turismovalencia.data.model.WebTag
 import com.cmarcillovargas.turismovalencia.util.normalizeText
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
  * Contenido de las páginas de la web (Que_Ver, Eventos, Gastronomia, Alojamientos, Entradas y la portada),
  * convertido a JSON y guardado en `assets/web/`. Las fotos van en `assets/img/` con la misma ruta que en la web.
  *
- * Solo está en español. Los títulos y las etiquetas de las páginas, las tarjetas de la portada y los títulos de las secciones salen
- * en el idioma de la app ([translations]); los textos de las páginas no (la pantalla lo avisa).
+ * El original está en español. Los títulos y las etiquetas de las páginas, las tarjetas de la portada y los títulos de las secciones
+ * salen en el idioma de la app ([translations]); el texto de cada página, si hay una traducción completa suya en
+ * `assets/i18n/<idioma>/pages/` (ver [PageTranslation]); si no, se ve en español y la pantalla lo avisa (`WebPage.textLanguage`).
  */
 // TODO(api): servir este contenido desde el backend (tabla Actividad y páginas) con caché en Room (TODO(room)).
 class WebContentRepository(context: Context) {
@@ -33,6 +29,9 @@ class WebContentRepository(context: Context) {
     val appContext: Context = context.applicationContext
     private val assets = appContext.assets
     private val cache = ConcurrentHashMap<String, WebPage>()
+
+    /** Las páginas ya traducidas (con su título), por idioma y página: el español no entra, que ya está en [cache]. */
+    private val translatedCache = ConcurrentHashMap<String, WebPage>()
 
     /** Traducciones del contenido propio de la app y de los títulos de la web (ver [ContentTranslations]). */
     val translations = ContentTranslations { path -> runCatching { read(path) }.getOrNull() }
@@ -50,7 +49,7 @@ class WebContentRepository(context: Context) {
             return translate(baseIndex).also { localizedIndex = language to it }
         }
 
-    /** Cambia el idioma de los títulos (el contenido de las páginas sigue en español). */
+    /** Cambia el idioma de los títulos y de los textos de las páginas que tengan traducción. */
     fun setLanguage(language: LanguageCode) {
         translations.setLanguage(language)
         localizedIndex = null
@@ -76,13 +75,25 @@ class WebContentRepository(context: Context) {
 
     fun pagesOf(vararg families: WebFamily): List<WebPageMeta> = index.pages.values.filter { it.family in families }
 
-    /** Página completa; se lee del JSON la primera vez y se guarda en memoria. Solo el título y la etiqueta salen traducidos. */
+    /**
+     * Página completa en el idioma de la app; se lee del JSON la primera vez y se guarda en memoria. El título y la etiqueta salen de
+     * `content.json`; el texto, de la traducción de la página si existe y tiene la forma del original (si no, en español: ver
+     * `WebPage.textLanguage`).
+     */
     suspend fun page(id: String): WebPage? {
+        val language = translations.language
+        val key = "${language.name}/$id"
+        translatedCache[key]?.let { return it }
         val page = cache[id] ?: withContext(Dispatchers.IO) {
-            runCatching { parsePage(id, JSONObject(read("web/pages/$id.json"))) }.getOrNull()?.also { cache[id] = it }
+            runCatching { WebPageParser.parse(id, JSONObject(read("web/pages/$id.json"))) }.getOrNull()?.also { cache[id] = it }
         } ?: return null
-        val text = translations.page(id) ?: return page
-        return page.copy(title = text.title ?: page.title, eyebrow = text.eyebrow ?: page.eyebrow)
+        val text = translations.page(id)
+        val titled = if (text == null) page else page.copy(title = text.title ?: page.title, eyebrow = text.eyebrow ?: page.eyebrow)
+        if (language == LanguageCode.ES) return titled
+        val localized = withContext(Dispatchers.IO) {
+            runCatching { PageTranslation.parse(read(PageTranslation.pathOf(language, id))) }.getOrNull()?.let { titled.translated(it, language) }
+        } ?: titled
+        return localized.also { translatedCache[key] = it }
     }
 
     /** Página de la web que corresponde a una ficha de la app, si la hay. */
@@ -143,51 +154,6 @@ class WebContentRepository(context: Context) {
         }.orEmpty()
         return WebIndex(metas, tiles("esencial"), tiles("planes"), tiles("sostenible"), categories)
     }
-
-    private fun parsePage(id: String, json: JSONObject): WebPage = WebPage(
-        id = id,
-        family = WebFamily.fromKey(json.getString("family")),
-        title = json.getString("title"),
-        eyebrow = json.optStringOrNull("eyebrow"),
-        lead = json.optJSONArray("lead").strings(),
-        hero = json.optStringOrNull("hero"),
-        blocks = json.getJSONArray("blocks").objects().map(::parseBlock),
-    )
-
-    private fun parseBlock(b: JSONObject): WebBlock = when (b.getString("type")) {
-        "facts" -> WebBlock.Facts(b.optString("title"), b.getJSONArray("rows").pairs())
-        "bullets" -> WebBlock.Bullets(b.optString("title"), b.getJSONArray("items").strings())
-        else -> WebBlock.Items(
-            title = b.optString("title"),
-            filters = b.optJSONArray("filters")?.objects()?.map { WebFilter(it.getString("id"), it.getString("label")) }.orEmpty(),
-            items = b.getJSONArray("items").objects().map(::parseItem),
-        )
-    }
-
-    private fun parseItem(o: JSONObject) = WebItem(
-        num = o.optStringOrNull("num"),
-        kicker = o.optStringOrNull("kicker"),
-        title = o.optStringOrNull("title"),
-        subtitle = o.optStringOrNull("subtitle"),
-        body = o.optStringOrNull("body"),
-        facts = o.optJSONArray("facts").pairs(),
-        bullets = o.optJSONArray("bullets").strings(),
-        bulletsTitle = o.optStringOrNull("bulletsTitle"),
-        notes = o.optJSONArray("notes").pairs(),
-        tags = o.optJSONArray("tags")?.objects()?.map { WebTag(it.getString("l"), it.optBoolean("free")) }.orEmpty(),
-        image = o.optStringOrNull("image"),
-        url = o.optStringOrNull("url"),
-        category = o.optStringOrNull("cat"),
-    )
-
-    private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
-
-    private fun JSONArray?.strings(): List<String> = if (this == null) emptyList() else List(length()) { optString(it) }
-
-    private fun JSONArray?.objects(): List<JSONObject> = if (this == null) emptyList() else List(length()) { getJSONObject(it) }
-
-    private fun JSONArray?.pairs(): List<Pair<String, String>> =
-        if (this == null) emptyList() else List(length()) { val row = getJSONArray(it); row.optString(0) to row.optString(1) }
 
     private companion object {
         val SearchableFamilies = setOf(WebFamily.Esencial, WebFamily.Planes, WebFamily.Entradas, WebFamily.Tours, WebFamily.Experiencias, WebFamily.Legal)

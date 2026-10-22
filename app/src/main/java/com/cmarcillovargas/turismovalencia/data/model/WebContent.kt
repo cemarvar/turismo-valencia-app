@@ -66,6 +66,8 @@ data class WebPage(
     val lead: List<String>,
     val hero: String?,
     val blocks: List<WebBlock>,
+    /** Idioma del texto de la página (no del título): español salvo que haya una traducción completa de sus textos. */
+    val textLanguage: LanguageCode = LanguageCode.ES,
 )
 
 /** Datos mínimos de una página para listas, buscador y tarjetas. */

@@ -27,3 +27,4 @@ backend/backups/
 
 # Grafo de conocimiento local de Graphify (se regenera con `graphify update .`)
 graphify-out/
+/tools/i18n/work/

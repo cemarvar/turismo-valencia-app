@@ -17,6 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -167,6 +168,22 @@ class LanguageTest {
         content.setLanguage(LanguageCode.ES)
         assertEquals("La Navidad más luminosa", web.index.pages.getValue("Navidad").title)
         assertEquals("Navidad", web.index.esencial.first { it.route == "Navidad" }.title)
+    }
+
+    @Test
+    fun elTextoDeLasPaginasDeLaWebSeLeeEnElIdiomaDeLaApp() = runBlocking {
+        // Las 65 páginas, en los tres idiomas, se leen de los archivos incluidos en la app con la forma del español (si no, saldrían en español).
+        for (language in listOf(LanguageCode.VA, LanguageCode.EN, LanguageCode.FR)) {
+            content.setLanguage(language)
+            val notTranslated = web.index.pages.keys.filter { id -> web.page(id)?.textLanguage != language }
+            assertTrue("$language: páginas sin traducir $notTranslated", notTranslated.isEmpty())
+        }
+        content.setLanguage(LanguageCode.EN)
+        assertTrue(web.page("Navidad")!!.lead.first().startsWith("Markets, nativity scenes, concerts and thousands of lights."))
+        content.setLanguage(LanguageCode.ES)
+        val spanish = web.page("Navidad")!!
+        assertEquals(LanguageCode.ES, spanish.textLanguage)
+        assertTrue(spanish.lead.first().startsWith("Mercados, belenes"))
     }
 
     @Test

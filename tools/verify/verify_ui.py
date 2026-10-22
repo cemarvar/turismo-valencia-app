@@ -1636,7 +1636,7 @@ def g_idiomas():
     check("las fichas salen traducidas (Central Market) y con el formato inglés (4.8 · 2.3k)", find("Central Market") is not None and any("(2.3k)" in t for t in texts()))
     start("detalle/mercado-central", reset=False, lang=None)
     check("la ficha traducida: título, información práctica y cifras", find("Valencia Central Market") is not None and find("Practical information") is not None and find("Free admission") is not None)
-    check("…con el aviso de que la guía de la web solo está en español", scroll_to("This content from the website is only available in Spanish.", tries=20) is not None)
+    check("…y la guía completa de la web, traducida y sin el aviso de «solo en español»", scroll_to("Full guide", tries=20) is not None and find("This content from the website is only available in Spanish.") is None and scroll_to("The Dome and Modernist Architecture", tries=20) is not None)
     start("reservas", reset=False, lang=None)
     check("Mis reservas en inglés", find("My bookings") is not None and find("3 bookings · 1 pending") is not None)
     check("…con el título de la oferta traducido (Boat trip on La Albufera)", find("Boat trip on La Albufera") is not None)
@@ -1683,7 +1683,9 @@ def g_idiomas():
     start("valbot", "--ez", "chatDown", "true", reset=False, lang=None)
     check("ValBot en français", ask_valbot("bonjour", "Posez-moi des questions"))
     start("pagina/Navidad", reset=False, lang=None)
-    check("una guía de la web: título traducido (Le Noël le plus lumineux) y aviso de que el texto está en español", find("Le Noël le plus lumineux") is not None and find("Ce contenu du site web n’est disponible qu’en espagnol.") is not None)
+    check("una guía de la web: título y texto traducidos (Le Noël le plus lumineux, Marchés, crèches…) y sin el aviso de «solo en español»", find("Le Noël le plus lumineux") is not None and any("Marchés, crèches, concerts" in t for t in texts()) and find("Ce contenu du site web n’est disponible qu’en espagnol.") is None, str(texts()[:6]))
+    start("pagina/AvisoLegal", reset=False, lang=None)
+    check("…y una página legal también (Mentions légales, Données d’identification)", scroll_to("1. Données d’identification", tries=14) is not None, str(texts()[:6]))
 
     # ---- Volver al español desde la hoja
     start("perfil", reset=False, lang=None)
