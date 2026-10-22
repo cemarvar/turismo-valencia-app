@@ -127,6 +127,8 @@ data class OfferEntity(
     val placeId: String?,
     /** Horarios como un array JSON de textos (`["16:30","17:30"]`). */
     val slots: String,
+    /** Traducciones del servidor como un objeto JSON por idioma (`{"en":{"title":"…"}}`); la columna se añadió en la v6. */
+    @ColumnInfo(defaultValue = "{}") val translations: String = "{}",
 )
 
 /** Datos de una caché del servidor (una fila por caché, `name`): la versión recibida (`ETag`) y cuándo se actualizó por última vez. */

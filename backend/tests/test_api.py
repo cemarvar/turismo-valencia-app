@@ -121,7 +121,7 @@ class Catalogo(unittest.TestCase):
         for expected in ("albufera-barca", "taller-paella", "tourist-card-72", "entrada-oceanografic"):
             self.assertIn(expected, by_id)
         for offer in offers:
-            self.assertEqual(set(offer), {"id", "kind", "tag", "title", "duration", "place", "extra", "priceFromCents", "description", "placeId", "slots"})
+            self.assertEqual(set(offer), {"id", "kind", "tag", "title", "duration", "place", "extra", "priceFromCents", "description", "placeId", "slots", "translations"})
             self.assertIn(offer["kind"], ("entrada", "tour", "experiencia"))
             self.assertIsInstance(offer["priceFromCents"], int)
             self.assertGreaterEqual(offer["priceFromCents"], 0)
@@ -132,6 +132,47 @@ class Catalogo(unittest.TestCase):
         self.assertEqual(by_id["tourist-card-72"]["slots"], ["Cualquier hora"])
         self.assertIsNone(by_id["tourist-card-72"]["placeId"])
         self.assertEqual(by_id["taller-paella"]["placeId"], "mercado-central")
+
+    def test_ofertas_con_sus_traducciones(self):
+        """Cada oferta lleva sus textos en valenciano, inglés y francés, y son los mismos que la app trae incluidos en su `content.json`."""
+        offers = {o["id"]: o for o in call("GET", "/offers")[2]["offers"]}
+        app_texts = {}
+        for lang in ("va", "en", "fr"):
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app", "src", "main", "assets", "i18n", lang, "content.json")
+            if os.path.isfile(path):
+                with open(path, encoding="utf-8") as file:
+                    app_texts[lang] = json.load(file)["offers"]
+        initial = ("albufera-barca", "taller-paella", "kayak-albufera", "excursion-albufera-paella", "paddle-surf", "taller-horchata", "tour-ruzafa",
+                   "ruta-ciutat-vella", "visita-catedral", "tour-lonja-catedral", "tour-ciudad-artes", "ruta-bici", "tour-carmen-nocturno", "tourist-card-72",
+                   "bus-turistico", "entrada-oceanografic")
+        for offer_id in initial:
+            translations = offers[offer_id]["translations"]
+            self.assertEqual(set(translations), {"va", "en", "fr"}, offer_id)
+            for lang, text in translations.items():
+                self.assertLessEqual(set(text), {"tag", "title", "duration", "place", "extra", "description"}, (offer_id, lang))
+                self.assertTrue(all(isinstance(v, str) and v for v in text.values()), (offer_id, lang))  # sin nulos ni vacíos: lo no traducido no viaja
+                self.assertTrue(text["title"] and text["description"], (offer_id, lang))
+                if lang in app_texts:
+                    self.assertEqual(text, app_texts[lang][offer_id], "%s/%s: el servidor y la app dicen cosas distintas" % (offer_id, lang))
+
+    @unittest.skipUnless(FULL, "usa la oferta de pruebas, que solo existe en local")
+    def test_una_oferta_sin_traducciones_las_lleva_vacias(self):
+        self.assertEqual(call("GET", "/offers/prueba-aforo")[2]["translations"], {})
+
+    @unittest.skipUnless(FULL, "escribe en la base de datos local")
+    def test_traducir_una_oferta_cambia_la_version_del_catalogo(self):
+        """Una traducción nueva o cambiada sube el `ETag` (la app la recibe sin esperar a que cambie otra cosa) y solo viajan los campos que tiene."""
+        before = call("GET", "/offers")[1]["etag"]
+        self.assertIsNotNone(local_sql("insert into app.offer_translations (offer_id, lang, title) values ('prueba-aforo', 'en', 'Test offer')"))
+        try:
+            status, headers, body = call("GET", "/offers", headers={"If-None-Match": before})
+            self.assertEqual(status, 200, "la versión del catálogo no cambió al traducir una oferta")
+            self.assertNotEqual(headers["etag"], before)
+            self.assertEqual(call("GET", "/offers/prueba-aforo")[2]["translations"], {"en": {"title": "Test offer"}})
+            self.assertEqual({o["id"]: o for o in body["offers"]}["prueba-aforo"]["translations"], {"en": {"title": "Test offer"}})
+        finally:
+            local_sql("delete from app.offer_translations where offer_id = 'prueba-aforo'")
+        self.assertEqual(call("GET", "/offers/prueba-aforo")[2]["translations"], {})
 
     def test_etag_y_304(self):
         _, headers, _ = call("GET", "/offers")
@@ -582,7 +623,7 @@ class Contrato(unittest.TestCase):
 class BaseDeDatosCerrada(unittest.TestCase):
     def test_la_api_automatica_no_ve_el_esquema_app(self):
         root = API_BASE.split("/functions/v1")[0]
-        for table in ("offers", "offer_slots", "reservations", "rate_limits", "reservation_devices"):
+        for table in ("offers", "offer_slots", "offer_translations", "reservations", "rate_limits", "reservation_devices"):
             for profile in (None, "app"):
                 headers = {"apikey": ANON_KEY, "Authorization": "Bearer " + ANON_KEY}
                 if profile:

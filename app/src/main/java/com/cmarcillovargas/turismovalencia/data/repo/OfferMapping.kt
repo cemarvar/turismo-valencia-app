@@ -1,17 +1,22 @@
 package com.cmarcillovargas.turismovalencia.data.repo
 
 import com.cmarcillovargas.turismovalencia.data.local.OfferEntity
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.Offer
 import com.cmarcillovargas.turismovalencia.data.model.OfferKind
+import com.cmarcillovargas.turismovalencia.data.model.OfferText
 import com.cmarcillovargas.turismovalencia.data.remote.OfferDto
+import com.cmarcillovargas.turismovalencia.data.remote.OfferTranslationDto
 import com.cmarcillovargas.turismovalencia.data.remote.TurismoApiClient
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
 // Del JSON de la API a la caché de Room y de ahí al modelo de la app. Es Kotlin puro (sin Android) para probarlo en la JVM.
 
 private val SlotsSerializer = ListSerializer(String.serializer())
+private val TranslationsSerializer = MapSerializer(String.serializer(), OfferTranslationDto.serializer())
 
 /** `entrada`, `tour` o `experiencia` (la API); cualquier otro valor es una oferta que esta versión de la app no sabe pintar. */
 internal fun offerKindOf(raw: String): OfferKind? = when (raw.trim().lowercase()) {
@@ -38,8 +43,26 @@ internal fun OfferDto.toEntity(position: Int): OfferEntity? {
         description = description,
         placeId = placeId?.takeIf { it.isNotBlank() },
         slots = TurismoApiClient.Json.encodeToString(SlotsSerializer, slots),
+        translations = TurismoApiClient.Json.encodeToString(TranslationsSerializer, translations.filter { (code, text) -> languageOfCode(code) != null && text.hasText() }),
     )
 }
+
+private fun OfferTranslationDto.hasText() = listOf(tag, title, duration, place, extra, description).any { !it.isNullOrBlank() }
+
+/** `va`, `en` o `fr` (como los manda la API); otro código es un idioma que esta versión de la app no tiene. */
+internal fun languageOfCode(code: String): LanguageCode? = LanguageCode.entries.firstOrNull { it != LanguageCode.ES && it.name.equals(code.trim(), ignoreCase = true) }
+
+/** Las traducciones guardadas; si el texto no se puede leer, ninguna (nunca cierra la app por un dato de la caché). */
+internal fun decodeTranslations(json: String): Map<LanguageCode, OfferText> =
+    try {
+        TurismoApiClient.Json.decodeFromString(TranslationsSerializer, json).mapNotNull { (code, text) ->
+            languageOfCode(code)?.let { it to OfferText(text.tag.clean(), text.title.clean(), text.duration.clean(), text.place.clean(), text.extra.clean(), text.description.clean()) }
+        }.toMap()
+    } catch (_: SerializationException) {
+        emptyMap()
+    }
+
+private fun String?.clean(): String? = this?.takeIf { it.isNotBlank() }
 
 /** Los horarios guardados; si el texto no se puede leer, ninguno (nunca cierra la app por un dato de la caché). */
 internal fun decodeSlots(json: String): List<String> =
@@ -70,4 +93,5 @@ internal fun OfferEntity.toModel(bundled: Offer?, assetImage: String?): Offer = 
     ticket = bundled?.ticket,
     placeId = placeId,
     assetImage = assetImage,
+    serverTexts = decodeTranslations(translations),
 )

@@ -109,4 +109,16 @@ data class Offer(
     val assetImage: String? = null,
     /** `tag` tal como lo manda el servidor (en español): la traducción cambia `tag`, pero el código que decide por él mira esta clave. */
     val tagKey: String = tag,
+    /** Textos en otros idiomas que mandó el servidor con la oferta (los que la app trae incluidos están en `assets/i18n`). */
+    val serverTexts: Map<LanguageCode, OfferText> = emptyMap(),
+)
+
+/** Los textos de una oferta en un idioma; lo que es `null` se ve en el idioma original. */
+class OfferText(
+    val tag: String? = null,
+    val title: String? = null,
+    val duration: String? = null,
+    val place: String? = null,
+    val extra: String? = null,
+    val description: String? = null,
 )

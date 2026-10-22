@@ -16,6 +16,7 @@ import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.LatLon
 import com.cmarcillovargas.turismovalencia.data.model.Offer
 import com.cmarcillovargas.turismovalencia.data.model.OfferKind
+import com.cmarcillovargas.turismovalencia.data.model.OfferText
 import com.cmarcillovargas.turismovalencia.data.model.SearchSuggestion
 import com.cmarcillovargas.turismovalencia.data.model.SortMode
 import com.cmarcillovargas.turismovalencia.data.model.WebFamily
@@ -88,7 +89,25 @@ class ContentRepository(
         val language = translations.language
         if (language == LanguageCode.ES) return source
         localizedOffers?.let { (from, lang, result) -> if (from === source && lang == language) return result }
-        return source.map { offer -> translations.offer(offer.id)?.let(offer::translated) ?: offer }.also { localizedOffers = Triple(source, language, it) }
+        return source.map { offer -> textOf(offer, language)?.let(offer::translated) ?: offer }.also { localizedOffers = Triple(source, language, it) }
+    }
+
+    /**
+     * Los textos de una oferta en [language]: los que mandó el servidor y, para lo que no trajo, los que la app trae incluidos
+     * (`assets/i18n`); lo que ninguno tenga se ve en español.
+     */
+    private fun textOf(offer: Offer, language: LanguageCode): OfferText? {
+        val server = offer.serverTexts[language]
+        val bundled = translations.offer(offer.id)
+        if (server == null || bundled == null) return server ?: bundled
+        return OfferText(
+            tag = server.tag ?: bundled.tag,
+            title = server.title ?: bundled.title,
+            duration = server.duration ?: bundled.duration,
+            place = server.place ?: bundled.place,
+            extra = server.extra ?: bundled.extra,
+            description = server.description ?: bundled.description,
+        )
     }
 
     /** Cambia el idioma de los textos del contenido y de la web. */

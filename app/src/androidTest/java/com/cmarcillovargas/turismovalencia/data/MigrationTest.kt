@@ -178,7 +178,34 @@ class MigrationTest {
     }
 
     @Test
-    fun deLaV1ALaV5PasaPorLasCuatroMigraciones() {
+    fun deLaV5ALaV6LasOfertasGuardadasGananLasTraduccionesYSeVuelveAPedirElCatalogo() {
+        helper.createDatabase(name, 5).apply {
+            execSQL(
+                "INSERT INTO offers (id, position, kind, tag, title, duration, place, extra, priceFromCents, description, placeId, slots) " +
+                    "VALUES ('albufera-barca', 0, 'Experiencia', 'Excursión', 'Paseo en barca', '1 h', 'El Palmar', 'español/inglés', 1800, 'Recorre el lago', 'albufera-barca', '[\"16:30\"]')",
+            )
+            execSQL("INSERT INTO cache_meta (name, etag, fetchedAt) VALUES ('offers', 'W/\"v1\"', 123)")
+            execSQL("INSERT INTO cache_meta (name, etag, fetchedAt) VALUES ('otra', 'W/\"o1\"', 456)")
+            execSQL("INSERT INTO favorites (position, itemId) VALUES (1, 'paella')")
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(name, 6, true, AppDatabase.Migration5To6)
+
+        fun rows(sql: String) = migrated.query(sql).use { c ->
+            generateSequence { if (c.moveToNext()) (0 until c.columnCount).map { c.getString(it) } else null }.toList()
+        }
+        // La oferta guardada sigue ahí, sin traducciones todavía…
+        assertEquals(listOf(listOf("albufera-barca", "Paseo en barca", "{}")), rows("SELECT id, title, translations FROM offers"))
+        // …y la caché olvida su versión (sin `ETag` el servidor manda el catálogo entero, ya con las traducciones). Lo demás no se toca.
+        assertEquals(listOf(listOf(null, "123")), rows("SELECT etag, fetchedAt FROM cache_meta WHERE name = 'offers'"))
+        assertEquals(listOf(listOf("W/\"o1\"")), rows("SELECT etag FROM cache_meta WHERE name = 'otra'"))
+        assertEquals(listOf(listOf("paella")), rows("SELECT itemId FROM favorites"))
+        migrated.close()
+    }
+
+    @Test
+    fun deLaV1ALaV6PasaPorLasCincoMigraciones() {
         helper.createDatabase(name, 1).apply {
             execSQL("INSERT INTO favorites (position, itemId) VALUES (1, 'paella')")
             execSQL(
@@ -188,7 +215,7 @@ class MigrationTest {
             close()
         }
 
-        val migrated = helper.runMigrationsAndValidate(name, 5, true, *AppDatabase.Migrations)
+        val migrated = helper.runMigrationsAndValidate(name, 6, true, *AppDatabase.Migrations)
 
         fun strings(sql: String) = migrated.query(sql).use { cursor -> generateSequence { if (cursor.moveToNext()) cursor.getString(0) else null }.toList() }
         assertEquals(listOf("paella"), strings("SELECT itemId FROM favorites"))

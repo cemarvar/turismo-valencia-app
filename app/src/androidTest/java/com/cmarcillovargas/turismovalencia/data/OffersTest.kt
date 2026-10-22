@@ -8,10 +8,12 @@ import com.cmarcillovargas.turismovalencia.data.fake.FakeOfertas
 import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.CacheMetaEntity
 import com.cmarcillovargas.turismovalencia.data.local.OfferDao
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.Offer
 import com.cmarcillovargas.turismovalencia.data.remote.ApiException
 import com.cmarcillovargas.turismovalencia.data.remote.NoOffersService
 import com.cmarcillovargas.turismovalencia.data.remote.OfferDto
+import com.cmarcillovargas.turismovalencia.data.remote.OfferTranslationDto
 import com.cmarcillovargas.turismovalencia.data.remote.OffersFetch
 import com.cmarcillovargas.turismovalencia.data.remote.OffersService
 import com.cmarcillovargas.turismovalencia.data.repo.OffersRefresh
@@ -121,6 +123,31 @@ class OffersTest {
         val meta = runBlocking { s.dao.meta(OfferDao.OffersCache) }!!
         assertEquals("W/\"v1\"", meta.etag)
         assertEquals(1_000L, meta.fetchedAt)
+    }
+
+    @Test
+    fun lasTraduccionesDelServidorSeGuardanEnLaCacheYSeLeenPorIdioma() {
+        val s = Session()
+        s.serve(
+            dto("oferta-nueva").copy(
+                translations = mapOf(
+                    "en" to OfferTranslationDto(title = "New offer", description = "A nice one"),
+                    "de" to OfferTranslationDto(title = "Neues Angebot"), // un idioma que la app no tiene
+                ),
+            ),
+            dto("sin-traducciones"),
+        )
+
+        runBlocking { s.repo.refresh() }
+
+        val offers = s.repo.offers.awaitIds(listOf("oferta-nueva", "sin-traducciones"))
+        // El original sigue en español y las traducciones viajan con la oferta, solo las que la app entiende y con lo que traen.
+        assertEquals("Oferta oferta-nueva", offers[0].title)
+        assertEquals(setOf(LanguageCode.EN), offers[0].serverTexts.keys)
+        assertEquals("New offer", offers[0].serverTexts.getValue(LanguageCode.EN).title)
+        assertEquals("A nice one", offers[0].serverTexts.getValue(LanguageCode.EN).description)
+        assertNull(offers[0].serverTexts.getValue(LanguageCode.EN).place)
+        assertTrue(offers[1].serverTexts.isEmpty())
     }
 
     @Test

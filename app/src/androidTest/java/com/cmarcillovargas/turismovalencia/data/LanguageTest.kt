@@ -10,6 +10,9 @@ import com.cmarcillovargas.turismovalencia.data.local.AppDatabase
 import com.cmarcillovargas.turismovalencia.data.local.SettingsStore
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
+import com.cmarcillovargas.turismovalencia.data.model.Offer
+import com.cmarcillovargas.turismovalencia.data.model.OfferKind
+import com.cmarcillovargas.turismovalencia.data.model.OfferText
 import com.cmarcillovargas.turismovalencia.data.repo.ContentRepository
 import com.cmarcillovargas.turismovalencia.data.repo.SettingsRepository
 import com.cmarcillovargas.turismovalencia.data.repo.WebContentRepository
@@ -17,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -140,6 +144,39 @@ class LanguageTest {
         assertEquals(FakeOfertas.size, content.offers.size)
         content.setLanguage(LanguageCode.ES)
         assertEquals("Taller de paella valenciana", content.offer("taller-paella")!!.title)
+    }
+
+    @Test
+    fun lasOfertasDelServidorTraenSusIdiomasYMandaElServidorSobreLaApp() {
+        val taller = FakeOfertas.first { it.id == "taller-paella" }.copy(serverTexts = mapOf(LanguageCode.EN to OfferText(title = "Paella class (from the server)")))
+        val nueva = Offer(
+            id = "oferta-nueva", kind = OfferKind.Tour, tag = "Tour", title = "Oferta nueva", duration = "1 h", place = "Centro", extra = "", priceFromCents = 1000,
+            image = null, description = "Descripción nueva", times = listOf("10:00"),
+            serverTexts = mapOf(LanguageCode.EN to OfferText(title = "New offer"), LanguageCode.FR to OfferText(title = "Nouvelle offre", description = "Nouvelle description")),
+        )
+        val repo = ContentRepository(web, MutableStateFlow(listOf(taller, FakeOfertas.first { it.id == "ruta-bici" }, nueva)), strings)
+
+        repo.setLanguage(LanguageCode.EN)
+        // Manda el servidor en lo que trae; en lo que no, la traducción que la app trae incluida.
+        assertEquals("Paella class (from the server)", repo.offer("taller-paella")!!.title)
+        assertEquals("Gastronomic", repo.offer("taller-paella")!!.tag)
+        // Sin traducción del servidor, la incluida en la app.
+        assertEquals("Bike ride around Valencia", repo.offer("ruta-bici")!!.title)
+        // Una oferta nueva solo con lo que el servidor traduzca: el resto sale en español.
+        assertEquals("New offer", repo.offer("oferta-nueva")!!.title)
+        assertEquals("Descripción nueva", repo.offer("oferta-nueva")!!.description)
+
+        repo.setLanguage(LanguageCode.FR)
+        assertEquals("Nouvelle offre", repo.offer("oferta-nueva")!!.title)
+        assertEquals("Nouvelle description", repo.offer("oferta-nueva")!!.description)
+        assertEquals("Atelier de paella valenciana", repo.offer("taller-paella")!!.title)
+
+        repo.setLanguage(LanguageCode.VA)
+        assertEquals("Oferta nueva", repo.offer("oferta-nueva")!!.title) // sin valenciano en el servidor ni en la app: en español
+        assertEquals("Taller de paella valenciana", repo.offer("taller-paella")!!.title)
+
+        repo.setLanguage(LanguageCode.ES)
+        assertEquals("Taller de paella valenciana", repo.offer("taller-paella")!!.title)
     }
 
     @Test

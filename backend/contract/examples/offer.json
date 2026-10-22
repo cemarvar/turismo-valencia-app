@@ -14,5 +14,31 @@
     "17:30",
     "18:30",
     "19:30"
-  ]
+  ],
+  "translations": {
+    "en": {
+      "tag": "Excursion",
+      "title": "Boat trip on La Albufera",
+      "duration": "1 h",
+      "place": "El Palmar",
+      "extra": "Spanish/English",
+      "description": "Tour the lake in an electric boat with a bilingual guide, among rice fields and migratory birds."
+    },
+    "fr": {
+      "tag": "Excursion",
+      "title": "Balade en barque sur L’Albufera",
+      "duration": "1 h",
+      "place": "El Palmar",
+      "extra": "espagnol/anglais",
+      "description": "Parcourez le lac dans une barque électrique avec un guide bilingue, entre rizières et oiseaux migrateurs."
+    },
+    "va": {
+      "tag": "Excursió",
+      "title": "Passeig en barca per l’Albufera",
+      "duration": "1 h",
+      "place": "El Palmar",
+      "extra": "castellà/anglés",
+      "description": "Recorre el llac en una barca elèctrica amb guia bilingüe, entre arrossars i aus migratòries."
+    }
+  }
 }

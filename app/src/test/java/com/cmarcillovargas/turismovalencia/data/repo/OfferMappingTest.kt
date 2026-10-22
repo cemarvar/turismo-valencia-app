@@ -1,8 +1,10 @@
 package com.cmarcillovargas.turismovalencia.data.repo
 
 import com.cmarcillovargas.turismovalencia.data.fake.FakeOfertas
+import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.OfferKind
 import com.cmarcillovargas.turismovalencia.data.remote.OfferDto
+import com.cmarcillovargas.turismovalencia.data.remote.OfferTranslationDto
 import com.cmarcillovargas.turismovalencia.data.remote.OffersResponse
 import com.cmarcillovargas.turismovalencia.data.remote.TurismoApiClient
 import com.cmarcillovargas.turismovalencia.data.remote.contractExample
@@ -11,6 +13,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.File
 
 class OfferMappingTest {
     private val catalog: List<OfferDto> = TurismoApiClient.Json.decodeFromString<OffersResponse>(contractExample("offers-list.json")).offers
@@ -46,6 +49,63 @@ class OfferMappingTest {
             assertEquals(server.id, bundled.times, server.slots)
             assertEquals(server.id, bundled.placeId, server.placeId)
         }
+    }
+
+    @Test
+    fun `las traducciones del contrato se guardan y se leen por idioma`() {
+        val albufera = catalog.first { it.id == "albufera-barca" }.toEntity(0)!!.toModel(bundled = null, assetImage = null)
+
+        assertEquals(setOf(LanguageCode.VA, LanguageCode.EN, LanguageCode.FR), albufera.serverTexts.keys)
+        val english = albufera.serverTexts.getValue(LanguageCode.EN)
+        assertEquals("Boat trip on La Albufera", english.title)
+        assertEquals("Excursion", english.tag)
+        // El original sigue siendo el español del servidor: lo que cambia el idioma es la lectura, no lo guardado.
+        assertEquals("Paseo en barca por la Albufera", albufera.title)
+        assertEquals("Excursión", albufera.tagKey)
+    }
+
+    @Test
+    fun `las traducciones del contrato son las mismas que la app trae incluidas`() {
+        // El servidor y `assets/i18n` dicen lo mismo de las ofertas del contrato (y el backend lo comprueba contra el contenido de la app).
+        listOf(LanguageCode.VA, LanguageCode.EN, LanguageCode.FR).forEach { language ->
+            val bundled = ContentTranslations.parse(File("src/main/assets/${ContentTranslations.pathOf(language)}").readText(Charsets.UTF_8))
+            catalog.forEach { server ->
+                val fromServer = server.translations.getValue(language.name.lowercase())
+                val fromApp = bundled.offers.getValue(server.id)
+                val where = "$language/${server.id}"
+                assertEquals(where, fromApp.title, fromServer.title)
+                assertEquals(where, fromApp.tag, fromServer.tag)
+                assertEquals(where, fromApp.duration, fromServer.duration)
+                assertEquals(where, fromApp.place, fromServer.place)
+                assertEquals(where, fromApp.extra, fromServer.extra)
+                assertEquals(where, fromApp.description, fromServer.description)
+            }
+        }
+    }
+
+    @Test
+    fun `un idioma que la app no tiene o una traduccion vacia no se guardan`() {
+        val offer = dto().copy(
+            translations = mapOf(
+                "de" to OfferTranslationDto(title = "Angebot"), // la app no está en alemán
+                "en" to OfferTranslationDto(), // sin ningún texto
+                "fr" to OfferTranslationDto(title = " ", description = "Texte"), // un texto en blanco es como no tenerlo
+                "es" to OfferTranslationDto(title = "Oferta"), // el español es el original, no una traducción
+            ),
+        )
+
+        val texts = offer.toEntity(0)!!.toModel(bundled = null, assetImage = null).serverTexts
+
+        assertEquals(setOf(LanguageCode.FR), texts.keys)
+        assertNull(texts.getValue(LanguageCode.FR).title)
+        assertEquals("Texte", texts.getValue(LanguageCode.FR).description)
+    }
+
+    @Test
+    fun `unas traducciones guardadas que no se pueden leer no rompen la app`() {
+        assertEquals(emptyMap<LanguageCode, Any>(), decodeTranslations("esto no es JSON"))
+        assertEquals(emptyMap<LanguageCode, Any>(), decodeTranslations("{}"))
+        assertEquals(setOf(LanguageCode.EN), decodeTranslations("""{"en":{"title":"Hi"},"xx":{"title":"?"}}""").keys)
     }
 
     @Test

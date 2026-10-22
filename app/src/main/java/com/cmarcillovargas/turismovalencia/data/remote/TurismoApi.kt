@@ -98,7 +98,11 @@ data class ReservationsResponse(val reservations: List<ReservationDto> = emptyLi
 @Serializable
 data class OffersResponse(val offers: List<OfferDto> = emptyList())
 
-/** Una oferta tal como la sirve la API. El dinero va en céntimos y `kind` es `entrada`, `tour` o `experiencia`. */
+/**
+ * Una oferta tal como la sirve la API. El dinero va en céntimos y `kind` es `entrada`, `tour` o `experiencia`. Los textos de arriba son
+ * los originales (español); `translations` trae los de otros idiomas por código de idioma (`va`, `en`, `fr`), con solo los campos que
+ * están traducidos.
+ */
 @Serializable
 data class OfferDto(
     val id: String,
@@ -112,6 +116,18 @@ data class OfferDto(
     val description: String = "",
     val placeId: String? = null,
     val slots: List<String> = emptyList(),
+    val translations: Map<String, OfferTranslationDto> = emptyMap(),
+)
+
+/** Los textos de una oferta en un idioma; lo que no viene se ve en el idioma original. */
+@Serializable
+data class OfferTranslationDto(
+    val tag: String? = null,
+    val title: String? = null,
+    val duration: String? = null,
+    val place: String? = null,
+    val extra: String? = null,
+    val description: String? = null,
 )
 
 /** Cliente de la API: Retrofit sobre el `OkHttpClient` de la app, con JSON de kotlinx.serialization. */

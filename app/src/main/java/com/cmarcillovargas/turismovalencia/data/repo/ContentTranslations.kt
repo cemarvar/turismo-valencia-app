@@ -5,8 +5,8 @@ import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.data.model.InfoRow
 import com.cmarcillovargas.turismovalencia.data.model.LanguageCode
 import com.cmarcillovargas.turismovalencia.data.model.Offer
+import com.cmarcillovargas.turismovalencia.data.model.OfferText
 import com.cmarcillovargas.turismovalencia.data.model.Stat
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -88,13 +88,6 @@ class ContentTranslations(private val read: (path: String) -> String?) {
 
         private fun <T> JSONObject?.entriesOf(read: (String, JSONObject) -> Pair<String, T>): Map<String, T> =
             if (this == null) emptyMap() else keys().asSequence().associate { key -> read(key, getJSONObject(key)) }
-
-        private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
-
-        private fun JSONArray?.strings(): List<String> = if (this == null) emptyList() else List(length()) { optString(it) }
-
-        private fun JSONArray?.pairs(): List<Pair<String, String>> =
-            if (this == null) emptyList() else List(length()) { val row = getJSONArray(it); row.optString(0) to row.optString(1) }
     }
 }
 
@@ -133,15 +126,6 @@ class ItemText(
     val featureLabel: String? = null,
     val featureSubtitle: String? = null,
     val keywords: List<String> = emptyList(),
-)
-
-class OfferText(
-    val tag: String? = null,
-    val title: String? = null,
-    val duration: String? = null,
-    val place: String? = null,
-    val extra: String? = null,
-    val description: String? = null,
 )
 
 class PageText(val title: String? = null, val eyebrow: String? = null)

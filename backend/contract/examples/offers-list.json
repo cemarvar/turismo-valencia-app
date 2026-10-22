@@ -16,7 +16,33 @@
         "17:30",
         "18:30",
         "19:30"
-      ]
+      ],
+      "translations": {
+        "en": {
+          "tag": "Excursion",
+          "title": "Boat trip on La Albufera",
+          "duration": "1 h",
+          "place": "El Palmar",
+          "extra": "Spanish/English",
+          "description": "Tour the lake in an electric boat with a bilingual guide, among rice fields and migratory birds."
+        },
+        "fr": {
+          "tag": "Excursion",
+          "title": "Balade en barque sur L’Albufera",
+          "duration": "1 h",
+          "place": "El Palmar",
+          "extra": "espagnol/anglais",
+          "description": "Parcourez le lac dans une barque électrique avec un guide bilingue, entre rizières et oiseaux migrateurs."
+        },
+        "va": {
+          "tag": "Excursió",
+          "title": "Passeig en barca per l’Albufera",
+          "duration": "1 h",
+          "place": "El Palmar",
+          "extra": "castellà/anglés",
+          "description": "Recorre el llac en una barca elèctrica amb guia bilingüe, entre arrossars i aus migratòries."
+        }
+      }
     },
     {
       "id": "tourist-card-72",
@@ -31,7 +57,33 @@
       "placeId": null,
       "slots": [
         "Cualquier hora"
-      ]
+      ],
+      "translations": {
+        "en": {
+          "tag": "Tickets",
+          "title": "Valencia Tourist Card 72 h",
+          "duration": "72 h",
+          "place": "The whole city",
+          "extra": "transport and museums",
+          "description": "The card that opens up the whole of Valencia: free transport, 14 museums included, a free tapa and discounts of up to 50% on more than 130 tourist services."
+        },
+        "fr": {
+          "tag": "Billets",
+          "title": "Valencia Tourist Card 72 h",
+          "duration": "72 h",
+          "place": "Toute la ville",
+          "extra": "transports et musées",
+          "description": "La carte qui vous ouvre tout Valence : transports gratuits, 14 musées inclus, une tapa offerte et jusqu’à 50 % de réduction sur plus de 130 services touristiques."
+        },
+        "va": {
+          "tag": "Entrades",
+          "title": "Valencia Tourist Card 72 h",
+          "duration": "72 h",
+          "place": "Tota la ciutat",
+          "extra": "transport i museus",
+          "description": "La targeta que t’obri València sencera: transport gratis, 14 museus inclosos, tapa de regal i descomptes de fins al 50 % en més de 130 serveis turístics."
+        }
+      }
     },
     {
       "id": "entrada-oceanografic",
@@ -48,7 +100,33 @@
         "10:00",
         "12:00",
         "15:00"
-      ]
+      ],
+      "translations": {
+        "en": {
+          "tag": "Tickets",
+          "title": "Oceanogràfic ticket",
+          "duration": "Full day",
+          "place": "City of Arts and Sciences",
+          "extra": "dolphinarium included",
+          "description": "Admission to Europe’s largest aquarium with the dolphinarium show included. Avoid queues by buying online."
+        },
+        "fr": {
+          "tag": "Billets",
+          "title": "Billet pour l’Oceanogràfic",
+          "duration": "Journée complète",
+          "place": "Cité des Arts et des Sciences",
+          "extra": "delphinarium inclus",
+          "description": "Entrée au plus grand aquarium d’Europe avec le spectacle du delphinarium inclus. Évitez les files en achetant en ligne."
+        },
+        "va": {
+          "tag": "Entrades",
+          "title": "Entrada a l’Oceanogràfic",
+          "duration": "Dia complet",
+          "place": "Ciutat de les Arts i les Ciències",
+          "extra": "delfinari inclòs",
+          "description": "Entrada al major aquari d’Europa amb l’espectacle del delfinari inclòs. Evita cues comprant en línia."
+        }
+      }
     }
   ]
 }

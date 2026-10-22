@@ -30,7 +30,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CacheMetaEntity::class,
         ReservationAttemptEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -117,7 +117,18 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        val Migrations = arrayOf(Migration1To2, Migration2To3, Migration3To4, Migration4To5)
+        /**
+         * v5 → v6: las ofertas guardadas ganan las traducciones del servidor. La caché se vuelve a pedir (sin `ETag` el servidor
+         * contesta con el catálogo entero, ya con ellas), así que quien ya tenía la app las recibe sin esperar a que cambie una oferta.
+         */
+        val Migration5To6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `offers` ADD COLUMN `translations` TEXT NOT NULL DEFAULT '{}'")
+                db.execSQL("UPDATE `cache_meta` SET `etag` = NULL WHERE `name` = 'offers'")
+            }
+        }
+
+        val Migrations = arrayOf(Migration1To2, Migration2To3, Migration3To4, Migration4To5, Migration5To6)
 
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, Name)
