@@ -12,8 +12,8 @@ solo la dirección.
 - **Versión:** `api-v1`. Añadir campos no cambia la versión (la app debe ignorar los campos que no conozca); un cambio incompatible
   sería una función nueva (`api-v2`) desplegada a la vez, para que las apps ya instaladas sigan funcionando.
 - **Sin cuentas:** cada móvil genera un UUID aleatorio la primera vez (lo guarda en la app, no en el código) y lo manda en
-  `X-Device-Id`; con él se listan sus reservas. Es el «secreto» del móvil: quien lo conozca puede ver esas reservas. Para recuperar
-  o cancelar una reserva en otro móvil sirve el localizador junto con el correo.
+  `X-Device-Id`; con él se listan sus reservas (las que hizo y las que ha recuperado). Es el «secreto» del móvil: quien lo conozca
+  puede ver esas reservas. Para recuperar o cancelar una reserva en otro móvil sirve el localizador junto con el correo.
 - **Ejemplos reales:** `backend/contract/examples/*.json`. Los usan las pruebas del servidor y las de la app; si la forma de la API
   cambia, las pruebas fallan hasta que se actualicen.
 
@@ -64,6 +64,11 @@ puede entregar el `ETag` como débil (`W/"…"`): el cliente debe devolverlo tal
 | `priceFromCents` | entero | Precio por adulto en céntimos; los niños no pagan |
 | `placeId` | texto o `null` | Ficha del lugar en la app donde empieza la actividad («Cómo llegar») |
 | `slots` | lista de texto | Horarios (`HH:MM`) o `Cualquier hora` |
+| `translations` | objeto | Los textos en otros idiomas, por código (`va`, `en`, `fr`); cada uno trae solo los campos traducidos (`tag`, `title`, `duration`, `place`, `extra`, `description`). `{}` si la oferta no tiene ninguna. Lo que falta se ve en el idioma original (español) |
+
+Los textos de arriba (`tag`, `title`, …) son siempre los originales, en español. La app guarda el catálogo entero con sus traducciones y elige el
+idioma sin volver a pedirlo: cambiar el idioma de la app no hace ninguna petición. Cambiar una traducción cambia el `ETag` del catálogo, así que la app
+la recoge en su siguiente apertura o refresco nocturno. Ejemplo con traducciones: `backend/contract/examples/offer.json`.
 
 ### `GET /offers/{id}`
 
@@ -99,12 +104,20 @@ El pago está simulado: no se piden ni guardan datos de tarjeta.
 
 ### `GET /reservations`
 
-Las reservas del dispositivo (`X-Device-Id`), las más recientes primero, hasta 100: `{ "reservations": [ … ] }`.
+Las reservas del dispositivo (`X-Device-Id`): **las que hizo y las que ha recuperado** (ver más abajo), las más recientes primero,
+hasta 100: `{ "reservations": [ … ] }`.
 
 ### `GET /reservations/{locator}?email=…`
 
 Recupera una reserva con su localizador y el correo con el que se hizo (sin distinguir mayúsculas). Si el correo no coincide,
-responde como si no existiera, para que nadie pueda averiguar qué localizadores hay. No lleva `X-Device-Id`.
+responde como si no existiera, para que nadie pueda averiguar qué localizadores hay.
+
+`X-Device-Id` es opcional. Con él (UUID del móvil que la recupera), si el localizador y el correo coinciden y la reserva no es de ese
+móvil, el servidor la **apunta a ese móvil** (tabla `app.reservation_devices`, una fila por reserva y móvil, repetir no duplica) y
+`GET /reservations` se la trae desde entonces: así una reserva recuperada se pone al día sola (si se cancela desde otro móvil, aquí
+también sale cancelada). Si el correo no coincide no se apunta nada. Sin la cabecera solo se ve (comportamiento anterior). Si la
+cabecera no es un UUID, 400 `invalid_request`. Borrar los datos de un correo (`backend/scripts/borrar_datos_de_un_correo.sql`) borra
+también esos enlaces.
 
 ### `POST /reservations/{locator}/cancel`
 
@@ -173,10 +186,11 @@ El cliente es Retrofit con kotlinx.serialization (`data/remote/TurismoApi.kt`; l
 
 El cliente es el mismo (`TurismoApi`) y `ReservationsRepository` (`data/repo`) es el único que lo usa:
 
-- **Dispositivo.** El UUID se genera la primera vez que se reserva y se guarda en Room (`settings.deviceId`, de forma atómica: nunca
-  hay dos). Un móvil que nunca ha reservado no tiene identificador: poner las reservas al día no lo crea ni manda nada al servidor. Va en `X-Device-Id`. Si el usuario borra los datos de la app o la
+- **Dispositivo.** El UUID se genera la primera vez que se reserva, se recupera o se cancela una reserva y se guarda en Room
+  (`settings.deviceId`, de forma atómica: nunca hay dos). Un móvil que nunca ha hecho nada de eso no tiene identificador: poner las
+  reservas al día no lo crea ni manda nada al servidor. Va en `X-Device-Id`. Si el usuario borra los datos de la app o la
   desinstala, el móvil pierde el UUID y deja de poder listar sus reservas (siguen existiendo en el servidor y se recuperan con su
-  localizador y su correo, ver «Recuperar»). El UUID también se crea la primera vez que se cancela una reserva recuperada.
+  localizador y su correo, ver «Recuperar»); si usa la copia de seguridad de Android, el UUID vuelve con el resto de la base de datos.
 - **Reservar exige conexión.** Sin red, la pantalla muestra «Reservar necesita conexión a Internet» y el botón queda desactivado;
   ver las reservas guardadas no necesita red. Pulsar «Confirmar reserva» manda `POST /reservations` y el botón dice «Reservando…»
   (un segundo toque mientras tanto no hace nada). El total que se enseña es una vista previa: el que vale es el del servidor.
@@ -211,10 +225,11 @@ El cliente es el mismo (`TurismoApi`) y `ReservationsRepository` (`data/repo`) e
   conectar… no sabemos si se ha cancelado… repetirlo es seguro», 429 y 5xx como al reservar y cualquier otro rechazo «No se ha
   podido cancelar la reserva».
 - **Recuperar.** «¿Reservaste desde otro móvil?», al final de Mis reservas, abre un diálogo con el localizador y el correo y manda
-  `GET /reservations/{localizador}?email=` (sin identificador de móvil). Si coinciden, la reserva se guarda en Room y se abre; si no,
-  «No hay ninguna reserva con ese localizador y ese correo. Revisa los dos datos.» (el servidor no dice cuál falla). Exige conexión.
-  Se puede cancelar desde ese móvil con su correo. **Límite conocido:** `GET /reservations` solo trae las reservas que hizo este
-  móvil, así que una reserva recuperada no se actualiza sola: si se cancela desde otro móvil, hay que recuperarla otra vez para verlo.
+  `GET /reservations/{localizador}?email=` con el identificador de este móvil (se crea ahora si hace falta). Si coinciden, la reserva
+  se guarda en Room y se abre; si no, «No hay ninguna reserva con ese localizador y ese correo. Revisa los dos datos.» (el servidor no
+  dice cuál falla). Exige conexión. Se puede cancelar desde ese móvil con su correo. **Se pone al día sola:** el servidor la deja
+  apuntada a este móvil, así que `GET /reservations` (al abrir la app, al volver la conexión y cada noche) la trae como a las demás
+  y, si se cancela desde otro móvil, aquí también sale cancelada, sin recuperarla otra vez.
 
 ## Datos personales
 

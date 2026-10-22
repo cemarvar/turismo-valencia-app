@@ -27,7 +27,8 @@ backend/
   conecta por su cuenta (`SUPABASE_DB_URL`). Una prueba lo comprueba con la clave pública.
 - **Ninguna clave en el APK.** La función es pública (`verify_jwt = false`) y la app solo conoce su dirección.
 - **Sin cuentas.** El móvil genera un UUID (`X-Device-Id`) y cada intento de reservar lleva otro (`Idempotency-Key`). Una reserva la ve y
-  la cancela el móvil que la hizo o quien tenga su localizador y su correo.
+  la cancela el móvil que la hizo o quien tenga su localizador y su correo; quien la recupera con su UUID queda apuntado a ella
+  (`app.reservation_devices`) y su lista de reservas se la trae desde entonces, así se pone al día sola.
 - **Límites de peticiones** por IP, dispositivo y correo (tabla de contadores con un resumen con sal, sin guardar IPs ni correos).
 - **El precio y el localizador los pone el servidor**, nunca el cliente.
 
@@ -110,7 +111,28 @@ llega débil (`W/"…"`); funciona igual y las pruebas aceptan las dos formas.
 - **Copia de seguridad:** `./scripts/backup.ps1` (las instrucciones están en el propio script). Se restaura con
   `docker run --rm -v "<carpeta de backups>:/backup" postgres:17-alpine pg_restore --clean --if-exists --no-owner -d "<cadena>" /backup/<archivo>.dump`.
   El plan gratuito de Supabase no suele incluir copias automáticas (revisa las condiciones vigentes).
-- **Borrar los datos de un correo** (derecho de supresión): `scripts/borrar_datos_de_un_correo.sql`, en el editor SQL del panel.
+- **Borrar los datos de un correo** (derecho de supresión): `scripts/borrar_datos_de_un_correo.sql`, en el editor SQL del panel
+  (borra también los apuntes de los móviles que recuperaron esas reservas: `on delete cascade`).
+- **Alta de una oferta con sus traducciones** (sin publicar una versión nueva de la app; en el editor SQL del panel o con `psql`). Una fila en
+  `app.offers` (el original, en español), otra por horario en `app.offer_slots` y, por idioma, una en `app.offer_translations` (`va`, `en`, `fr`;
+  los campos en `null` se ven en español). Cada cambio sube la versión del catálogo (el `ETag`), así que las apps lo recogen solas:
+
+  ```sql
+  insert into app.offers (id, kind, tag, title, duration, place, extra, price_from_cents, description, place_id, position)
+  values ('visita-nocturna', 'tour', 'Cultural', 'Visita nocturna al casco antiguo', '2 h', 'Plaza de la Virgen', 'español/inglés', 1500,
+          'Un paseo con guía por las calles iluminadas del centro histórico.', null, 20);
+  insert into app.offer_slots (offer_id, slot, capacity) values ('visita-nocturna', '21:00', 15);
+  insert into app.offer_translations (offer_id, lang, tag, title, duration, place, extra, description) values
+    ('visita-nocturna', 'en', 'Cultural', 'Night walk through the old town', '2 h', 'Plaza de la Virgen', 'Spanish/English',
+     'A guided walk through the illuminated streets of the historic centre.'),
+    ('visita-nocturna', 'va', 'Cultural', 'Visita nocturna pel casc antic', '2 h', 'Plaça de la Mare de Déu', 'castellà/anglés',
+     'Un passeig amb guia pels carrers il·luminats del centre històric.'),
+    ('visita-nocturna', 'fr', 'Culturel', 'Visite nocturne de la vieille ville', '2 h', 'Plaza de la Virgen', 'espagnol/anglais',
+     'Une promenade guidée dans les rues illuminées du centre historique.');
+  ```
+
+  Para corregir una traducción: `update app.offer_translations set title = '…' where offer_id = '…' and lang = '…';`. La prueba
+  `backend/tests/test_api.py` comprueba que la API sirve `translations` con esa forma.
 - **Rol de permisos mínimos (opcional):** la función puede conectarse con un rol que solo ejecute las funciones de `app`. Se crea el rol
   con contraseña en el editor SQL y se guarda su cadena como secreto `API_DB_URL`, que la función prefiere a `SUPABASE_DB_URL`.
 
@@ -119,7 +141,9 @@ llega débil (`W/"…"`); funciona igual y las pruebas aceptan las dos formas.
 - Sin cuentas, el UUID del dispositivo es el «secreto» de sus reservas; si se pierde (reinstalar la app, borrar sus datos), se recuperan
   con el localizador y el correo (la app lo hace desde Mis reservas). Quien tenga el localizador y el correo de una reserva puede verla y
   cancelarla: el localizador es correlativo, pero sin el correo no sirve de nada (el servidor responde igual que si no existiera) y las
-  búsquedas por localizador tienen su propio límite.
+  búsquedas por localizador tienen su propio límite. Quien recupera una reserva con éxito queda apuntado a ella y la sigue viendo en su
+  lista hasta que se borren los datos del correo; no gana nada que no tuviera ya (con el localizador y el correo ya podía verla y
+  cancelarla), pero no hay forma de «desapuntar» un móvil.
 - Los límites de peticiones son una defensa básica, suficiente para este proyecto; no sustituyen a un captcha ni a un cortafuegos.
 - La API cancela reservas (`POST /reservations/{localizador}/cancel`, hasta que empieza la actividad; se conservan con
   `status = cancelled` y sus plazas se liberan) pero no las modifica: cambiar la fecha o las personas es cancelar y reservar otra vez.

@@ -15,8 +15,8 @@ números.
 | Respuestas de ValBot sin conexión (y sus sugerencias) | `strings.xml` + reglas en `ValBotEngine` | Traducido; entiende la pregunta en cualquiera de los cuatro idiomas |
 | Notificación de la mascletà, su canal y las notificaciones de demostración | `strings.xml` | Traducido |
 | Fechas, días de la semana, precios («18 €», «€18», «18 €» con espacio fino en francés), distancias («1,1 km», «1.1 km») | `util/Format.kt` (tablas propias, no dependen del ICU del móvil) | Traducido |
-| **Textos de las páginas de la web** (las guías: «Guía completa», Lo esencial, Planes, textos legales de la web…) | `assets/web/pages/*.json`, importados de la web | **Solo en español**; la pantalla avisa con «Este contenido de la web solo está disponible en español» (`InfoNotice`) |
-| Ofertas que el servidor añada y que la app no conozca | Servidor | Se ven con el texto del servidor (en español) |
+| **Textos de las 65 páginas de la web** (las guías: «Guía completa», Lo esencial, Planes, guías de entradas, tours y experiencias, textos legales de la web…) | `assets/web/pages/*.json` (español, importado de la web) y `assets/i18n/<va\|en\|fr>/pages/<Pagina>.json` | Traducido; si una página no tuviera su traducción (o no tuviera la forma del español) saldría en español con el aviso «Este contenido de la web solo está disponible en español» (`InfoNotice`) |
+| Ofertas que el servidor añada | Servidor (campo `translations` de cada oferta) | Traducido por el servidor: se ven en el idioma de la app sin publicar una versión nueva; lo que el servidor no traiga se completa con `content.json` y, si tampoco está, sale en español |
 | ValBot en línea (Gemini) | Función `chat` de la web | Traducido: la función usa el `lang` que manda la app y contesta en ese idioma aunque la pregunta sea en otro |
 | Nombres propios y de platos (Oceanogràfic, paella, fideuà…), la marca «Turismo Valencia», direcciones, teléfonos y enlaces | — | No se traducen |
 
@@ -77,14 +77,63 @@ SettingsRepository.setLanguage(código)           el sistema ya tiene el idioma 
 - **`ContentTranslationsTest`** (JVM) exige que cada ficha, oferta, página, tarjeta y sección tenga traducción en los tres idiomas y con la
   misma forma que el original: si alguien añade una ficha en `data/fake`, falla hasta que se traduzca.
 
+## Texto de las páginas de la web (`assets/i18n/<va|en|fr>/pages/<Pagina>.json`)
+
+El texto de las páginas es el que se importó de la web (español). Cada idioma lleva, por página, un JSON con **la misma forma** que el
+original y solo los campos que se traducen; lo que no es texto (números, fotos, enlaces, qué filtro es cada ficha, qué etiqueta es
+«gratuita») sale siempre del original.
+
+```json
+{
+  "lead":   ["párrafo 1", "párrafo 2"],
+  "blocks": [
+    { "title": "…", "filters": ["…"], "items": [ { "kicker": "…", "title": "…", "subtitle": "…", "body": "…", "facts": [["etiqueta", "valor"]],
+                                                   "bullets": ["…"], "bulletsTitle": "…", "notes": [["etiqueta", "valor"]], "tags": ["…"] } ] },
+    { "title": "…", "rows": [["etiqueta", "valor"]] },
+    { "title": "…", "items": ["…"] }
+  ]
+}
+```
+
+- `PageTranslation` (`data/repo/PageTranslations.kt`) lo lee y `WebPage.translated(…)` lo aplica al original. Si la forma no coincide (un
+  párrafo, un dato, una etiqueta o un bloque de más o de menos) **no se aplica** y la página sale en español con el aviso: mejor eso que un
+  texto desparejado. `WebPage.textLanguage` dice en qué idioma está el texto; `WebPageScreen` y la guía de `DetalleScreen` avisan cuando no es
+  el de la app.
+- `WebContentRepository` carga la traducción al abrir una página (y guarda las ya aplicadas por idioma); al cambiar de idioma se descartan.
+- **El título de cada página y su sobretítulo** no están en este JSON: salen de `assets/i18n/<idioma>/content.json` (`pages`).
+- **`WebPageTextTest`** (JVM) exige las 65 páginas en los tres idiomas, con la forma del original, sin marcas de código, comillas o apóstrofos
+  rectos, espacios de más ni cifras perdidas (cada número del español tiene que estar en la traducción), y el francés con espacios de no
+  separación en los miles y las unidades.
+- **Cómo se hizo y cómo se rehace:** `tools/i18n/pages.py` (ver `tools/i18n/README.md`). `extract` escribe las cadenas por traducir de cada
+  página (`work/<Pagina>.es.txt`, ignorado por git); quien traduce escribe `work/<Pagina>.<idioma>.txt` con `id|texto`; `build` lo valida (cifras,
+  comillas, saltos de línea, tipografía, glosario) y escribe el JSON de la app. Si se reimporta la web, `extract` vuelve a sacar las cadenas y
+  `status` dice qué páginas hay que revisar.
+- **Convenciones propias de estos textos:** las cifras, precios y horarios no se cambian de formato más que por el idioma (`2,5 km` / `2.5 km`,
+  `10:00` / `10 h 00` en francés, «From €82» / «À partir de 82 €» / «Des de 82 €»); los nombres propios, direcciones, teléfonos y correos se dejan
+  como están; la grafía valenciana de los topónimos se usa en valenciano (Xàtiva, Russafa, Cullera, Borriana, Alboraia, la Malva-rosa).
+- **Los textos legales** (política de privacidad y aviso legal de la web) están traducidos como cortesía, pero el texto que obliga es el español de
+  la web: conviene que los revise quien responda de ellos antes de publicar la app.
+
+## Ofertas del servidor
+
+La API (`GET /offers`) manda cada oferta con sus textos originales (español) y, en `translations`, un objeto por idioma (`va`, `en`, `fr`) con
+solo los campos traducidos (`tag`, `title`, `duration`, `place`, `extra`, `description`). La app los guarda en Room (`offers.translations`, base
+v6) y `ContentRepository.textOf` elige, campo a campo, **servidor → `content.json` → español**. Así una oferta nueva se ve en los cuatro idiomas
+sin publicar una versión de la app: basta con dar de alta sus filas en `app.offer_translations` (ver `backend/README.md`, «Mantenimiento»). Cambiar
+una traducción cambia la versión del catálogo (el `ETag`), y la app lo vuelve a pedir en la siguiente apertura o en el refresco nocturno.
+
 ## Cómo añadir o cambiar un texto
 
 1. **Texto de pantalla:** `stringResource(R.string.xxx)` y la cadena en `values/strings.xml` **y** en `values-ca`, `values-en` y `values-fr`
    (cadenas idénticas en todos los idiomas, como una URL, llevan `translatable="false"`). Lint (`MissingTranslation`) y `StringsTranslationsTest`
    avisan de lo que falta y de marcadores (`%1$s`) distintos.
 2. **Texto que sale de un repositorio o de un receptor:** `AppStrings.get(R.string.xxx)`, no `context.getString`.
-3. **Ficha, oferta o página nueva:** al código (`data/fake`) y al JSON de cada idioma; `ContentTranslationsTest` lo comprueba.
-4. **Fecha, precio o distancia:** `util/Format.kt` (`formatShortDate`, `formatPrice`, `formatDistance`…), nunca `String.format` ni
+3. **Ficha, oferta incluida en la app o título de página nuevos:** al código (`data/fake`) y a `content.json` de cada idioma;
+   `ContentTranslationsTest` lo comprueba.
+4. **Página de la web nueva o cambiada** (tras reimportar): `python tools/i18n/pages.py extract <Pagina>`, traducir `work/<Pagina>.<idioma>.txt`,
+   `python tools/i18n/pages.py build all <Pagina>` y `check`; `WebPageTextTest` lo comprueba.
+5. **Oferta nueva del servidor:** sus filas en `app.offer_translations` (el servidor las manda en `translations`); no hace falta tocar la app.
+6. **Fecha, precio o distancia:** `util/Format.kt` (`formatShortDate`, `formatPrice`, `formatDistance`…), nunca `String.format` ni
    `DateTimeFormatter` con un idioma fijo.
 
 ## Cómo añadir un idioma
@@ -110,19 +159,23 @@ SettingsRepository.setLanguage(código)           el sistema ya tiene el idioma 
 
 - `./gradlew test`: `FormatTest` (precios, fechas y distancias en los cuatro idiomas), `StringsTranslationsTest` (todas las claves, marcadores,
   plurales, listas, `locale_code` y `locales_config`), `ContentTranslationsTest` (todo el contenido traducido y con la misma forma),
-  `ValBotIntentTest` (cada regla entiende preguntas en los cuatro idiomas y las palabras cortas solo valen enteras) y `ValBotRepositoryTest`/
-  `ChatApiTest` (el idioma viaja al asistente en línea).
-- `./gradlew connectedDebugAndroidTest`: `LanguageTest` (recursos de cada idioma, fichas y ofertas traducidas, buscador, títulos de la web, el
-  idioma se pide una sola vez al sistema) y `RemindersTest.elAvisoSaleEnElIdiomaDeLaApp` (título, texto y canal de la notificación en los
+  `WebPageTextTest` y `PageTranslationsTest` (las 65 páginas en los tres idiomas y cómo se aplica una traducción), `OfferMappingTest` (las
+  traducciones del ejemplo del contrato y el orden servidor → `content.json` → español), `ValBotIntentTest` (cada regla entiende preguntas en
+  los cuatro idiomas y las palabras cortas solo valen enteras) y `ValBotRepositoryTest`/`ChatApiTest` (el idioma viaja al asistente en línea).
+- `./gradlew connectedDebugAndroidTest`: `LanguageTest` (recursos de cada idioma, fichas y ofertas traducidas, también las del servidor, buscador,
+  páginas de la web traducidas, el idioma se pide una sola vez al sistema), `OffersTest`/`MigrationTest` (las traducciones de las ofertas se
+  guardan en Room y la migración 5→6 las añade) y `RemindersTest.elAvisoSaleEnElIdiomaDeLaApp` (título, texto y canal de la notificación en los
   cuatro idiomas).
 - `python tools/verify/verify_ui.py idiomas` (emulador): cambiar desde la hoja y desde los ajustes del móvil, inglés, valenciano y francés
-  en Inicio, ficha, reservas, notificaciones, Tickets & Tours, buscador y ValBot (`--ez chatDown true`: sin asistente en línea), que persiste al
-  reiniciar, volver al español, y el primer arranque con el móvil en inglés (sale en inglés) y en alemán (sale en español). Extras de
-  depuración: `--es lang ES|VA|EN|FR` y `--ez chatDown true`.
+  en Inicio, ficha (con su guía de la web ya traducida, sin aviso), reservas, notificaciones, Tickets & Tours, buscador y ValBot (`--ez chatDown true`:
+  sin asistente en línea), una guía y una página legal en francés sin el aviso de «solo en español», que persiste al reiniciar, volver al español,
+  y el primer arranque con el móvil en inglés (sale en inglés) y en alemán (sale en español). Extras de depuración: `--es lang ES|VA|EN|FR` y
+  `--ez chatDown true`.
+- `python tools/i18n/pages.py check`: revisa los JSON de `assets/i18n/*/pages/` (forma, cifras, comillas, tipografía) sin necesitar Android.
 
 ## Pendiente
 
-- Traducir el texto de las páginas de la web: hoy solo se traducen sus títulos. Haría falta traducirlas en la web (`cemarvar/TurismoValencia`)
-  y reimportarlas, o añadir un segundo juego de JSON por idioma en `assets/i18n/<idioma>/pages/` y que `WebContentRepository.page` los lea.
-- Que el servidor devuelva las ofertas ya traducidas (`Accept-Language` o un campo por idioma): hoy se traducen en la app por su `id`.
-- Una revisión por hablantes nativos (valenciano y francés sobre todo) y de los textos legales antes de publicar.
+- Una revisión por hablantes nativos (valenciano y francés sobre todo) antes de publicar, y de los textos legales por quien responda de ellos.
+- Si la web cambia y se reimporta, las páginas cuyo texto cambie hay que volver a extraerlas y traducirlas (`pages.py status` dice cuáles).
+- Las ofertas incluidas en la app (`assets/i18n/*/content.json`, `offers`) y las del servidor se traducen en dos sitios: cuando el catálogo del
+  servidor sea la única fuente, se podrán quitar de `content.json` (hoy sirven de respaldo sin conexión).
