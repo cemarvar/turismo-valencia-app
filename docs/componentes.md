@@ -74,7 +74,7 @@ Hoy solo se usan en un sitio. Cuando se repitan, se mueven a `ui/components` y s
 | Colores de Material 3 | `MaterialTheme.colorScheme.*` | Texto, iconos, bordes, fondos y contenedores. `primary` (`#C44D00` en claro, `#EB5A00` en oscuro) para el naranja **de texto, iconos y bordes**, no para rellenos |
 | Rellenos | `MaterialTheme.appColors.action`/`onAction`, `navy`/`onNavy` | El **relleno** (con su texto) de botones, chips seleccionados, día elegido, pantalla de arranque, avatar y aviso sin conexión: en claro son `primary` y `secondary`, en oscuro son colores distintos para que el texto blanco llegue a 4,5:1 |
 | Colores propios | `MaterialTheme.appColors.*` | `brand` (`#EB5A00`, solo iconos y gráficos), `switchThumb`, `paper`/`onPaper` (QR y logotipo: blancos en los dos temas), `botAccent` (ValBot como texto), `eco` (verde de relleno), `rating`, `favorite`, `controlInactive`, `location`, `gold`, `bot`/`botContainer`, `lodging`, `warning`/`warningContainer`, `brandSoft`, `ecoContainer`/`ecoLight`, `slateContainer`, `map*` |
-| Tipografía | `MaterialTheme.typography.*`, `.eyebrow`, `.screenTitle`, `.tabTitle` | Source Sans 3; escala en `docs/progreso.md` |
+| Tipografía | `MaterialTheme.typography.*`, `.eyebrow`, `.screenTitle`, `.tabTitle` | Source Sans 3 (Regular, Italic, Medium, SemiBold, Bold y ExtraBold); escala en `docs/progreso.md` |
 | Formas | `CardShape` (16dp), `BottomSheetShape` (24dp arriba), `PillShape`; `MaterialTheme.shapes` | Tarjetas, sheets, botones y chips |
 | Espaciado | `Spacing.xxs`…`xxl` (4, 8, 12, 16, 24, 32, 48dp) | Márgenes y huecos |
 | Área táctil | `MinTouchTarget` (48dp) | Alto de botones y filas pulsables |

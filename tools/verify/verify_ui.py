@@ -523,21 +523,25 @@ def g_persist():
     start(None, reset=False)
     time.sleep(2.2)
     check("y al reabrir sigue la bienvenida (se guardó)", find("Saltar") is not None)
-    # Cerrar sesión borra lo del usuario: terminada la bienvenida, la app está como en el primer arranque (con la demostración).
+    # Cerrar sesión borra lo del usuario: terminada la bienvenida, la app está vacía (sin la demostración del primer arranque).
     tap_text("Saltar")
     time.sleep(1.2)
     tap_text("Mientras se usa la app")
     accept_location_dialog()
     time.sleep(1.0)
     start("favoritos", reset=False)
-    check("cerrar sesión borró lo del usuario: los favoritos vuelven a ser los 6 de la demostración", find("6 lugares guardados") is not None)
+    check("cerrar sesión borró lo del usuario: sin favoritos (pantalla vacía)", find("Aún no tienes favoritos") is not None and find("5 lugares guardados") is None)
+    start("reservas", reset=False)
+    check("…sin reservas guardadas (ni las de demostración)", find("No tienes reservas todavía.", exact=False) is not None)
+    start("descargas", reset=False)
+    check("…sin descargas", find("Aún no has guardado nada.", exact=False) is not None)
     start("perfil", reset=False)
     check("…y el tamaño del texto vuelve al del sistema (ya no es «Grande»)", find("Grande") is None)
     start("busqueda", reset=False)
     ts = texts()
-    check("…y la búsqueda «Bioparc» ya no está entre las recientes", "Bioparc" not in ts and "bioparc" not in ts, str(ts[:8]))
+    check("…y sin búsquedas recientes (ni «Bioparc» ni las de demostración)", all(t not in ts for t in ("Bioparc", "bioparc", "Mercado Central", "Fallas 2027")), str(ts[:8]))
     start("inicio", reset=False)
-    check("…y la campana vuelve a tener avisos sin leer", bell_dot())
+    check("…y la campana sin avisos", not bell_dot())
     start(None)  # deja la app como un primer arranque
 
 

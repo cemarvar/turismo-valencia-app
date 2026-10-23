@@ -320,7 +320,7 @@ class PersistenceTest {
     }
 
     @Test
-    fun cerrarSesionBorraLoDelUsuarioYDejaLaAppComoRecienInstalada() {
+    fun cerrarSesionBorraLoDelUsuarioYDejaLaAppVacia() {
         val app = ApplicationProvider.getApplicationContext<Application>()
         val memory = Room.inMemoryDatabaseBuilder(app, AppDatabase::class.java).build()
         try {
@@ -340,11 +340,13 @@ class PersistenceTest {
 
             runBlocking { container.signOut() }
 
-            // Queda como en el primer arranque: los datos de demostración, los ajustes de fábrica, sin identificador y con la bienvenida por hacer.
-            container.favorites.ids.awaitThat { it.size == 6 }
-            container.reminders.ids.await(setOf("fallas"))
-            container.searchHistory.recent.awaitThat { "bioparc" !in it }
-            assertEquals(3, container.reservations.items.value.size)
+            // Queda vacía (sin la demostración), con los ajustes de fábrica, sin identificador y con la bienvenida por hacer.
+            container.favorites.ids.await(emptyList())
+            container.reminders.ids.await(emptySet())
+            container.searchHistory.recent.await(emptyList())
+            container.reservations.items.awaitThat { it.isEmpty() }
+            container.notifications.items.awaitThat { it.isEmpty() }
+            container.downloads.ids.awaitThat { it.isEmpty() }
             container.settings.textScale.await(TextScale.System)
             assertFalse(container.settings.onboardingDone.value)
             assertEquals(null, runBlocking { memory.settings().current()!!.deviceId })

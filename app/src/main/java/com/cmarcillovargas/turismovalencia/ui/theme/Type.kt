@@ -15,6 +15,9 @@ import com.cmarcillovargas.turismovalencia.R
 val SourceSans3 = FontFamily(
     Font(R.font.source_sans_3_regular, FontWeight.Normal),
     Font(R.font.source_sans_3_italic, FontWeight.Normal, FontStyle.Italic),
+    // Ningún estilo del tema lo usa (el diseño solo trae Regular, SemiBold, Bold, ExtraBold e Italic), pero está para que un
+    // `FontWeight.Medium` no caiga a Regular.
+    Font(R.font.source_sans_3_medium, FontWeight.Medium),
     Font(R.font.source_sans_3_semibold, FontWeight.SemiBold),
     Font(R.font.source_sans_3_bold, FontWeight.Bold),
     Font(R.font.source_sans_3_extrabold, FontWeight.ExtraBold),

@@ -24,6 +24,23 @@ class DemoData(private val content: ContentRepository) {
     }
 
     /**
+     * «Cerrar sesión»: borra todo lo del usuario y deja los ajustes de fábrica, **sin** datos de demostración (la app queda vacía:
+     * sin favoritos, descargas, reservas, avisos ni búsquedas). Solo se conserva el idioma. Deja la fila de ajustes escrita, así que
+     * al volver a abrir la app no se vuelve a sembrar la demostración (`seedIfFirstRun` solo actúa sin fila de ajustes).
+     */
+    suspend fun clearUserData(db: AppDatabase, language: LanguageCode = LanguageCode.ES) = db.withTransaction {
+        db.favorites().clear()
+        db.downloads().clear()
+        db.reservations().clear()
+        db.reservationAttempts().clear()
+        db.recentSearches().clear()
+        db.notifications().clear()
+        db.reminders().clear()
+        db.offers().clearCache()
+        db.settings().save(SettingsEntity(language = language))
+    }
+
+    /**
      * Deja la base de datos como en el primer arranque (también lo usa el gancho de depuración `resetData`). El idioma no es parte de
      * la demostración: se conserva el que se esté usando.
      */
