@@ -523,6 +523,21 @@ def g_persist():
     start(None, reset=False)
     time.sleep(2.2)
     check("y al reabrir sigue la bienvenida (se guardó)", find("Saltar") is not None)
+    # Cerrar sesión borra lo del usuario: terminada la bienvenida, la app está como en el primer arranque (con la demostración).
+    tap_text("Saltar")
+    time.sleep(1.2)
+    tap_text("Mientras se usa la app")
+    accept_location_dialog()
+    time.sleep(1.0)
+    start("favoritos", reset=False)
+    check("cerrar sesión borró lo del usuario: los favoritos vuelven a ser los 6 de la demostración", find("6 lugares guardados") is not None)
+    start("perfil", reset=False)
+    check("…y el tamaño del texto vuelve al del sistema (ya no es «Grande»)", find("Grande") is None)
+    start("busqueda", reset=False)
+    ts = texts()
+    check("…y la búsqueda «Bioparc» ya no está entre las recientes", "Bioparc" not in ts and "bioparc" not in ts, str(ts[:8]))
+    start("inicio", reset=False)
+    check("…y la campana vuelve a tener avisos sin leer", bell_dot())
     start(None)  # deja la app como un primer arranque
 
 
@@ -1568,7 +1583,7 @@ def g_privacidad():
     print("\n## Política de privacidad: la de la web y lo que añade la app")
     start("pagina/PoliticaPrivacidad")
     check("la política de la web sigue arriba", find("Política de Privacidad") is not None and find("1. Responsable del tratamiento") is not None)
-    sections = ("La app en tu móvil", "Reservas", "Cancelar y recuperar reservas", "Identificador del móvil", "Copia de seguridad de Android", "Asistente ValBot", "Mapa, rutas y ubicación", "Actualización automática", "Lo que la app no incluye", "Tus derechos")
+    sections = ("La app en tu móvil", "Reservas", "Cancelar y recuperar reservas", "Identificador del móvil", "Copia de seguridad de Android", "Cerrar sesión", "Asistente ValBot", "Mapa, rutas y ubicación", "Actualización automática", "Lo que la app no incluye", "Tus derechos")
     for title in sections:
         check("debajo, lo que añade la app: «%s»" % title, scroll_to(title, tries=40) is not None)
         if title == "Reservas":

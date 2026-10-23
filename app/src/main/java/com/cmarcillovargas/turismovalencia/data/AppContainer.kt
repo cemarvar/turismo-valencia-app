@@ -50,6 +50,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -220,6 +221,19 @@ class AppContainer(
         content.setLanguage(language)
         AppLanguagePrefs.write(application, language)
         settings.syncLanguage(language)
+    }
+
+    /**
+     * «Cerrar sesión». Sin cuentas, es borrar lo del usuario de este móvil y dejar la app como en el primer arranque: los datos de
+     * demostración, el modo de pantalla del móvil, los ajustes de fábrica (también el identificador del móvil, que se crea de nuevo si
+     * hace falta) y la bienvenida otra vez; solo se conserva el idioma. Los avisos de eventos se cancelan solos (siguen a su tabla) y
+     * el refresco nocturno vuelve a sus ajustes de fábrica. Las reservas ya hechas siguen en el servidor: se recuperan con su
+     * localizador y su correo. La escritura va por el ámbito de los repositorios, así que queda detrás de lo que estuviera pendiente.
+     */
+    suspend fun signOut() {
+        scope.async { demo.populate(database, language = strings.language) }.await()
+        themeApplier.apply(ThemeMode.System)
+        if (network.isOnline.value) scope.launch { refreshOffers() }
     }
 
     /**

@@ -318,4 +318,40 @@ class PersistenceTest {
             memory.close()
         }
     }
+
+    @Test
+    fun cerrarSesionBorraLoDelUsuarioYDejaLaAppComoRecienInstalada() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val memory = Room.inMemoryDatabaseBuilder(app, AppDatabase::class.java).build()
+        try {
+            val container = AppContainer(app, memory, NoOffersService, NoReservationsService, NoRefreshScheduler, NoLanguageApplier, NoThemeApplier)
+            // El usuario cambia todo lo suyo: favoritos, tamaño del texto, bienvenida hecha, un aviso, una búsqueda, el identificador del móvil y el idioma.
+            container.favorites.clear()
+            container.favorites.ids.await(emptyList())
+            container.settings.setTextScale(TextScale.Large)
+            container.settings.setOnboardingDone(true)
+            container.reminders.set("fallas", false)
+            container.reminders.ids.await(emptySet())
+            container.searchHistory.add("bioparc")
+            container.searchHistory.recent.awaitThat { it.firstOrNull() == "bioparc" }
+            runBlocking { memory.settings().save(memory.settings().current()!!.copy(deviceId = "11111111-1111-1111-1111-111111111111")) }
+            container.applyLanguage(LanguageCode.EN)
+            container.settings.language.await(LanguageCode.EN)
+
+            runBlocking { container.signOut() }
+
+            // Queda como en el primer arranque: los datos de demostración, los ajustes de fábrica, sin identificador y con la bienvenida por hacer.
+            container.favorites.ids.awaitThat { it.size == 6 }
+            container.reminders.ids.await(setOf("fallas"))
+            container.searchHistory.recent.awaitThat { "bioparc" !in it }
+            assertEquals(3, container.reservations.items.value.size)
+            container.settings.textScale.await(TextScale.System)
+            assertFalse(container.settings.onboardingDone.value)
+            assertEquals(null, runBlocking { memory.settings().current()!!.deviceId })
+            // Lo único que se conserva es el idioma.
+            assertEquals(LanguageCode.EN, container.settings.language.value)
+        } finally {
+            memory.close()
+        }
+    }
 }

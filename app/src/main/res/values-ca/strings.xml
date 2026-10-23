@@ -349,7 +349,7 @@
     <string name="profile_privacy_text">Els teus preferits, reserves i descàrregues es guarden al teu mòbil. Usem la teua ubicació només mentre uses l’app per a ordenar llocs per proximitat i calcular rutes. El mapa i les rutes els servix OpenStreetMap: per a dibuixar-los li arriben la zona que mires i el punt d’eixida i d’arribada de la ruta. Pots canviar-ho quan vulgues.</string>
     <string name="profile_logout">Tancar la sessió</string>
     <string name="profile_logout_title">Tancar la sessió?</string>
-    <string name="profile_logout_text">Tornaràs a la pantalla de benvinguda.</string>
+    <string name="profile_logout_text">S’esborraran d’este mòbil els teus favorits, descàrregues, reserves guardades, cerques i ajustos, i tornaràs a la pantalla de benvinguda. Les reserves que ja vas fer continuen al nostre servidor: podràs recuperar-les amb el seu localitzador i el teu correu.</string>
     <string name="notifications_today">Hui</string>
     <string name="notifications_settings">Configuració de notificacions</string>
     <string name="notifications_blocked_title">Notificacions desactivades</string>
@@ -408,6 +408,8 @@
     <string name="privacy_app_device_body">La primera vegada que reserves, recuperes o cancel·les una reserva, l’app crea un número aleatori i el guarda al teu mòbil. No conté dades teues ni de l’aparell. S’envia amb cada reserva, cada recuperació, cada cancel·lació i cada vegada que l’app consulta les teues reserves. Si esborres les dades de l’app, el mòbil el perd i deixa de veure les seues reserves en l’app (pots recuperar-les amb el seu localitzador i el seu correu; si uses la còpia de seguretat d’Android, en reinstal·lar-la pot tornar amb la resta de les teues dades); en el nostre servidor continuen fins que demanes esborrar-les.</string>
     <string name="privacy_app_backup_title">Còpia de seguretat d’Android</string>
     <string name="privacy_app_backup_body">Si tens activada la còpia de seguretat d’Android, el sistema pot guardar al teu compte de Google les dades de l’app (preferits, configuració, reserves amb el seu correu i l’identificador del mòbil) per a tornar-te-les en reinstal·lar-la o en instal·lar-la en un altre mòbil. No es copia la memòria cau del mapa. En Android 12 o posterior, la còpia al núvol només es fa si el mòbil pot xifrar-la d’extrem a extrem (cal un bloqueig de pantalla). La còpia la fa i la guarda Google, no el nostre servidor: s’activa, es desactiva i s’esborra en la configuració d’Android.</string>
+    <string name="privacy_app_logout_title">Tancar la sessió</string>
+    <string name="privacy_app_logout_body">«Tancar la sessió», a Perfil, esborra del teu mòbil tot el que guarda l’app (favorits, descàrregues, reserves guardades, cerques, ajustos i l’identificador del mòbil) i deixa l’app com si estiguera acabada d’instal·lar; no avisa al nostre servidor. Les reserves que ja estan al servidor no s’esborren: perquè les esborrem, escriu com s’explica a «Els teus drets».</string>
     <string name="privacy_app_valbot_title">Assistent ValBot</string>
     <string name="privacy_app_valbot_body">El que escrius a ValBot s’envia al servidor de la web, que el processa amb el servei d’intel·ligència artificial Gemini de Google per a respondre’t (punts 2 i 6). No escrigues dades personals en el xat. Si no hi ha connexió, o el servidor no pot respondre, l’app respon amb respostes bàsiques des del teu mòbil (sense connexió no s’envia res).</string>
     <string name="privacy_app_map_title">Mapa, rutes i ubicació</string>

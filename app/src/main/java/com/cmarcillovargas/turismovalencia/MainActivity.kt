@@ -85,6 +85,8 @@ class MainActivity : AppCompatActivity() {
                     openItem = null
                     intent.removeExtra(ExtraOpenItem)
                 },
+                // «Cerrar sesión»: los ViewModel de la sesión anterior se descartan (ver `AppRoot`).
+                onSignedOut = { viewModelStore.clear() },
             )
         }
     }

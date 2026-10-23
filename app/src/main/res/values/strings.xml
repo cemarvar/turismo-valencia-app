@@ -355,7 +355,7 @@
     <string name="profile_privacy_text">Tus favoritos, reservas y descargas se guardan en tu móvil. Usamos tu ubicación solo mientras usas la app para ordenar lugares por cercanía y calcular rutas. El mapa y las rutas los sirve OpenStreetMap: para dibujarlos le llegan la zona que miras y el punto de salida y de llegada de la ruta. Puedes cambiarlo cuando quieras.</string>
     <string name="profile_logout">Cerrar sesión</string>
     <string name="profile_logout_title">¿Cerrar sesión?</string>
-    <string name="profile_logout_text">Volverás a la pantalla de bienvenida.</string>
+    <string name="profile_logout_text">Se borrarán de este móvil tus favoritos, descargas, reservas guardadas, búsquedas y ajustes, y volverás a la pantalla de bienvenida. Las reservas que ya hiciste siguen en nuestro servidor: podrás recuperarlas con su localizador y tu correo.</string>
     <string name="notifications_today">Hoy</string>
     <string name="notifications_settings">Ajustes de notificaciones</string>
     <string name="notifications_blocked_title">Notificaciones desactivadas</string>
@@ -425,6 +425,8 @@
     <string name="privacy_app_device_body">La primera vez que reservas, recuperas o cancelas una reserva, la app crea un número aleatorio y lo guarda en tu móvil. No contiene datos tuyos ni del aparato. Se manda con cada reserva, cada recuperación, cada cancelación y cada vez que la app consulta tus reservas. Si borras los datos de la app, el móvil lo pierde y deja de ver sus reservas en la app (puedes recuperarlas con su localizador y su correo; si usas la copia de seguridad de Android, al reinstalarla puede volver con el resto de tus datos); en nuestro servidor siguen hasta que pidas borrarlas.</string>
     <string name="privacy_app_backup_title">Copia de seguridad de Android</string>
     <string name="privacy_app_backup_body">Si tienes activada la copia de seguridad de Android, el sistema puede guardar en tu cuenta de Google los datos de la app (favoritos, ajustes, reservas con su correo y el identificador del móvil) para devolvértelos al reinstalarla o al instalarla en otro móvil. No se copia la caché del mapa. En Android 12 o posterior la copia en la nube solo se hace si el móvil puede cifrarla de extremo a extremo (hace falta un bloqueo de pantalla). La copia la hace y la guarda Google, no nuestro servidor: se activa, se desactiva y se borra en los ajustes de Android.</string>
+    <string name="privacy_app_logout_title">Cerrar sesión</string>
+    <string name="privacy_app_logout_body">«Cerrar sesión», en Perfil, borra de tu móvil todo lo que la app guarda (favoritos, descargas, reservas guardadas, búsquedas, ajustes y el identificador del móvil) y deja la app como recién instalada; no avisa a nuestro servidor. Las reservas que ya están en el servidor no se borran: para que las borremos, escribe como se explica en «Tus derechos».</string>
     <string name="privacy_app_valbot_title">Asistente ValBot</string>
     <string name="privacy_app_valbot_body">Lo que escribes a ValBot se envía al servidor de la web, que lo procesa con el servicio de inteligencia artificial Gemini de Google para contestarte (puntos 2 y 6). No escribas datos personales en el chat. Si no hay conexión, o el servidor no puede contestar, la app responde con respuestas básicas desde tu móvil (sin conexión no se envía nada).</string>
     <string name="privacy_app_map_title">Mapa, rutas y ubicación</string>

@@ -341,7 +341,7 @@
     <string name="profile_privacy_text">Your favourites, bookings and downloads are saved on your phone. We use your location only while you use the app, to sort places by distance and work out routes. Maps and routes are served by OpenStreetMap: to draw them, it receives the area you’re viewing and the start and end points of the route. You can change this whenever you like.</string>
     <string name="profile_logout">Log out</string>
     <string name="profile_logout_title">Log out?</string>
-    <string name="profile_logout_text">You’ll return to the welcome screen.</string>
+    <string name="profile_logout_text">Your favourites, downloads, saved bookings, searches and settings will be deleted from this phone, and you’ll go back to the welcome screen. The bookings you’ve already made stay on our server: you can recover them with their reference and your email.</string>
     <string name="notifications_today">Today</string>
     <string name="notifications_settings">Notification settings</string>
     <string name="notifications_blocked_title">Notifications are off</string>
@@ -400,6 +400,8 @@
     <string name="privacy_app_device_body">The first time you book, recover or cancel a booking, the app creates a random number and stores it on your phone. It contains no data about you or your device. It is sent with every booking, every recovery, every cancellation and every time the app checks your bookings. If you clear the app’s data, the phone loses it and stops seeing its bookings in the app (you can recover them with their reference and email; if you use Android backup, it may come back with the rest of your data when you reinstall the app); on our server they remain until you ask for them to be deleted.</string>
     <string name="privacy_app_backup_title">Android backup</string>
     <string name="privacy_app_backup_body">If Android backup is turned on, the system may save the app’s data (favourites, settings, bookings with their email, and the phone identifier) to your Google account so it can be restored when you reinstall the app or install it on another phone. The map cache is not backed up. On Android 12 or later the cloud backup is only made if the phone can encrypt it end to end (a screen lock is required). The backup is made and stored by Google, not by our server: you turn it on, turn it off and delete it in Android’s settings.</string>
+    <string name="privacy_app_logout_title">Log out</string>
+    <string name="privacy_app_logout_body">“Log out”, in Profile, deletes everything the app stores on your phone (favourites, downloads, saved bookings, searches, settings and the phone identifier) and leaves the app as if just installed; it does not notify our server. Bookings already on the server are not deleted: to have us delete them, write as explained in “Your rights”.</string>
     <string name="privacy_app_valbot_title">ValBot assistant</string>
     <string name="privacy_app_valbot_body">What you write to ValBot is sent to the website’s server, which processes it with Google’s Gemini artificial intelligence service to answer you (sections 2 and 6). Don’t write personal data in the chat. If there is no connection, or the server can’t answer, the app replies with basic answers from your phone (offline, nothing is sent).</string>
     <string name="privacy_app_map_title">Map, routes and location</string>
