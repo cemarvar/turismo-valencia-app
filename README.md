@@ -62,6 +62,7 @@ O abre la carpeta en Android Studio, espera a que sincronice Gradle y pulsa **Ru
 | `./gradlew test` | Tests unitarios (cliente de ValBot, respaldo, fichas enlazadas, Markdown, mapeo de Room, cliente de la API propia con sus ejemplos del contrato, calendario del refresco nocturno, y los idiomas: formatos, todas las traducciones de textos y de contenido y las reglas de ValBot en los cuatro idiomas) y el contraste AA de cada pareja de color en los temas claro y oscuro |
 | `./gradlew connectedDebugAndroidTest` | Tests en el emulador o móvil: persistencia y migración de Room (cierran y reabren la base de datos), el catálogo de ofertas con su caché, las reservas con un servidor falso (idempotencia, errores), el refresco nocturno con el WorkManager de pruebas, avisos (alarmas y notificaciones reales, también en cada idioma) y los idiomas (recursos, contenido traducido, buscador) |
 | `./gradlew assembleReleaseCheck` | APK de publicación (R8) firmado con la clave de depuración y apuntando al backend local, para `tools/verify/verify_release.py` |
+| `./gradlew assembleRelease` | APK de publicación (R8), el que se entrega: firmado con la clave propia si hay ruta y contraseña (ver `docs/firma.md`); sin ellas sale sin firmar |
 
 Por defecto la app habla con la API publicada. Para que use el backend local (`cd backend && npm start`, con Docker Desktop), desde el
 emulador o un móvil por USB: `adb reverse tcp:54321 tcp:54321` y

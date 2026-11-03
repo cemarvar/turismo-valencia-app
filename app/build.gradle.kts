@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -14,6 +16,23 @@ plugins {
 // virtual). Solo la versión de depuración admite HTTP sin cifrar, y únicamente hacia el ordenador (`src/debug/res/xml`).
 val apiBaseUrl = "https://rttqdgrrprzgdxdlhaeq.supabase.co/functions/v1/api-v1/"
 val localApiBaseUrl = "http://127.0.0.1:54321/functions/v1/api-v1/"
+
+// Firma de la versión de publicación (`release`), que es el APK que se entrega. La clave NO está en el repositorio ni en el APK: el
+// almacén (`.jks`) vive fuera del proyecto y aquí solo se leen su ruta y sus contraseñas, de variables de entorno o de
+// `local.properties` (ignorado por git). Ver `docs/firma.md`.
+//   variable de entorno         clave de local.properties   qué es
+//   TURISMO_KEYSTORE_FILE       release.storeFile           ruta del .jks (en local.properties, con «/» y no «\»)
+//   TURISMO_KEYSTORE_PASSWORD   release.storePassword       contraseña del almacén
+//   TURISMO_KEY_ALIAS           release.keyAlias            alias de la clave (por defecto «turismovalencia»)
+//   TURISMO_KEY_PASSWORD        release.keyPassword         contraseña de la clave (por defecto, la del almacén)
+// Sin ruta y contraseña, `release` se compila sin firmar (no se puede instalar) y las demás compilaciones no se ven afectadas.
+val localProperties = Properties().apply {
+    providers.fileContents(rootProject.layout.projectDirectory.file("local.properties")).asText.orNull?.let { load(it.reader()) }
+}
+fun releaseSigning(env: String, property: String): String? =
+    providers.environmentVariable(env).orNull?.takeIf { it.isNotBlank() } ?: localProperties.getProperty(property)?.takeIf { it.isNotBlank() }
+val releaseStoreFile = releaseSigning("TURISMO_KEYSTORE_FILE", "release.storeFile")
+val releaseStorePassword = releaseSigning("TURISMO_KEYSTORE_PASSWORD", "release.storePassword")
 
 android {
     namespace = "com.cmarcillovargas.turismovalencia"
@@ -33,11 +52,23 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
+    signingConfigs {
+        if (releaseStoreFile != null && releaseStorePassword != null) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseSigning("TURISMO_KEY_ALIAS", "release.keyAlias") ?: "turismovalencia"
+                keyPassword = releaseSigning("TURISMO_KEY_PASSWORD", "release.keyPassword") ?: releaseStorePassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             providers.gradleProperty("apiBaseUrl").orNull?.let { buildConfigField("String", "API_BASE_URL", "\"$it\"") }
         }
         release {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             optimization {
                 enable = true
                 // R8 solo procesa estos paquetes; lo de fuera (la app, ZXing) se deja intacto. Toda librería de Kotlin que
