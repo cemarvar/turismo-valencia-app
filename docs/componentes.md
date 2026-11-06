@@ -35,7 +35,7 @@ Catálogo de lo que hay en `ui/components` y de los tokens del theme. **Antes de
 | `rememberLocationPermissionRequest` / `OnScreenVisible` | `LocationEffects.kt` | Pide el permiso de ubicación del sistema (si el sistema ya no pregunta, además llama a `onBlocked`); avisa cuando una pantalla se ve y deja de verse (para seguir la ubicación solo entonces) | `onResult`, `onBlocked`; `onStart`, `onStop` |
 | `rememberNotificationAccessRequest` / `NotificationAccessResult` | `NotificationEffects.kt` | Se asegura de que la app puede notificar: lo dice enseguida si ya puede, abre el diálogo de Android 13+ si falta el permiso y, si el sistema ya no pregunta o las notificaciones están apagadas, devuelve `NeedsSettings`. Se pide al encender un aviso, no al abrir la app | `onResult` (`Granted`, `Denied`, `NeedsSettings`) |
 | `OpenSettingsDialog` | `SettingsDialog.kt` | Diálogo que explica que un permiso solo se activa en los ajustes del móvil y ofrece «Abrir ajustes» (`Context.openAppSettings()` / `openNotificationSettings()` en `util/Intents.kt`) | `title`, `text`, `onOpenSettings`, `onDismiss` |
-| `MapPlaceholder` | `MapPlaceholder.kt` | Fondo de plano dibujado, sin red ni interacción (pantalla de permiso y Contacto) | — |
+| `MapPlaceholder` | `MapPlaceholder.kt` | Fondo de plano dibujado, sin red ni interacción (Contacto) | — |
 | `EmptyState` | `States.kt` | Círculo suave + título + texto + acción (favoritos vacío, sin resultados) | `icon`, `title`, `text`, `actionText`, `onAction` |
 | `SkeletonBox` | `States.kt` | Bloque gris que late (inicio cargando) | `shape` |
 | `AppSwitch` | `States.kt` | Interruptor naranja con check (pulgar `appColors.switchThumb`, claro en los dos temas) | `checked`, `onCheckedChange` |

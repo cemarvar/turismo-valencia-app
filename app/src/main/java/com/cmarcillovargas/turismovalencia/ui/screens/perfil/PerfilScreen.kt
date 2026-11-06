@@ -71,6 +71,7 @@ import com.cmarcillovargas.turismovalencia.data.model.ThemeMode
 import com.cmarcillovargas.turismovalencia.ui.components.AppSwitch
 import com.cmarcillovargas.turismovalencia.ui.components.AppTopBar
 import com.cmarcillovargas.turismovalencia.ui.components.NotificationAccessResult
+import com.cmarcillovargas.turismovalencia.ui.components.OnScreenVisible
 import com.cmarcillovargas.turismovalencia.ui.components.OpenSettingsDialog
 import com.cmarcillovargas.turismovalencia.ui.components.SectionLabel
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
@@ -103,6 +104,7 @@ fun PerfilRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    OnScreenVisible(onStart = viewModel::refreshLocationPermission, onStop = {})
     var showLanguage by remember { mutableStateOf(false) }
     // Los permisos del sistema solo se pueden pedir un par de veces: si el usuario ya dijo que no, lo único que se puede hacer es
     // llevarle a los ajustes del móvil.

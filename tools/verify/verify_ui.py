@@ -1,5 +1,5 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas cancelar refresco privacidad idiomas oscuro tema navegacion)
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas cancelar refresco privacidad idiomas oscuro tema navegacion ubicacion)
 Los grupos `reservas` y `cancelar` necesitan el backend local (cd backend && npm start, con Docker Desktop) y la app instalada con su
 dirección; si no lo encuentran, se saltan con un aviso.
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
@@ -398,13 +398,6 @@ def g_busqueda():
             check("buscar «%s» no se rompe" % q, find("Atrás", ns=ns) is not None)
 
 
-def accept_location_dialog():
-    """La pantalla de permiso de la bienvenida abre el diálogo real del sistema (en inglés en el emulador): lo acepta."""
-    if wait_for("While using the app", 5):
-        tap_text("While using the app")
-    time.sleep(1.5)
-
-
 def tap_last(text):
     """Pulsa el último nodo con ese texto (el de la capa de encima, p. ej. el botón de un diálogo)."""
     hits = [n for n in nodes() if n["t"] == text or n["d"] == text]
@@ -505,9 +498,6 @@ def g_persist():
     check("primer arranque: se muestra la bienvenida", find("Saltar") is not None)
     tap_text("Saltar")
     time.sleep(1.2)
-    tap_text("Mientras se usa la app")
-    accept_location_dialog()
-    time.sleep(1.0)
     check("terminada la bienvenida se entra en Inicio", find("Buscar en Valencia…") is not None)
     start(None, reset=False)
     time.sleep(1.5)
@@ -526,9 +516,6 @@ def g_persist():
     # Cerrar sesión borra lo del usuario: terminada la bienvenida, la app está vacía (sin la demostración del primer arranque).
     tap_text("Saltar")
     time.sleep(1.2)
-    tap_text("Mientras se usa la app")
-    accept_location_dialog()
-    time.sleep(1.0)
     start("favoritos", reset=False)
     check("cerrar sesión borró lo del usuario: sin favoritos (pantalla vacía)", find("Aún no tienes favoritos") is not None and find("5 lugares guardados") is None)
     start("reservas", reset=False)
@@ -715,17 +702,7 @@ def g_mapa():
     time.sleep(2)
     check("…y al aceptar queda «Solo esta vez»", find("Solo esta vez") is not None and has_location_permission())
 
-    # Bienvenida: la pantalla de permiso lanza la petición real
-    set_location_permission(False)
-    start(None)
-    time.sleep(2.5)
-    tap_text("Saltar")
-    time.sleep(1.2)
-    tap_text("Mientras se usa la app")
-    check("Bienvenida: «Mientras se usa la app» abre el diálogo del sistema", wait_for("While using the app", 6))
-    tap_text("While using the app")
-    time.sleep(2)
-    check("…y al aceptar se entra en Inicio con el permiso concedido", wait_for("Buscar en Valencia…", 6) and has_location_permission())
+    # (La bienvenida ya no pide la ubicación: el permiso se pide en contexto; ver el grupo `ubicacion`.)
     start(None)  # deja la app como un primer arranque
 
 
@@ -837,13 +814,11 @@ def reminder_on():
 
 
 def welcome_to_home():
-    """Recorre la bienvenida (con el permiso de ubicación del sistema) hasta Inicio; deja `onboardingDone` guardado."""
+    """Recorre la bienvenida hasta Inicio; deja `onboardingDone` guardado."""
     start(None)
     time.sleep(2.2)
     tap_text("Saltar")
     time.sleep(1.2)
-    tap_text("Mientras se usa la app")
-    accept_location_dialog()
     return wait_for("Buscar en Valencia…", 8)
 
 
@@ -2056,7 +2031,61 @@ def g_navegacion():
     check("Mapa: pulsar Mapa vuelve a su vista de partida (Mercado Central elegido)", tab is not None and bool(de_partida))
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "cancelar": g_cancelar, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas, "oscuro": g_oscuro, "tema": g_tema, "navegacion": g_navegacion}
+def g_ubicacion():
+    print("\n## Ubicación: el permiso se pide en contexto, sin pantalla propia en la bienvenida")
+    # 1. La bienvenida pasa de largo: ni pantalla de permiso ni diálogo del sistema
+    set_location_permission(False)
+    start(None)
+    time.sleep(2.5)
+    check("primer arranque: se muestra la bienvenida", find("Saltar") is not None)
+    tap_text("Saltar")
+    time.sleep(1.5)
+    ns = nodes()
+    check("la bienvenida acaba en Inicio, sin pantalla de permiso de ubicación", find("Buscar en Valencia…", ns=ns) is not None and find("Lugares cerca de ti", ns=ns) is None and find("Mientras se usa la app", ns=ns) is None)
+    check("…ni diálogo del sistema: el permiso sigue sin concederse", find("While using the app") is None and not has_location_permission())
+
+    # 2. Perfil dice la verdad: sin permiso del sistema, «No permitir»
+    start("perfil", reset=False)
+    check("Perfil → Ubicación muestra «No permitir» mientras el sistema no da el permiso", find("No permitir") is not None)
+
+    # 3. «Cómo llegar» sin permiso lo pide una vez; si se dice que no, no insiste
+    set_location_permission(False)
+    start("ruta/mercado-central")
+    check("«Cómo llegar» sin permiso abre el diálogo del sistema", wait_for("While using the app", 8))
+    tap_system_button("Don't allow")
+    time.sleep(2)
+    check("…y al rechazarlo la ruta sale igualmente (desde el centro de Valencia)", not has_location_permission() and wait_for("Has llegado: Mercado Central", 14))
+    start("ruta/mercado-central", reset=False)
+    check("al reabrir la ruta tras «No permitir» no se vuelve a preguntar", wait_for("Has llegado: Mercado Central", 12) and find("While using the app") is None)
+    start("perfil", reset=False)
+    check("Perfil → Ubicación queda en «No permitir»", find("No permitir") is not None)
+
+    # 4. El botón del mapa sí vuelve a pedirlo, aunque se hubiera dicho que no
+    start("mapa", reset=False)
+    time.sleep(3)
+    tap_text("Centrar en mi ubicación")
+    check("«Centrar en mi ubicación» vuelve a abrir el diálogo del sistema", wait_for("While using the app", 6))
+    tap_text("While using the app")
+    time.sleep(2)
+    check("…y al aceptar queda concedido el permiso", has_location_permission())
+    start("perfil", reset=False)
+    check("Perfil → Ubicación pasa a «Mientras se usa la app»", find("Mientras se usa la app") is not None)
+
+    # 5. Con el permiso concedido «Cómo llegar» no pregunta
+    start("ruta/mercado-central", reset=False)
+    check("con el permiso concedido «Cómo llegar» no abre ningún diálogo", wait_for("Has llegado: Mercado Central", 12) and find("While using the app") is None)
+
+    # 6. Aceptar desde «Cómo llegar»
+    set_location_permission(False)
+    start("ruta/mercado-central")
+    check("«Cómo llegar» con datos nuevos y sin permiso abre el diálogo", wait_for("While using the app", 8))
+    tap_text("While using the app")
+    time.sleep(2.5)
+    check("…y al aceptar queda concedido y la ruta se muestra", has_location_permission() and wait_for("Has llegado: Mercado Central", 12))
+    start(None)  # deja la app como un primer arranque
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "cancelar": g_cancelar, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas, "oscuro": g_oscuro, "tema": g_tema, "navegacion": g_navegacion, "ubicacion": g_ubicacion}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     # El emulador está en inglés y la app sigue el idioma del móvil: los grupos esperan el español.

@@ -26,16 +26,10 @@
     <string name="onboarding_3_texto">Tu asistente con IA te recomienda planes, rutas y restaurantes cerca de ti, en tu idioma.</string>
     <string name="onboarding_3_imagen">Arco en una calle del casco antiguo de Valencia</string>
 
-    <!-- A5 · Permiso de ubicación -->
-    <string name="permiso_dialogo_titulo">¿Permitir que %1$s acceda a la ubicación de este dispositivo?</string>
-    <string name="permiso_precisa">Precisa</string>
-    <string name="permiso_aproximada">Aproximada</string>
+    <!-- Ubicación (Perfil). La pantalla A5 de permiso se quitó: el permiso se pide en contexto -->
     <string name="permiso_mientras_se_usa">Mientras se usa la app</string>
     <string name="permiso_solo_esta_vez">Solo esta vez</string>
     <string name="permiso_no_permitir">No permitir</string>
-    <string name="permiso_panel_etiqueta">Permiso de ubicación</string>
-    <string name="permiso_panel_titulo">Lugares cerca de ti</string>
-    <string name="permiso_panel_texto">Usamos tu ubicación solo mientras usas la app para ordenar lugares por cercanía y calcular rutas a pie. Puedes cambiarlo en Ajustes.</string>
 
     <!-- A6 · Selección de idioma -->
     <string name="idioma_titulo">Idioma de la app</string>

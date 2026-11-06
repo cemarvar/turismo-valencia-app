@@ -65,10 +65,6 @@ def main():
     time.sleep(1.8)  # splash
     v.check("primer arranque: se muestra la bienvenida", wait_for("Saltar", 6))
     v.tap_text("Saltar")
-    v.tap_text("Mientras se usa la app")
-    # La pantalla de permiso abre después el diálogo real del sistema (en inglés en el emulador).
-    if wait_for("While using the app", 5):
-        v.tap_text("While using the app")
     v.check("terminada la bienvenida se entra en Inicio", wait_for("Buscar en Valencia…", 8))
     v.check("Inicio lee las descargas de Room (Mercado Central sin conexión)", v.find("Sin conexión") is not None)
     line = v.offers_log("actualizado")
@@ -110,6 +106,9 @@ def main():
     pins = [t for t in ("Lonja de la Seda", "Catedral y Santo Cáliz", "Mercado Central", "Barrio del Carmen") if v.pin_nodes(t)]
     v.check("Mapa: marcadores accesibles sobre el mapa", len(pins) >= 3, str(pins))
     v.tap_text("Cómo llegar")
+    # Sin permiso de ubicación, «Cómo llegar» abre el diálogo real del sistema (en inglés en el emulador): se acepta, y así se prueba bajo R8.
+    v.check("Ruta: sin permiso de ubicación, «Cómo llegar» abre el diálogo del sistema", wait_for("While using the app", 6))
+    v.tap_text("While using the app")
     v.check("Ruta: se calcula con el servicio y acaba en la llegada", wait_for("Has llegado: Mercado Central", 14))
     time.sleep(2)
     v.check("Ruta: distancia y hora de llegada", any(re.match(r"^\d+ m · llegada \d\d:\d\d$", t) or re.match(r"^\d[\d,]* km · llegada", t) for t in v.texts()))

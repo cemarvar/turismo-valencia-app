@@ -74,6 +74,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.MapCamera
 import com.cmarcillovargas.turismovalencia.ui.components.MapMarker
 import com.cmarcillovargas.turismovalencia.ui.components.OnScreenVisible
 import com.cmarcillovargas.turismovalencia.ui.components.OsmMap
+import com.cmarcillovargas.turismovalencia.ui.components.rememberLocationPermissionRequest
 import com.cmarcillovargas.turismovalencia.ui.components.rememberMapCamera
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
@@ -101,6 +102,10 @@ fun RutaRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     OnScreenVisible(onStart = viewModel::onVisible, onStop = viewModel::onHidden)
+    // «Cómo llegar» es cuando hace falta saber dónde está el usuario: si el sistema no tiene el permiso (y el usuario no dijo «No permitir»), se
+    // pide aquí. Es el único diálogo: la bienvenida ya no lo pide. Si no se concede, la ruta sale desde el centro de Valencia.
+    val askLocation = rememberLocationPermissionRequest { granted -> viewModel.onLocationResult(granted) }
+    LaunchedEffect(Unit) { if (viewModel.shouldAskLocation()) askLocation(true) }
     RutaScreen(
         uiState = uiState,
         onBack = onBack,

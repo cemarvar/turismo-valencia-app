@@ -21,16 +21,10 @@
     <string name="onboarding_3_texto">Your AI assistant recommends plans, routes and restaurants near you, in your language.</string>
     <string name="onboarding_3_imagen">An arch on a street in Valencia’s old town</string>
 
-    <!-- A5 · Location permission -->
-    <string name="permiso_dialogo_titulo">Allow %1$s to access this device’s location?</string>
-    <string name="permiso_precisa">Precise</string>
-    <string name="permiso_aproximada">Approximate</string>
+    <!-- Location (Profile). The A5 permission screen was removed: the permission is asked in context -->
     <string name="permiso_mientras_se_usa">While using the app</string>
     <string name="permiso_solo_esta_vez">Only this time</string>
     <string name="permiso_no_permitir">Don’t allow</string>
-    <string name="permiso_panel_etiqueta">Location permission</string>
-    <string name="permiso_panel_titulo">Places near you</string>
-    <string name="permiso_panel_texto">We use your location only while you use the app, to sort places by distance and work out walking routes. You can change this in Settings.</string>
 
     <!-- A6 · Language selection -->
     <string name="idioma_titulo">App language</string>

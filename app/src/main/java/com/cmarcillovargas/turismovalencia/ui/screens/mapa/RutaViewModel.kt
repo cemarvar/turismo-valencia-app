@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cmarcillovargas.turismovalencia.data.AppContainer
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.data.model.LatLon
+import com.cmarcillovargas.turismovalencia.data.model.LocationMode
 import com.cmarcillovargas.turismovalencia.data.model.RoutePlan
 import com.cmarcillovargas.turismovalencia.data.model.RouteProfile
 import com.cmarcillovargas.turismovalencia.data.model.RouteStep
@@ -117,6 +118,19 @@ class RutaViewModel(private val container: AppContainer, private val id: String)
     }
 
     fun onToggleSaved() = container.downloads.toggle(id)
+
+    /** ¿Hay que pedir el permiso de ubicación al abrir la ruta? Solo si el sistema no lo da y el usuario no ha dicho «No permitir». */
+    fun shouldAskLocation(): Boolean {
+        container.location.refreshPermission()
+        return !container.location.permissionGranted.value && container.settings.location.value != LocationMode.Denied
+    }
+
+    /** Lo que respondió el diálogo del sistema que se abre al entrar en la ruta sin permiso. */
+    fun onLocationResult(granted: Boolean) {
+        container.settings.setLocation(if (granted) LocationMode.WhileUsing else LocationMode.Denied)
+        container.location.refreshPermission()
+        if (granted) container.location.start()
+    }
 
     /** La ruta se ve: sigue la ubicación del usuario (si hay permiso) para que el punto de partida sea el real. */
     fun onVisible() = container.location.start()

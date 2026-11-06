@@ -22,16 +22,10 @@
     <string name="onboarding_3_texto">El teu assistent amb IA et recomana plans, rutes i restaurants prop de tu, en el teu idioma.</string>
     <string name="onboarding_3_imagen">Un arc en un carrer del casc antic de València</string>
 
-    <!-- A5 · Permís d’ubicació -->
-    <string name="permiso_dialogo_titulo">Vols permetre que %1$s accedisca a la ubicació d’este dispositiu?</string>
-    <string name="permiso_precisa">Precisa</string>
-    <string name="permiso_aproximada">Aproximada</string>
+    <!-- Ubicació (Perfil). La pantalla A5 de permís es va llevar: el permís es demana en context -->
     <string name="permiso_mientras_se_usa">Mentre s’utilitza l’app</string>
     <string name="permiso_solo_esta_vez">Només esta vegada</string>
     <string name="permiso_no_permitir">No permetre</string>
-    <string name="permiso_panel_etiqueta">Permís d’ubicació</string>
-    <string name="permiso_panel_titulo">Llocs prop de tu</string>
-    <string name="permiso_panel_texto">Usem la teua ubicació només mentre uses l’app, per a ordenar llocs per proximitat i calcular rutes a peu. Pots canviar-ho en Configuració.</string>
 
     <!-- A6 · Selecció d’idioma -->
     <string name="idioma_titulo">Idioma de l’app</string>

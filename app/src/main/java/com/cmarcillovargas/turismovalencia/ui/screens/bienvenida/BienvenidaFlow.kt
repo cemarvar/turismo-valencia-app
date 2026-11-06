@@ -1,6 +1,5 @@
 package com.cmarcillovargas.turismovalencia.ui.screens.bienvenida
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -11,10 +10,11 @@ import kotlinx.coroutines.delay
 
 private const val SplashMillis = 1_500L
 
-private enum class Paso { Splash, Onboarding, Permiso }
+private enum class Paso { Splash, Onboarding }
 
 /**
- * Recorrido de bienvenida: splash → onboarding → permiso de ubicación. Al terminar llama a `onFinished`.
+ * Recorrido de bienvenida: splash → onboarding. Al terminar llama a `onFinished`. El permiso de ubicación no se pide aquí: se pide en
+ * contexto, cuando hace falta (el botón «Centrar en mi ubicación» del mapa y «Cómo llegar»), y así el diálogo del sistema sale una sola vez.
  * Es un host en memoria sin la librería de navegación y arranca siempre desde el splash; que ya se haya hecho
  * se guarda aparte (`SettingsRepository.onboardingDone`) y `AppRoot` decide si se muestra.
  */
@@ -31,11 +31,6 @@ fun BienvenidaFlow(onFinished: () -> Unit) {
             }
         }
 
-        Paso.Onboarding -> OnboardingRoute(onFinished = { paso = Paso.Permiso })
-
-        Paso.Permiso -> {
-            BackHandler { paso = Paso.Onboarding }
-            PermisoUbicacionRoute(onContinue = onFinished)
-        }
+        Paso.Onboarding -> OnboardingRoute(onFinished = onFinished)
     }
 }

@@ -21,16 +21,10 @@
     <string name="onboarding_3_texto">Votre assistant IA vous recommande des plans, des itinéraires et des restaurants près de chez vous, dans votre langue.</string>
     <string name="onboarding_3_imagen">Une arche dans une rue de la vieille ville de Valence</string>
 
-    <!-- A5 · Autorisation de localisation -->
-    <string name="permiso_dialogo_titulo">Autoriser %1$s à accéder à la position de cet appareil&#160;?</string>
-    <string name="permiso_precisa">Précise</string>
-    <string name="permiso_aproximada">Approximative</string>
+    <!-- Localisation (Profil). L’écran A5 d’autorisation a été retiré : l’autorisation se demande en contexte -->
     <string name="permiso_mientras_se_usa">Pendant l’utilisation de l’appli</string>
     <string name="permiso_solo_esta_vez">Uniquement cette fois</string>
     <string name="permiso_no_permitir">Ne pas autoriser</string>
-    <string name="permiso_panel_etiqueta">Autorisation de localisation</string>
-    <string name="permiso_panel_titulo">Lieux près de vous</string>
-    <string name="permiso_panel_texto">Nous utilisons votre position uniquement pendant que vous utilisez l’appli, pour trier les lieux par proximité et calculer des itinéraires à pied. Vous pouvez le modifier dans les Réglages.</string>
 
     <!-- A6 · Choix de la langue -->
     <string name="idioma_titulo">Langue de l’appli</string>

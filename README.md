@@ -18,7 +18,7 @@ siguiendo el diseño de Figma pantalla a pantalla.
 
 | Sección | Pantallas |
 |---|---|
-| **Bienvenida** | Splash, onboarding de 3 páginas, permiso de ubicación, selector de idioma (ES · VA · EN · FR) |
+| **Bienvenida** | Splash y onboarding de 3 páginas; el idioma (ES · VA · EN · FR) se elige desde la app o los ajustes del móvil. El permiso de ubicación no se pide aquí: se pide cuando hace falta |
 | **Explorar** | Portada con carrusel de destacados y chips de sección, búsqueda con sugerencias, listados por sección, fichas de lugar y de evento (con el aviso de la mascletà 30 min antes), Tickets & Tours, turismo sostenible |
 | **Contenido de la web** | Las 65 páginas de la web: Lo esencial, Planes, Qué ver, Eventos, Gastronomía, Alojamientos, Sostenible, guías de entradas, tours y experiencias, y los textos legales; más Contacto. Los índices de sección siguen el orden de la web (15 lugares, 6 eventos, 9 platos, 6 alojamientos) |
 | **Mapa** | Mapa de OpenStreetMap con filtros por categoría, tu ubicación (con permiso), y ruta real a pie o en bici con los pasos por las calles (autobús y metro, estimados) |
@@ -159,7 +159,7 @@ Más detalles en [`tools/web-import/README.md`](tools/web-import/README.md).
 - [x] **Persistencia local** con Room: favoritos, descargas, reservas, ajustes, búsquedas, avisos y primer arranque
 - [x] **Mapa real** con osmdroid, ubicación del usuario y rutas a pie y en bici
 - [ ] **Mapa sin conexión por zonas** (hoy se ven sin conexión las teselas ya vistas)
-- [x] **Permiso de ubicación** real (pantalla de bienvenida, botón del mapa y Perfil)
+- [x] **Permiso de ubicación** real, pedido en contexto (botón del mapa, «Cómo llegar» y Perfil; la bienvenida ya no lo pide)
 - [x] **Notificaciones**: permiso del sistema y aviso de la mascletà (alarma local, 30 min antes)
 - [x] **Icono de la app** y **pantalla de arranque del sistema** (SplashScreen API)
 - [x] **Idiomas** ES · VA · EN · FR: interfaz, contenido propio (fichas y ofertas), títulos de la web, ValBot sin conexión, avisos y formatos; elegir desde la app o desde los ajustes del móvil ([`docs/idiomas.md`](docs/idiomas.md))

@@ -20,6 +20,7 @@ data class PerfilUiState(
     val language: LanguageCode = LanguageCode.ES,
     /** Las notificaciones llegarán: el ajuste está activo y el sistema las permite. */
     val notifications: Boolean = true,
+    /** Lo que la app usa de verdad: sin el permiso del sistema es [LocationMode.Denied], diga lo que diga el ajuste guardado. */
     val location: LocationMode = LocationMode.WhileUsing,
     val textScale: TextScale = TextScale.System,
     val themeMode: ThemeMode = ThemeMode.System,
@@ -35,15 +36,15 @@ class PerfilViewModel(private val container: AppContainer) : ViewModel() {
     ) { language, notifications, location, scale, theme -> listOf(language, notifications, location, scale, theme) }
 
     val uiState: StateFlow<PerfilUiState> = combine(
-        settings, container.downloads.ids, container.downloads.mapDownloaded, container.reservations.items,
-    ) { values, downloads, map, reservations ->
+        settings, container.downloads.ids, container.downloads.mapDownloaded, container.reservations.items, container.location.permissionGranted,
+    ) { values, downloads, map, reservations, locationGranted ->
         PerfilUiState(
             offlineMb = container.downloads.cardsMb(downloads) + if (map) DownloadsRepository.MAP_MB else 0,
             cardsMb = container.downloads.cardsMb(downloads),
             reservations = reservations.size,
             language = values[0] as LanguageCode,
             notifications = values[1] as Boolean,
-            location = values[2] as LocationMode,
+            location = if (locationGranted) values[2] as LocationMode else LocationMode.Denied,
             textScale = values[3] as TextScale,
             themeMode = values[4] as ThemeMode,
         )
@@ -53,6 +54,9 @@ class PerfilViewModel(private val container: AppContainer) : ViewModel() {
     fun onNotifications(value: Boolean) = container.settings.setNotificationsEnabled(value)
 
     fun onLocation(value: LocationMode) = container.settings.setLocation(value)
+
+    /** Vuelve a mirar el permiso del sistema: pudo cambiarse en los ajustes del móvil mientras la app estaba en segundo plano. */
+    fun refreshLocationPermission() = container.location.refreshPermission()
 
     /** ¿Tiene la app el permiso de ubicación del sistema? (se vuelve a mirar: pudo cambiarse en Ajustes). */
     fun locationPermissionGranted(): Boolean {
