@@ -21,7 +21,8 @@ val localApiBaseUrl = "http://127.0.0.1:54321/functions/v1/api-v1/"
 // almacén (`.jks`) vive fuera del proyecto y aquí solo se leen su ruta y sus contraseñas, de variables de entorno o de
 // `local.properties` (ignorado por git). Ver `docs/firma.md`.
 //   variable de entorno         clave de local.properties   qué es
-//   TURISMO_KEYSTORE_FILE       release.storeFile           ruta del .jks (en local.properties, con «/» y no «\»)
+//   TURISMO_KEYSTORE_FILE       release.storeFile           ruta del .jks; «~/» es la carpeta del usuario (en local.properties, mejor
+//                                                           así que «C:/…»: lint exige escapar la unidad y la barra invertida de ese formato)
 //   TURISMO_KEYSTORE_PASSWORD   release.storePassword       contraseña del almacén
 //   TURISMO_KEY_ALIAS           release.keyAlias            alias de la clave (por defecto «turismovalencia»)
 //   TURISMO_KEY_PASSWORD        release.keyPassword         contraseña de la clave (por defecto, la del almacén)
@@ -55,7 +56,7 @@ android {
     signingConfigs {
         if (releaseStoreFile != null && releaseStorePassword != null) {
             create("release") {
-                storeFile = file(releaseStoreFile)
+                storeFile = file(if (releaseStoreFile.startsWith("~/")) System.getProperty("user.home") + releaseStoreFile.substring(1) else releaseStoreFile)
                 storePassword = releaseStorePassword
                 keyAlias = releaseSigning("TURISMO_KEY_ALIAS", "release.keyAlias") ?: "turismovalencia"
                 keyPassword = releaseSigning("TURISMO_KEY_PASSWORD", "release.keyPassword") ?: releaseStorePassword

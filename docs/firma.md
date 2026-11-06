@@ -14,7 +14,7 @@ La app **no se publica** (ni Google Play ni App Bundle): se entrega como un **AP
 | `TURISMO_KEY_ALIAS` | `release.keyAlias` | Alias (por defecto `turismovalencia`) |
 | `TURISMO_KEY_PASSWORD` | `release.keyPassword` | Contraseña de la clave (por defecto, la del almacén) |
 
-En `local.properties` la ruta se escribe **con `/`** (`C:/Users/camvf/claves/turismo-valencia.jks`): la barra invertida es un carácter de escape en ese formato y estropea la ruta.
+En `local.properties` la ruta se escribe **con `~/`**, que es la carpeta del usuario (`~/claves/turismo-valencia.jks` = `C:\Users\camvf\claves\turismo-valencia.jks`): en ese formato la letra de unidad y la barra invertida hay que escaparlas (`C\:`, `\\`) y lint da error si no, así que `~/` evita el problema. En la variable de entorno `TURISMO_KEYSTORE_FILE` sirve una ruta normal de Windows.
 
 ## Crear la clave (una sola vez, en el ordenador personal)
 
@@ -51,7 +51,7 @@ $env:TURISMO_KEYSTORE_PASSWORD = Read-Host "Contraseña del almacén"
 O, para no repetirlo, en `local.properties` (que git ignora):
 
 ```properties
-release.storeFile=C:/Users/camvf/claves/turismo-valencia.jks
+release.storeFile=~/claves/turismo-valencia.jks
 release.storePassword=…
 ```
 
