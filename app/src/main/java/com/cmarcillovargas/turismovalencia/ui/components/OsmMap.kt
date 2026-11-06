@@ -142,6 +142,9 @@ class MapCamera(private var center: LatLon = ValenciaCenter, private var zoom: D
         }
     }
 
+    /** Vuelve a la vista de partida: el centro de Valencia con el zoom por defecto (con animación). */
+    fun home() = centerOn(ValenciaCenter, DefaultZoom)
+
     /** Acerca (positivo) o aleja (negativo) el mapa esos niveles de zoom. */
     fun zoomBy(delta: Double) {
         val map = view ?: return

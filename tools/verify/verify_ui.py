@@ -1,5 +1,5 @@
 """Pruebas de interfaz en el emulador (780x1688 px / 320 dpi): navegación, contenido de la web y fotos cargadas.
-Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas cancelar refresco privacidad idiomas oscuro tema)
+Uso: python verify_ui.py [grupo ...]   (grupos: chips cats tiles contacto guias detalles paginas busqueda persist mapa avisos ofertas reservas cancelar refresco privacidad idiomas oscuro tema navegacion)
 Los grupos `reservas` y `cancelar` necesitan el backend local (cd backend && npm start, con Docker Desktop) y la app instalada con su
 dirección; si no lo encuentran, se saltan con un aviso.
 Cada arranque restablece los datos de demostración (`--ez resetData true`) para que las pruebas no dependan de lo que
@@ -1953,7 +1953,110 @@ def g_tema():
     start(None)  # deja la app como un primer arranque
 
 
-GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "cancelar": g_cancelar, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas, "oscuro": g_oscuro, "tema": g_tema}
+def tab_node(label, ns=None):
+    """La pestaña de la barra inferior con ese nombre."""
+    return next((n for n in (ns if ns is not None else nodes()) if n["t"] == label and n["b"][1] > 1500), None)
+
+
+def en_inicio(ns=None):
+    ns = ns if ns is not None else nodes()
+    return find("Mejor esta vida", ns=ns) is not None and find("Buscar lugares en el mapa", ns=ns) is None
+
+
+def g_navegacion():
+    print("\n## Barra inferior: «Inicio» vuelve siempre al inicio")
+    # Una ficha abierta desde Inicio y su «Ver en el mapa» dejan la pila [inicio, ficha, mapa]. Al pulsar Inicio, la navegación restauraba lo
+    # último que se sacó de la pila (la ficha y el mapa) en vez de volver a la portada, y no dejaba salir del mapa hasta cerrar la app.
+    for card, button in (("Paella valenciana", "Ver en el mapa"), ("Fallas 2027", "Ver en el mapa")):
+        start("inicio")
+        n = scroll_to(card)
+        if not n:
+            check("%s: está en la portada" % card, False)
+            continue
+        tap(n)
+        check("%s: «%s» abre el mapa" % (card, button), tap_text(button) and wait_for("Buscar lugares en el mapa", 8))
+        for lap in (1, 2):
+            tab = tab_node("Inicio")
+            if tab:
+                tap(tab)
+            time.sleep(0.8)
+            check("%s: pulsar Inicio (vez %d) muestra la portada y no el mapa" % (card, lap), tab is not None and en_inicio())
+            tab = tab_node("Mapa")
+            if tab:
+                tap(tab)
+            time.sleep(0.8)
+            check("%s: pulsar Mapa (vez %d) abre el mapa" % (card, lap), tab is not None and find("Buscar lugares en el mapa") is not None)
+    # Las demás pestañas siguen su camino y Inicio siempre vuelve a la portada.
+    start("inicio")
+    for label, marker in (("Favoritos", "Favoritos"), ("ValBot", "ValBot"), ("Reservas", "Reservas")):
+        tab = tab_node(label)
+        if tab:
+            tap(tab)
+        time.sleep(0.8)
+        tab = tab_node("Inicio")
+        if tab:
+            tap(tab)
+        time.sleep(0.8)
+        check("%s → Inicio muestra la portada" % label, tab is not None and en_inicio())
+
+    # Pulsar una pestaña lleva siempre al principio de su sección, también la pestaña en la que ya se está.
+    def arriba_de_inicio():
+        return find("Buscar en Valencia…") is not None
+
+    start("inicio")
+    swipe_up(5)
+    check("Inicio: bajando por la portada deja de verse el buscador", not arriba_de_inicio())
+    tab = tab_node("Inicio")
+    if tab:
+        tap(tab)
+    time.sleep(1.5)
+    check("Inicio: pulsar Inicio con la portada abajo vuelve arriba del todo", tab is not None and arriba_de_inicio())
+    swipe_up(2)
+    tab = tab_node("Inicio")
+    if tab:
+        tap(tab)
+    time.sleep(1.5)
+    check("Inicio: y a la segunda también", tab is not None and arriba_de_inicio())
+
+    # Desde otra pantalla de la pestaña Inicio (una lista de lugares), Inicio vuelve a la portada, arriba.
+    start("inicio")
+    check("Inicio: «Ver todo» abre la lista de lugares", tap_text("Ver todo") and not arriba_de_inicio())
+    tab = tab_node("Inicio")
+    if tab:
+        tap(tab)
+    time.sleep(1.5)
+    check("Inicio: desde la lista de lugares, pulsar Inicio vuelve a la portada, arriba", tab is not None and arriba_de_inicio() and en_inicio())
+
+    # Favoritos
+    start("favoritos")
+    swipe_up(3)
+    check("Favoritos: bajando por la lista, las pestañas «Todos / Lugares» salen de la pantalla", find("Todos") is None)
+    tab = tab_node("Favoritos")
+    if tab:
+        tap(tab)
+    time.sleep(1.5)
+    check("Favoritos: pulsar Favoritos vuelve arriba del todo", tab is not None and find("Todos") is not None)
+
+    # Mapa: vuelve a su vista de partida (el lugar de siempre elegido), aunque se hubiera elegido otro
+    start("mapa")
+    wait_for("© Colaboradores de OpenStreetMap", 10)
+    time.sleep(4)
+    lonja = [n for n in pin_nodes("Lonja de la Seda")]
+    lonja = min(lonja, key=lambda n: n["b"][3] - n["b"][1]) if lonja else None
+    if lonja:
+        tap(lonja)
+        time.sleep(1.5)
+    elegido = [n for n in nodes() if n["t"] == "Lonja de la Seda" and n["b"][1] > 1050]
+    check("Mapa: elegir otro lugar abre su hoja", bool(elegido))
+    tab = tab_node("Mapa")
+    if tab:
+        tap(tab)
+    time.sleep(2)
+    de_partida = [n for n in nodes() if n["t"] == "Mercado Central" and n["b"][1] > 1050]
+    check("Mapa: pulsar Mapa vuelve a su vista de partida (Mercado Central elegido)", tab is not None and bool(de_partida))
+
+
+GROUPS = {"chips": g_chips, "cats": g_cats, "tiles": g_tiles, "contacto": g_contacto, "guias": g_guias, "detalles": g_detalles, "paginas": g_paginas, "busqueda": g_busqueda, "persist": g_persist, "mapa": g_mapa, "avisos": g_avisos, "ofertas": g_ofertas, "reservas": g_reservas, "cancelar": g_cancelar, "refresco": g_refresco, "privacidad": g_privacidad, "idiomas": g_idiomas, "oscuro": g_oscuro, "tema": g_tema, "navegacion": g_navegacion}
 if __name__ == "__main__":
     adb("shell", "logcat", "-c")
     # El emulador está en inglés y la app sigue el idioma del móvil: los grupos esperan el español.

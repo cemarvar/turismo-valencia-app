@@ -9,6 +9,7 @@ Catálogo de lo que hay en `ui/components` y de los tokens del theme. **Antes de
 | `AppButton` | `AppButton.kt` | Botón en píldora de 48dp (40dp con `compact`) | `text`, `onClick`, `style` (`Primary`, `Tonal`, `Plain`, `Outlined`, `Danger`), `leadingIcon` / `trailingIcon` (`ImageVector`), `compact`, `enabled` |
 | `AppTopBar` | `Bars.kt` | Barra superior blanca con atrás, título, subtítulo y acciones | `title`, `subtitle`, `onBack`, `actions` |
 | `BottomNavBar` / `NavBarItem` | `Bars.kt` | Barra inferior de 5 pestañas (la activa va en píldora naranja suave) | `items`, `selectedKey`, `onSelect` |
+| `TabReselect` / `TabScope` / `OnTabReselect` | `TabReselect.kt` | Pulsar una pestaña de la barra inferior lleva al principio de su sección, también si ya se estaba en ella: `MainApp` dispara el aviso (`fire`) y la pantalla de partida de la pestaña lo atiende con `OnTabReselect { … }` (listas arriba del todo, mapa a su vista de partida). `AppNavHost` marca cada pantalla de partida con su pestaña (`tabComposable`) | `action` |
 | `BottomActionBar` | `Bars.kt` | Barra inferior con dos botones («Guardar» + «Cómo llegar»…) | contenido en `Row` |
 | `OfflineBanner` | `Bars.kt` | Banda azul marino «Sin conexión · mostrando contenido guardado»; con `text` dice otra cosa (Reservar: «Reservar necesita conexión a Internet») | `text` |
 | `OfflineSnackbar` | `Bars.kt` | Snackbar oscuro «Sin conexión a Internet · Reintentar» | `onRetry` |

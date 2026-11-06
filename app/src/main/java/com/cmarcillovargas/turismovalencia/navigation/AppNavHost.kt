@@ -2,12 +2,16 @@ package com.cmarcillovargas.turismovalencia.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.cmarcillovargas.turismovalencia.data.model.Category
+import com.cmarcillovargas.turismovalencia.ui.components.TabScope
 import com.cmarcillovargas.turismovalencia.ui.screens.explorar.BusquedaRoute
 import com.cmarcillovargas.turismovalencia.ui.screens.explorar.CategoriaRoute
 import com.cmarcillovargas.turismovalencia.ui.screens.explorar.DetalleRoute
@@ -33,6 +37,14 @@ private fun stringArg(name: String) = navArgument(name) {
     defaultValue = ""
 }
 
+/** Una pantalla de partida de la barra inferior: sabe de qué pestaña es, para atender el aviso de pulsarla (`OnTabReselect`). */
+private fun NavGraphBuilder.tabComposable(
+    route: String,
+    tab: String,
+    arguments: List<NamedNavArgument> = emptyList(),
+    content: @Composable (NavBackStackEntry) -> Unit,
+) = composable(route, arguments) { entry -> TabScope(tab) { content(entry) } }
+
 /** Grafo de navegación de la app principal. */
 @Composable
 fun AppNavHost(
@@ -47,7 +59,7 @@ fun AppNavHost(
     val openItem: (String) -> Unit = { open(Routes.detalle(it)) }
 
     NavHost(navController, startDestination = startDestination, modifier = modifier) {
-        composable(Routes.Inicio) {
+        tabComposable(Routes.Inicio, Routes.Inicio) {
             InicioRoute(
                 onOpenItem = openItem,
                 onOpenSearch = { open(Routes.Busqueda) },
@@ -61,7 +73,7 @@ fun AppNavHost(
                 onOpenContact = { open(Routes.Contacto) },
             )
         }
-        composable(Routes.MapaPattern, arguments = listOf(stringArg("focus"), stringArg("q"))) { entry ->
+        tabComposable(Routes.MapaPattern, Routes.Mapa, arguments = listOf(stringArg("focus"), stringArg("q"))) { entry ->
             MapaRoute(
                 focus = entry.arguments?.getString("focus")?.takeIf { it.isNotBlank() },
                 initialQuery = entry.arguments?.getString("q")?.takeIf { it.isNotBlank() },
@@ -69,7 +81,7 @@ fun AppNavHost(
                 onOpenRoute = { open(Routes.ruta(it)) },
             )
         }
-        composable(Routes.ValbotPattern, arguments = listOf(stringArg("q"))) { entry ->
+        tabComposable(Routes.ValbotPattern, Routes.Valbot, arguments = listOf(stringArg("q"))) { entry ->
             ValBotRoute(
                 question = entry.arguments?.getString("q")?.takeIf { it.isNotBlank() },
                 onBack = { onTab(Routes.Inicio) },
@@ -79,7 +91,7 @@ fun AppNavHost(
                 onOpenMap = { onTab(Routes.Mapa) },
             )
         }
-        composable(Routes.Favoritos) {
+        tabComposable(Routes.Favoritos, Routes.Favoritos) {
             FavoritosRoute(
                 onOpenItem = openItem,
                 onOpenProfile = { open(Routes.Perfil) },
@@ -87,7 +99,7 @@ fun AppNavHost(
                 onExplore = { onTab(Routes.Inicio) },
             )
         }
-        composable(Routes.Reservas) {
+        tabComposable(Routes.Reservas, Routes.Reservas) {
             ReservasRoute(onOpenReservation = { open(Routes.reserva(it)) }, onOpenProfile = { open(Routes.Perfil) })
         }
         composable(Routes.Busqueda) {

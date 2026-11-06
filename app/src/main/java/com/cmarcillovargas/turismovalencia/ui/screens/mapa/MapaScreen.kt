@@ -73,6 +73,7 @@ import com.cmarcillovargas.turismovalencia.ui.components.MapCamera
 import com.cmarcillovargas.turismovalencia.ui.components.MapAttribution
 import com.cmarcillovargas.turismovalencia.ui.components.MapMarker
 import com.cmarcillovargas.turismovalencia.ui.components.OnScreenVisible
+import com.cmarcillovargas.turismovalencia.ui.components.OnTabReselect
 import com.cmarcillovargas.turismovalencia.ui.components.OpenSettingsDialog
 import com.cmarcillovargas.turismovalencia.ui.components.OsmMap
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
@@ -108,6 +109,11 @@ fun MapaRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val camera = rememberMapCamera()
+    // Pulsar Mapa vuelve a su vista de partida: sin filtros, con el lugar de siempre elegido y el mapa centrado en Valencia.
+    OnTabReselect {
+        viewModel.onResetView()
+        camera.home()
+    }
     OnScreenVisible(onStart = viewModel::onVisible, onStop = viewModel::onHidden)
     // Tras conceder el permiso, el mapa se centra en el usuario cuando llega su primera posición real.
     var centerOnFix by remember { mutableStateOf(false) }

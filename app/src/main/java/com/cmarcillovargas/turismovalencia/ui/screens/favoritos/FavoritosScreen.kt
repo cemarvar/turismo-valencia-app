@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -44,6 +45,7 @@ import com.cmarcillovargas.turismovalencia.data.fake.FakeQueVer
 import com.cmarcillovargas.turismovalencia.data.model.Category
 import com.cmarcillovargas.turismovalencia.ui.components.EmptyState
 import com.cmarcillovargas.turismovalencia.ui.components.OfflineChip
+import com.cmarcillovargas.turismovalencia.ui.components.OnTabReselect
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceListCard
 import com.cmarcillovargas.turismovalencia.ui.components.SegmentedTabs
 import com.cmarcillovargas.turismovalencia.ui.components.UserAvatar
@@ -87,6 +89,9 @@ fun FavoritosScreen(
     onToggleDownload: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+    // Pulsar Favoritos vuelve arriba del todo.
+    OnTabReselect { listState.animateScrollToItem(0) }
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TabHeader(
             title = stringResource(R.string.nav_favoritos),
@@ -105,7 +110,7 @@ fun FavoritosScreen(
                 )
             }
         } else {
-            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
                 item { OfflineSummary(uiState, onOpenDownloads) }
                 item {
                     SegmentedTabs(

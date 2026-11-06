@@ -72,6 +72,7 @@ import com.cmarcillovargas.turismovalencia.data.model.HomeTile
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.ui.components.AppFilterChip
 import com.cmarcillovargas.turismovalencia.ui.components.ContactSummaryCard
+import com.cmarcillovargas.turismovalencia.ui.components.OnTabReselect
 import com.cmarcillovargas.turismovalencia.ui.components.ChipStyle
 import com.cmarcillovargas.turismovalencia.ui.components.FavoriteButton
 import com.cmarcillovargas.turismovalencia.ui.components.FavoriteStyle
@@ -160,6 +161,9 @@ fun InicioScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+    // Pulsar Inicio, esté donde esté la lista, vuelve arriba del todo.
+    OnTabReselect { listState.animateScrollToItem(0) }
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize()) {
             HomeHeader(uiState.hasUnread, uiState.language, onOpenLanguage, onOpenNotifications)
@@ -167,7 +171,7 @@ fun InicioScreen(
             if (uiState.loading) {
                 InicioCargando(onOpenSearch)
             } else {
-                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = Spacing.xxl + Spacing.l)) {
+                LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = Spacing.xxl + Spacing.l)) {
                     item { HomeSearchField(onOpenSearch, Modifier.padding(horizontal = Spacing.m, vertical = Spacing.s)) }
                     item(key = "featured") {
                         // Se vuelve a crear al cambiar de sección para que el carrusel empiece en su primera tarjeta.

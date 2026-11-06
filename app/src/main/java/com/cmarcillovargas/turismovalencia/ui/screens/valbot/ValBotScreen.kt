@@ -82,6 +82,7 @@ import com.cmarcillovargas.turismovalencia.data.model.ChatMessage
 import com.cmarcillovargas.turismovalencia.data.model.ContentItem
 import com.cmarcillovargas.turismovalencia.data.model.WebPageMeta
 import com.cmarcillovargas.turismovalencia.ui.components.OfflineSnackbar
+import com.cmarcillovargas.turismovalencia.ui.components.OnTabReselect
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.StatusChip
 import com.cmarcillovargas.turismovalencia.ui.components.StatusTone
@@ -162,6 +163,8 @@ fun ValBotScreen(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
+    // Pulsar ValBot vuelve al principio de la conversación.
+    OnTabReselect { listState.animateScrollToItem(0) }
     val count = uiState.messages.size + (if (uiState.typing) 1 else 0) + (if (!uiState.online) 2 else 0)
     // «Escribiendo…» se sustituye por la respuesta sin cambiar el total, así que también depende de `typing`.
     LaunchedEffect(count, uiState.typing) { if (count > 0) listState.animateScrollToItem(count) }

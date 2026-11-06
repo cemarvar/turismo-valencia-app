@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -56,6 +57,7 @@ import com.cmarcillovargas.turismovalencia.data.model.Reservation
 import com.cmarcillovargas.turismovalencia.data.model.ReservationStatus
 import com.cmarcillovargas.turismovalencia.ui.components.ErrorNotice
 import com.cmarcillovargas.turismovalencia.ui.components.LabeledTextField
+import com.cmarcillovargas.turismovalencia.ui.components.OnTabReselect
 import com.cmarcillovargas.turismovalencia.ui.components.PlaceImage
 import com.cmarcillovargas.turismovalencia.ui.components.slotLabel
 import com.cmarcillovargas.turismovalencia.ui.components.SectionLabel
@@ -107,13 +109,16 @@ fun ReservasScreen(
     onRecover: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+    // Pulsar Reservas vuelve arriba del todo.
+    OnTabReselect { listState.animateScrollToItem(0) }
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TabHeader(
             title = stringResource(R.string.res_title),
             subtitle = "${pluralStringResource(R.plurals.res_count, uiState.total, uiState.total)} · ${pluralStringResource(R.plurals.res_pending, uiState.pending, uiState.pending)}",
             onOpenProfile = onOpenProfile,
         )
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+        LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(Spacing.m), verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
             item {
                 SegmentedTabs(
                     labels = listOf(R.string.res_tab_upcoming, R.string.res_tab_history).map { stringResource(it) },

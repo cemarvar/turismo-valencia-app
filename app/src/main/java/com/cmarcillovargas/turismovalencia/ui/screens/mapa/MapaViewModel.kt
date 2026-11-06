@@ -107,6 +107,12 @@ class MapaViewModel(private val container: AppContainer, focusId: String?) : Vie
         selectedId.value = id
     }
 
+    /** Vuelve a la vista de partida del mapa: sin búsqueda ni filtros y con el lugar de siempre elegido. */
+    fun onResetView() {
+        onClearFilters()
+        selectedId.value = DefaultSelected
+    }
+
     fun onToggleFavorite() = container.favorites.toggle(selectedId.value)
 
     /** El mapa se ve: empieza a seguir la ubicación del usuario (si hay permiso). */
