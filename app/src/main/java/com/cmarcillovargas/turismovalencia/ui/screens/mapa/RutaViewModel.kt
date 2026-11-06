@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -64,11 +65,16 @@ class RutaViewModel(private val container: AppContainer, private val id: String)
                 plans.value = Plans(emptyMap())
                 return@launch
             }
-            // Si la ubicación cambia (el usuario se mueve), se recalcula desde el nuevo punto.
-            container.location.origin.collectLatest { origin ->
-                plans.value = null
-                plans.value = Plans(load(origin, destination))
-            }
+            // Si el usuario se mueve de verdad, se recalcula desde el nuevo punto. El GPS y la red dan posiciones distintas cada pocos
+            // segundos aunque el usuario esté quieto: recalcular con cada una pediría la ruta al servidor sin parar y haría parpadear
+            // «Calculando…». La ruta anterior se mantiene en pantalla hasta que llega la nueva.
+            var planned: LatLon? = null
+            container.location.origin
+                .filter { origin -> planned?.let { distanceMeters(it, origin) >= ReplanMeters } ?: true }
+                .collectLatest { origin ->
+                    planned = origin
+                    plans.value = Plans(load(origin, destination))
+                }
         }
     }
 
@@ -145,6 +151,7 @@ class RutaViewModel(private val container: AppContainer, private val id: String)
     }
 
     private companion object {
+        const val ReplanMeters = 50.0
         const val MinMeters = 150
         const val StreetFactor = 1.25
         const val WalkMetersPerMinute = 75

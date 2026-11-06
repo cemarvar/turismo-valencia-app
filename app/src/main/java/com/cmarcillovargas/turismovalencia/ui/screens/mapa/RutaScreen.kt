@@ -70,6 +70,7 @@ import com.cmarcillovargas.turismovalencia.data.model.RouteStep
 import com.cmarcillovargas.turismovalencia.data.model.StepKind
 import com.cmarcillovargas.turismovalencia.ui.components.AppButton
 import com.cmarcillovargas.turismovalencia.ui.components.MapAttribution
+import com.cmarcillovargas.turismovalencia.ui.components.MapCamera
 import com.cmarcillovargas.turismovalencia.ui.components.MapMarker
 import com.cmarcillovargas.turismovalencia.ui.components.OnScreenVisible
 import com.cmarcillovargas.turismovalencia.ui.components.OsmMap
@@ -117,10 +118,10 @@ fun RutaScreen(
     onToggleSaved: () -> Unit,
     onStart: () -> Unit,
     modifier: Modifier = Modifier,
+    camera: MapCamera = rememberMapCamera(),
 ) {
     val item = uiState.item ?: return
     // Encuadra la ruta (origen y destino) cuando ya se conoce.
-    val camera = rememberMapCamera()
     var headerPx by remember { mutableIntStateOf(0) }
     var sheetPx by remember { mutableIntStateOf(0) }
     LaunchedEffect(uiState.route, headerPx, sheetPx) {

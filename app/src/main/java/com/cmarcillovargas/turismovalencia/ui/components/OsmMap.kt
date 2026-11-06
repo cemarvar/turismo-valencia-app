@@ -102,6 +102,17 @@ class MapCamera(private var center: LatLon = ValenciaCenter, private var zoom: D
         version++
     }
 
+    /**
+     * `true` desde que el usuario toca el mapa. Desde entonces nada lo recoloca por su cuenta ([fit]): con el GPS la posición cambia
+     * cada pocos segundos y, si cada vez se volviera a encuadrar, el mapa saltaría de vuelta en mitad de un arrastre o un pellizco.
+     */
+    var touched: Boolean = false
+        private set
+
+    internal fun markTouched() {
+        touched = true
+    }
+
     internal val initialCenter: LatLon get() = center
     internal val initialZoom: Double get() = zoom
 
@@ -139,14 +150,15 @@ class MapCamera(private var center: LatLon = ValenciaCenter, private var zoom: D
 
     /**
      * Ajusta el mapa para que se vean todos los puntos en el hueco que dejan las capas de encima (cabecera arriba y hoja abajo,
-     * en píxeles) y con [sidePx] a los lados, centrándolos en ese hueco.
+     * en píxeles) y con [sidePx] a los lados, centrándolos en ese hueco. No hace nada si el usuario ya ha tocado el mapa ([touched]).
      */
     fun fit(points: List<LatLon>, topPx: Int, bottomPx: Int, sidePx: Int) {
-        if (points.isEmpty()) return
+        if (points.isEmpty() || touched) return
         val map = view ?: return
         val box = BoundingBox.fromGeoPointsSafe(points.map { it.toGeoPoint() })
         center = LatLon(box.centerLatitude, box.centerLongitude)
         map.post {
+            if (touched) return@post
             val width = map.width
             val height = map.height
             val freeWidth = width - 2 * sidePx
@@ -195,6 +207,13 @@ fun OsmMap(
     val routeColor = colors.brand.toArgb()
     val dark = MaterialTheme.isDark
     val currentOnMarkerClick by rememberUpdatedState(onMarkerClick)
+    // Anota que el usuario ha tocado el mapa y deja que el toque siga su curso (arrastrar, pellizcar, tocar un marcador).
+    val touchTracker = remember(camera) {
+        View.OnTouchListener { _, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) camera.markTouched()
+            false
+        }
+    }
 
     DisposableEffect(lifecycle, camera) {
         val observer = LifecycleEventObserver { _, event ->
@@ -216,7 +235,7 @@ fun OsmMap(
                 MapView(ctx).also { configure(it, camera, dark) }
             },
             update = { view ->
-                view.setOnTouchListener(if (interactive) null else BlockTouches)
+                view.setOnTouchListener(if (interactive) touchTracker else BlockTouches)
                 view.render(markers, selectedId, user, route, renderer, categoryColors, routeColor, showSelectedLabel) { currentOnMarkerClick(it) }
             },
             onRelease = {
